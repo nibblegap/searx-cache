@@ -16,10 +16,12 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 
 (C) 2013- by Adam Tauber, <asciimoo@gmail.com>
 '''
+from searx.results import ResultContainer
 
 if __name__ == '__main__':
     from sys import path
     from os.path import realpath, dirname
+
     path.append(realpath(dirname(realpath(__file__)) + '/../'))
 
 import hashlib
@@ -31,6 +33,7 @@ import sys
 import requests
 
 from searx import logger
+
 logger = logger.getChild('webapp')
 
 try:
@@ -40,6 +43,7 @@ try:
 except:
     logger.critical("cannot import dependency: pygments")
     from sys import exit
+
     exit(1)
 from cgi import escape
 from datetime import datetime, timedelta
@@ -63,7 +67,7 @@ from searx.utils import (
 from searx.version import VERSION_STRING
 from searx.languages import language_codes as languages
 from searx.search import SearchWithPlugins, get_search_query_from_webapp
-from searx.query import RawTextQuery
+from searx.query import RawTextQuery, SearchQuery
 from searx.autocomplete import searx_bang, backends as autocomplete_backends
 from searx.plugins import plugins
 from searx.plugins.oa_doi_rewrite import get_doi_resolver
@@ -85,7 +89,6 @@ try:
 except:
     from io import StringIO
 
-
 if sys.version_info[0] == 3:
     unicode = str
     PY3 = True
@@ -94,6 +97,7 @@ else:
 
 # serve pages with HTTP/1.1
 from werkzeug.serving import WSGIRequestHandler
+
 WSGIRequestHandler.protocol_version = "HTTP/{}".format(settings['server'].get('http_protocol_version', '1.0'))
 
 # about static
@@ -126,8 +130,8 @@ app.jinja_env.lstrip_blocks = True
 app.secret_key = settings['server']['secret_key']
 
 if not searx_debug \
-   or os.environ.get("WERKZEUG_RUN_MAIN") == "true" \
-   or os.environ.get('UWSGI_ORIGINAL_PROC_NAME') is not None:
+        or os.environ.get("WERKZEUG_RUN_MAIN") == "true" \
+        or os.environ.get('UWSGI_ORIGINAL_PROC_NAME') is not None:
     initialize_engines(settings['engines'])
 
 babel = Babel(app)
@@ -157,12 +161,12 @@ def get_locale():
     if request.preferences.get_value('locale') != '':
         locale = request.preferences.get_value('locale')
 
-    if 'locale' in request.args\
-       and request.args['locale'] in settings['locales']:
+    if 'locale' in request.args \
+            and request.args['locale'] in settings['locales']:
         locale = request.args['locale']
 
-    if 'locale' in request.form\
-       and request.form['locale'] in settings['locales']:
+    if 'locale' in request.form \
+            and request.form['locale'] in settings['locales']:
         locale = request.form['locale']
 
     if locale == 'zh_TW':
@@ -195,9 +199,8 @@ def code_highlighter(codelines, language=None):
             line_code_start = line
 
         # new codeblock is detected
-        if last_line is not None and\
-           last_line + 1 != line:
-
+        if last_line is not None and \
+                last_line + 1 != line:
             # highlight last codepart
             formatter = HtmlFormatter(linenos='inline',
                                       linenostart=line_code_start)
@@ -288,7 +291,6 @@ def proxify(url):
 
 
 def image_proxify(url):
-
     if url.startswith('//'):
         url = 'https:' + url
 
@@ -433,96 +435,11 @@ def pre_request():
                 or plugin.id in allowed_plugins):
             request.user_plugins.append(plugin)
 
-
-def index_error(output_format, error_message):
-    if output_format == 'json':
-        return Response(json.dumps({'error': error_message}),
-                        mimetype='application/json')
-    elif output_format == 'csv':
-        response = Response('', mimetype='application/csv')
-        cont_disp = 'attachment;Filename=searx.csv'
-        response.headers.add('Content-Disposition', cont_disp)
-        return response
-    elif output_format == 'rss':
-        response_rss = render(
-            'opensearch_response_rss.xml',
-            results=[],
-            q=request.form['q'] if 'q' in request.form else '',
-            number_of_results=0,
-            base_url=get_base_url(),
-            error_message=error_message,
-            override_theme='__common__',
-        )
-        return Response(response_rss, mimetype='text/xml')
-    else:
-        # html
-        request.errors.append(gettext('search error'))
-        return render(
-            'index.html',
-        )
-
-
-@app.route('/search', methods=['GET', 'POST'])
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    """Render index page.
-
-    Supported outputs: html, json, csv, rss.
-    """
-
-    # output_format
-    output_format = request.form.get('format', 'html')
-    if output_format not in ['html', 'csv', 'json', 'rss']:
-        output_format = 'html'
-
-    # check if there is query
-    if request.form.get('q') is None:
-        if output_format == 'html':
-            return render(
-                'index.html',
-            )
-        else:
-            return index_error(output_format, 'No query'), 400
-
-    # search
-    search_query = None
-    result_container = None
-    try:
-        search_query = get_search_query_from_webapp(request.preferences, request.form)
-        # search = Search(search_query) #  without plugins
-        search = SearchWithPlugins(search_query, request.user_plugins, request)
-        result_container = search.search()
-    except Exception as e:
-        # log exception
-        logger.exception('search error')
-
-        # is it an invalid input parameter or something else ?
-        if (issubclass(e.__class__, SearxParameterException)):
-            return index_error(output_format, e.message), 400
-        else:
-            return index_error(output_format, gettext('search error')), 500
-
-    # results
-    results = result_container.get_ordered_results()
-    number_of_results = result_container.results_number()
-    if number_of_results < result_container.results_length():
-        number_of_results = 0
-
-    # UI
-    advanced_search = request.form.get('advanced_search', None)
-
-    # output
+def config_results(results, query):
     for result in results:
-        if output_format == 'html':
-            if 'content' in result and result['content']:
-                result['content'] = highlight_content(escape(result['content'][:1024]), search_query.query)
-            result['title'] = highlight_content(escape(result['title'] or u''), search_query.query)
-        else:
-            if result.get('content'):
-                result['content'] = html_to_text(result['content']).strip()
-            # removing html content and whitespace duplications
-            result['title'] = ' '.join(html_to_text(result['title']).strip().split())
-
+        if 'content' in result and result['content']:
+            result['content'] = highlight_content(escape(result['content'][:1024]), query)
+        result['title'] = highlight_content(escape(result['title'] or u''), query)
         result['pretty_url'] = prettify_url(result['url'])
 
         # TODO, check if timezone is calculated right
@@ -539,43 +456,77 @@ def index():
                     if hours == 0:
                         result['publishedDate'] = gettext(u'{minutes} minute(s) ago').format(minutes=minutes)
                     else:
-                        result['publishedDate'] = gettext(u'{hours} hour(s), {minutes} minute(s) ago').format(hours=hours, minutes=minutes)  # noqa
+                        result['publishedDate'] = gettext(u'{hours} hour(s), {minutes} minute(s) ago').format(
+                            hours=hours, minutes=minutes)  # noqa
                 else:
                     result['publishedDate'] = format_date(result['publishedDate'])
 
-    if output_format == 'json':
-        return Response(json.dumps({'query': search_query.query.decode('utf-8'),
-                                    'number_of_results': number_of_results,
-                                    'results': results,
-                                    'answers': list(result_container.answers),
-                                    'corrections': list(result_container.corrections),
-                                    'infoboxes': result_container.infoboxes,
-                                    'suggestions': list(result_container.suggestions),
-                                    'unresponsive_engines': list(result_container.unresponsive_engines)},
-                                   default=lambda item: list(item) if isinstance(item, set) else item),
-                        mimetype='application/json')
-    elif output_format == 'csv':
-        csv = UnicodeWriter(StringIO())
-        keys = ('title', 'url', 'content', 'host', 'engine', 'score')
-        csv.writerow(keys)
-        for row in results:
-            row['host'] = row['parsed_url'].netloc
-            csv.writerow([row.get(key, '') for key in keys])
-        csv.stream.seek(0)
-        response = Response(csv.stream.read(), mimetype='application/csv')
-        cont_disp = 'attachment;Filename=searx_-_{0}.csv'.format(search_query.query)
-        response.headers.add('Content-Disposition', cont_disp)
-        return response
-    elif output_format == 'rss':
-        response_rss = render(
-            'opensearch_response_rss.xml',
-            results=results,
-            q=request.form['q'],
-            number_of_results=number_of_results,
-            base_url=get_base_url(),
-            override_theme='__common__',
+def index_error():
+        request.errors.append(gettext('search error'))
+        return render(
+            'index.html',
         )
-        return Response(response_rss, mimetype='text/xml')
+
+
+@app.route('/search', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    # check if there is query
+    if request.form.get('q') is None:
+        return render(
+            'index.html',
+        )
+
+    # search
+    search_query = None
+    result_container = None
+    results_images = []
+    try:
+        search_query = get_search_query_from_webapp(request.preferences, request.form)
+
+        # search = Search(search_query) #  without plugins
+        search = SearchWithPlugins(search_query, request.user_plugins, request)
+        result_container = search.search()
+    except Exception as e:
+        # log exception
+        logger.exception('search error')
+
+        # is it an invalid input parameter or something else ?
+        if (issubclass(e.__class__, SearxParameterException)):
+            return index_error(), 400
+        else:
+            return index_error(), 500
+
+    # serarch images
+    if search_query.categories == ['general'] and search_query.pageno == 1:
+        search_images_engines = []
+        disabled_engines = request.preferences.engines.get_disabled()
+        for engine in categories['images']:
+            if (engine.name, 'images') not in disabled_engines:
+                search_images_engines.append({'category': 'images', 'name': engine.name})
+        images_search_query = SearchQuery(search_query.query, search_images_engines, ['images'], search_query.lang,
+                                          search_query.safesearch, 1, search_query.time_range)
+        results_images_big = SearchWithPlugins(images_search_query, request.user_plugins,
+                                                    request).search().get_ordered_results()
+        to_ten = 0
+        for image in results_images_big:
+            to_ten+=1
+            if to_ten > 10:
+                break
+            results_images.append(image)
+
+    # results
+    results = result_container.get_ordered_results()
+    number_of_results = result_container.results_number()
+    if number_of_results < result_container.results_length():
+        number_of_results = 0
+
+    # UI
+    advanced_search = request.form.get('advanced_search', None)
+
+    # output
+    config_results(results, search_query.query)
+    config_results(results_images, search_query.query)
 
     return render(
         'results.html',
@@ -595,6 +546,7 @@ def index():
         current_language=match_language(search_query.lang,
                                         LANGUAGE_CODES,
                                         fallback=settings['search']['language']),
+        results_image=results_images,
         base_url=get_base_url(),
         theme=get_current_theme_name(),
         favicons=global_favicons[themes.index(get_current_theme_name())]
@@ -846,9 +798,9 @@ def config():
                                  'paging': engine.paging,
                                  'language_support': engine.language_support,
                                  'supported_languages':
-                                 engine.supported_languages.keys()
-                                 if isinstance(engine.supported_languages, dict)
-                                 else engine.supported_languages,
+                                     engine.supported_languages.keys()
+                                     if isinstance(engine.supported_languages, dict)
+                                     else engine.supported_languages,
                                  'safesearch': engine.safesearch,
                                  'time_range_support': engine.time_range_support,
                                  'timeout': engine.timeout}
