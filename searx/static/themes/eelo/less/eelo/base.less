@@ -1,0 +1,99 @@
+
+html {
+  position: relative;
+  min-height: 100%;
+  color: @text-color;
+}
+
+body {
+  /* Margin bottom by footer height */
+  margin: 0px;
+  padding: 0px;
+  font-size: @fontsize_medium;
+  margin-bottom: 80px;
+  background-color: white;
+}
+
+body, body * {
+  font-family: 'Roboto', "Cantarell", Helvetica, Arial, sans-serif;
+}
+
+a { color: @link-color; }
+
+
+input, select {
+  box-shadow: none !important;
+}
+
+
+.text-muted {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.danger, .btn.danger {
+  color: @color_danger;
+}
+
+
+a, a:hover, a:focus, a:active, select:hover, select:focus, select:active {
+  outline: none;
+  text-decoration: none;
+}
+
+
+.btn {
+  text-transform: uppercase;
+  padding: 8px 14px;
+  background-color: transparent;
+  border: 2px solid rgba(0, 0, 0, .2);
+  border-radius: @corner-radius;  
+  text-align: center;
+  font-size: @fontsize_medium;
+  font-weight: bold;
+  color: @color_base-text-hl;  
+}
+.btn.btn-block, .block {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+.btn.primary, input.btn[type="submit"] {
+  // border-color: @color_accent;
+  color: @color_accent;
+}
+.btn.btn-flat {
+  border: none;
+  border-radius: 0;
+}
+.btn.btn-flat:hover {
+  background-color: transparent;
+  color: blue;
+}
+
+// .btn.danger {
+//   border-color: @color_danger;
+// }
+
+
+.hidden, #icons {
+  display: none;
+}
+
+
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  border: none;
+  
+  font-weight: normal;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAQAAACR313BAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZ
+cwAABFkAAARZAVnbJUkAAAAHdElNRQfgBxgLDwB20OFsAAAAbElEQVQY073OsQ3CMAAEwJMYwJGn
+sAehpoXJItltBkmcdZBYgIIiQoLglnz3ui+eP+bk5uneteTMZJa6OJuIqvYzSJoqwqBq8gdmTTW8
+6/dghxAUq4xsVYT9laBYXCw93Aajh7GPEF23t4fkBYevGFTANkPRAAAAJXRFWHRkYXRlOmNyZWF0
+ZQAyMDE2LTA3LTI0VDExOjU1OjU4KzAyOjAwRFqFOQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNi0w
+Ny0yNFQxMToxNTowMCswMjowMP7RDgQAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb
+7jwaAAAAAElFTkSuQmCC) 96% no-repeat;
+}

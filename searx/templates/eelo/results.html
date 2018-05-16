@@ -1,0 +1,115 @@
+{% extends "eelo/base.html" %}
+{% macro search_form_attrs(pageno) -%}
+    {% for category in selected_categories %}<input type="hidden" name="category_{{ category }}" value="1"/>{% endfor %}
+    <input type="hidden" name="q" value="{{ q|e }}" />
+    <input type="hidden" name="pageno" value="{{ pageno }}" />
+    <input type="hidden" name="time_range" value="{{ time_range }}" />
+    <input type="hidden" name="language" value="{{ current_language }}" />
+{%- endmacro %}
+{%- macro search_url() %}{{ base_url }}?q={{ q|urlencode }}{% if selected_categories %}&amp;categories={{ selected_categories|join(",") | replace(' ','+') }}{% endif %}{% if pageno > 1 %}&amp;pageno={{ pageno }}{% endif %}{% if time_range %}&amp;time_range={{ time_range }}{% endif %}{% if current_language != 'all' %}&amp;language={{ current_language }}{% endif %}{% endmacro -%}
+
+{% macro put_results(results_slice) -%}
+{%- for result in results_slice %}
+<div class="result {% if result['template'] %}result-{{ result.template|replace('.html', '') }}{% else %}result-default{% endif %}">
+    {% set index = loop.index %}
+    {% if result.template %}
+        {% include get_result_template('eelo', result['template']) %}
+    {% else %}
+        {% include 'eelo/result_templates/default.html' %}
+    {% endif %}
+</div>
+{%- endfor %}
+{%- endmacro %}
+
+{% block title %}{{ q|e }} - {% endblock %}
+{% block meta %}<link rel="alternate" type="application/rss+xml" title="Searx search: {{ q|e }}" href="{{ search_url() }}&amp;format=rss">{% endblock %}
+{% block content %}
+
+    <div class="container">
+        <div>
+            {% include 'eelo/search_full.html' %}
+        </div>
+    </div>
+
+    <div class="container">
+        <div>
+
+            {% if corrections %}
+            <div class="result">
+                <span class="result_header text-muted form-inline pull-left suggestion_item">{{ _('Try searching for:') }}</span>
+                {% for correction in corrections %}
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation" class="form-inline pull-left suggestion_item">
+                        <input type="hidden" name="q" value="{{ correction }}">
+                        <button type="submit" class="btn btn-default btn-xs">{{ correction }}</button>
+                    </form>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+
+            {% if answers %}
+            {% for answer in answers %}
+            <div class="result well">
+                <span>{{ answer }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+
+            {% if not results and not answers %}
+                {% include 'eelo/messages/no_results.html' %}
+            {% else %}
+
+                {{ put_results(results[:3]) }}
+
+                {% if image_results %}
+                <h1>images</h1>
+                <div id="default_images_container">
+                    {{ put_results(image_results) }}
+                </div>
+                {% endif %}
+
+                {{ put_results(results[4:]) }}
+
+                {% if paging %}
+                <div id="pagination" {% if rtl %} class="rtl" {% endif %} >
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
+                        {{ search_form_attrs(pageno - 1) }}
+                        <button type="submit" class="btn btn-default" {% if pageno == 1 %}disabled{% endif %}><span class="glyphicon glyphicon-forward"></span> {{ _('previous page') }}</button>
+                    </form>
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
+                        {{ search_form_attrs(pageno + 1) }}
+                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-backward"></span> {{ _('next page') }}</button>
+                    </form>
+                </div><!-- /#pagination -->
+                {% endif %}
+
+            {% endif %}
+
+        </div>
+
+        <div>
+            {% if infoboxes %}
+                {% for infobox in infoboxes %}
+                    {% include 'eelo/infobox.html' %}
+                {% endfor %}
+            {% endif %}
+
+            {% if suggestions %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">{{ _('Suggestions') }}</h4>
+                </div>
+                <div class="panel-body">
+                    {% for suggestion in suggestions %}
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation" class="form-inline pull-{% if rtl %}right{% else %}left{% endif %} suggestion_item">
+                        <input type="hidden" name="q" value="{{ suggestion }}">
+                        <button type="submit" class="btn btn-default btn-xs">{{ suggestion }}</button>
+                    </form>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

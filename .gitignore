@@ -15,6 +15,9 @@ setup.cfg
 *~
 
 node_modules/
+yarn.lock
+yarn-error.log
 
 .tx/
-.idea
+
+.vscode

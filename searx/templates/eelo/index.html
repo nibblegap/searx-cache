@@ -1,0 +1,7 @@
+{% extends "eelo/base.html" %}
+{% block content %}
+<div id="index">
+    <img src="{{ url_for('static', filename='img/logo_searx_a.png') }}" alt="searx logo" />
+    {% include 'eelo/search.html' %}    
+</div>
+{% endblock %}
