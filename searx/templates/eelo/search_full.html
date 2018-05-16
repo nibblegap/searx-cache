@@ -1,0 +1,11 @@
+{% from 'eelo/macros.html' import search_bar %}
+
+{% call search_bar(q, true) %}
+  <div id="search_params">
+    {% include 'eelo/categories.html' %}
+    <span>
+      {% include 'eelo/time-range.html' %}
+      {% include 'eelo/languages.html' %}
+    </span>
+  </div>
+{% endcall %}

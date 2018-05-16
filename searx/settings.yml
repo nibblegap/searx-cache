@@ -1,6 +1,6 @@
 general:
-    debug : False # Debug mode, only for development
-    instance_name : "searx" # displayed name
+    debug : debug # Debug mode, only for development
+    instance_name : "eelo" # displayed name
 
 search:
     safe_search : 0 # Filter results. 0: None, 1: Moderate, 2: Strict
@@ -18,7 +18,7 @@ server:
 ui:
     static_path : "" # Custom static path - leave it blank if you didn't change
     templates_path : "" # Custom templates path - leave it blank if you didn't change
-    default_theme : oscar # ui theme
+    default_theme : eelo # ui theme
     default_locale : "" # Default interface locale - leave blank to detect from browser information or use codes from the 'locales' config section
 
 # searx supports result proxification using an external service: https://github.com/asciimoo/morty

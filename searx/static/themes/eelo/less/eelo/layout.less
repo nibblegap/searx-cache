@@ -1,0 +1,46 @@
+
+#pagination {
+  display: flex;
+  justify-content: space-between;
+}
+
+.container {
+  max-width: 1100px;
+  padding-left: @spacing_large;
+  padding-right: @spacing_large;
+
+  display: flex;
+  justify-content: space-between;
+
+  >:first-child {
+    max-width: 600px;
+    width: 600px;
+  }
+  >:last-child:not(:first-child) {
+    max-width: 400px;
+    width: 400px;
+  }
+}
+
+#index {
+  max-width: 600px;
+  margin: auto;
+
+  img {
+    width: 300px;
+    display: block;
+    margin: auto;
+    margin-top: 64px;
+    margin-bottom: 64px;    
+  }
+}
+
+
+.inline {
+  display: flex;
+  flex-direction: row;
+}
+
+.rtl {
+  flex-direction: row-reverse;
+}
