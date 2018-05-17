@@ -31,9 +31,9 @@
         </div>
     </div>
 
-    <div class="container">
+    {% set image_gallery = 'images' in selected_categories %}
+    <div class="container {% if image_gallery %} full {% endif %} ">
         <div>
-
             {% if corrections %}
             <div class="result">
                 <span class="result_header text-muted form-inline pull-left suggestion_item">{{ _('Try searching for:') }}</span>
@@ -60,16 +60,18 @@
                 {% include 'eelo/messages/no_results.html' %}
             {% else %}
 
-                {{ put_results(results[:3]) }}
+                <div id="results" {% if image_gallery %} class="image-gallery" {% endif %}>
+                    {{ put_results(results[:3]) }}
 
-                {% if image_results %}
-                <h1>images</h1>
-                <div id="default_images_container">
-                    {{ put_results(image_results) }}
+                    {% if image_results %}
+                    <h1>images</h1>
+                    <div id="default_images_container">
+                        {{ put_results(image_results) }}
+                    </div>
+                    {% endif %}
+    
+                    {{ put_results(results[4:]) }}
                 </div>
-                {% endif %}
-
-                {{ put_results(results[4:]) }}
 
                 {% if paging %}
                 <div id="pagination" {% if rtl %} class="rtl" {% endif %} >

@@ -1,3 +1,4 @@
+
 .result.result-default {
   margin-bottom: 32px;
 }
@@ -48,21 +49,19 @@
   margin-top: 48px;
 }
 
-
 .result-images {
   display: inline;
 }
-
-
+#results.image-gallery {
+  column-count: 7;
+  column-gap: @spacing_medium;
+}
 #default_images_container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  column-count: 5;
+  column-gap: @spacing_medium;
 }
-#default_images_container > .result.result-images {
-  flex: 20%;
-}
-
 .img-thumbnail {
+  width: 100%;
   border: none;
+  margin-bottom: @spacing_medium;
 }

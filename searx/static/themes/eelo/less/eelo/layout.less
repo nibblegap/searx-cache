@@ -22,6 +22,17 @@
   }
 }
 
+.container.full {
+  max-width: 100%;
+  >:first-child {
+    max-width: 100%;
+    width: 100%;
+  }
+  >:last-child:not(:first-child) {
+    display: none;
+  }
+}
+
 #index {
   max-width: 600px;
   margin: auto;
