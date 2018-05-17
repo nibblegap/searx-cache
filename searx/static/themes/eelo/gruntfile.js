@@ -37,20 +37,18 @@ module.exports = function(grunt) {
     less: {
         development: {
             options: {
-                paths: ["less/logicodev", "less/eelo"]
+                paths: ["less/eelo"]
                 //banner: '/*! less/eelo/oscar.css | <%= grunt.template.today("dd-mm-yyyy") %> | https://github.com/asciimoo/searx */\n'
             },
-            files: {"css/logicodev.css": "less/logicodev-dark/oscar.less",
-                    "css/eelo.css": "less/eelo/eelo.less"}
+            files: {"css/eelo.css": "less/eelo/eelo.less"}
         },
         production: {
             options: {
-                paths: ["less/logicodev", "less/eelo"],
+                paths: ["less/eelo"],
                 //banner: '/*! less/eelo/oscar.css | <%= grunt.template.today("dd-mm-yyyy") %> | https://github.com/asciimoo/searx */\n',
                 cleancss: true
             },
-            files: {"css/logicodev.min.css": "less/logicodev/oscar.less",
-                    "css/eelo.min.css": "less/eelo/eelo.less"}
+            files: {"css/eelo.min.css": "less/eelo/eelo.less"}
         },
         /*
 	// built with ./manage.sh styles
