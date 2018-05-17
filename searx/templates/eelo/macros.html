@@ -1,10 +1,9 @@
-<!-- Draw glyphicon icon from bootstrap-theme -->
+<!-- use icons defined in icons.html -->
 {% macro icon(action) -%}
-    <svg class="icon" viewBox="0 0 512 512" width="24px" height="24px">
-        <use href="#{{ action }}" xlink:href="#{{ action }}"></use>
-    </svg>
+  <svg class="icon" viewBox="0 0 24 24" width="24px" height="24px">
+    <use href="#{{ action }}" xlink:href="#{{ action }}"></use>
+  </svg>
 {%- endmacro %}
-
 
 <!-- Search bar base -->
 {% macro search_bar(value="", inline=false) -%}
