@@ -3,9 +3,10 @@
 {% call search_bar(q, true) %}
   <div id="search_params">
     {% include 'eelo/categories.html' %}
-    <span>
-      {% include 'eelo/time-range.html' %}
+    <span id="time_and_lang">
+      {% set flat_lang_selector = True %}
       {% include 'eelo/languages.html' %}
+      {% include 'eelo/time-range.html' %}
     </span>
   </div>
 {% endcall %}

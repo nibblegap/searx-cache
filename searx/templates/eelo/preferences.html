@@ -23,7 +23,7 @@
 <form method="post" action="{{ url_for('preferences') }}" id="preferences" class="container">
 
     <div id="controls">
-        <input type="radio" class="tab-radio" id="tab_general_r" value="general" name="tab">
+        <input type="radio" class="tab-radio" id="tab_general_r" value="general" name="tab" checked>
         <div id="tab_general" class="tab-content">
             <fieldset>
                 {% set language_label = _('Search language') %}

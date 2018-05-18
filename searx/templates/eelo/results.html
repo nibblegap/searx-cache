@@ -1,38 +1,17 @@
 {% extends "eelo/base.html" %}
-{% macro search_form_attrs(pageno) -%}
-    {% for category in selected_categories %}<input type="hidden" name="category_{{ category }}" value="1"/>{% endfor %}
-    <input type="hidden" name="q" value="{{ q|e }}" />
-    <input type="hidden" name="pageno" value="{{ pageno }}" />
-    <input type="hidden" name="time_range" value="{{ time_range }}" />
-    <input type="hidden" name="language" value="{{ current_language }}" />
-{%- endmacro %}
+
+
 {%- macro search_url() %}{{ base_url }}?q={{ q|urlencode }}{% if selected_categories %}&amp;categories={{ selected_categories|join(",") | replace(' ','+') }}{% endif %}{% if pageno > 1 %}&amp;pageno={{ pageno }}{% endif %}{% if time_range %}&amp;time_range={{ time_range }}{% endif %}{% if current_language != 'all' %}&amp;language={{ current_language }}{% endif %}{% endmacro -%}
-
-{% macro put_results(results_slice) -%}
-{%- for result in results_slice %}
-<div class="result {% if result['template'] %}result-{{ result.template|replace('.html', '') }}{% else %}result-default{% endif %}">
-    {% set index = loop.index %}
-    {% if result.template %}
-        {% include get_result_template('eelo', result['template']) %}
-    {% else %}
-        {% include 'eelo/result_templates/default.html' %}
-    {% endif %}
-</div>
-{%- endfor %}
-{%- endmacro %}
-
 {% block title %}{{ q|e }} - {% endblock %}
 {% block meta %}<link rel="alternate" type="application/rss+xml" title="Searx search: {{ q|e }}" href="{{ search_url() }}&amp;format=rss">{% endblock %}
 {% block content %}
 
-    <div class="container">
-        <div>
-            {% include 'eelo/search_full.html' %}
-        </div>
+    <div id="search_bar_area">
+        {% include 'eelo/search_full.html' %}
     </div>
 
     {% set image_gallery = 'images' in selected_categories %}
-    <div class="container {% if image_gallery %} full {% endif %} ">
+    <div class="container contents {% if image_gallery %} full {% endif %}">
         <div>
             {% if corrections %}
             <div class="result">
@@ -59,6 +38,19 @@
             {% if not results and not answers %}
                 {% include 'eelo/messages/no_results.html' %}
             {% else %}
+            
+                {% macro put_results(results_slice) -%}
+                {%- for result in results_slice %}
+                <div class="result {% if result['template'] %}result-{{ result.template|replace('.html', '') }}{% else %}result-default{% endif %}">
+                    {% set index = loop.index %}
+                    {% if result.template %}
+                        {% include get_result_template('eelo', result['template']) %}
+                    {% else %}
+                        {% include 'eelo/result_templates/default.html' %}
+                    {% endif %}
+                </div>
+                {%- endfor %}
+                {%- endmacro %}
 
                 <div id="results" {% if image_gallery %} class="image-gallery" {% endif %}>
                     {{ put_results(results[:3]) }}
@@ -73,7 +65,16 @@
                     {{ put_results(results[4:]) }}
                 </div>
 
+
                 {% if paging %}
+                {% macro search_form_attrs(pageno) -%}
+                    {% for category in selected_categories %}<input type="hidden" name="category_{{ category }}" value="1"/>{% endfor %}
+                    <input type="hidden" name="q" value="{{ q|e }}" />
+                    <input type="hidden" name="pageno" value="{{ pageno }}" />
+                    <input type="hidden" name="time_range" value="{{ time_range }}" />
+                    <input type="hidden" name="language" value="{{ current_language }}" />
+                {%- endmacro %}
+
                 <div id="pagination" {% if rtl %} class="rtl" {% endif %} >
                     <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
                         {{ search_form_attrs(pageno - 1) }}
@@ -97,6 +98,7 @@
                 {% endfor %}
             {% endif %}
 
+
             {% if suggestions %}
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -113,5 +115,7 @@
             </div>
             {% endif %}
         </div>
+
+
     </div>
 {% endblock %}
