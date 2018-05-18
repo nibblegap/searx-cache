@@ -1,5 +1,5 @@
 #q {
-  border: 2px solid rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(0, 0, 0, 0.24);
   border-radius: 50px;
 
   height: 42px;
@@ -7,7 +7,13 @@
   width: 100%;
   padding-left: @spacing_large;
   font-size: @fontsize_medium;
+
+  transition: border-color 0.2s ease-in-out;
 }
+#q:focus {
+  border-color: @color_accent;
+}
+
 #search_input_container {
   position: relative;
   display: flex;
@@ -19,6 +25,25 @@
     height: 24px;
     border: none;
     background: none;
+    padding: 0;
+    z-index: 2;
+    cursor: pointer;
+
+    .icon { transition: fill 0.2s ease-in-out; }
+    + .circle { transition: transform 0.2s ease-in-out; }
+  }
+  button[type="submit"]:hover {
+    .icon { fill: white; }
+    + .circle { transform: scale(1.6); }
+  }
+  .circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50px;
+    background-color: @color_accent;
+    position: absolute;
+    right: 6px;
+    transform: scale(0);
   }
 }
 
@@ -28,6 +53,20 @@
   font-size: @fontsize_x-small;
   margin-bottom: @spacing_large;
   margin-top: @spacing_large;
+  padding-left: @spacing_x-large;
+  padding-right: @spacing_x-large;
+
+  select, label {
+    font-size: @fontsize_small;
+  }
+  select {
+    color: rgba(0,0,0, .5);
+    text-align: right;
+    padding-right: 32px;
+  }
+  #time_and_lang > :first-child {
+    margin-right: @spacing_large;
+  }
 }
 
 .search_categories, #categories {
@@ -62,7 +101,7 @@
   height: 32px;  
 }
 .inline-search #q {
-  padding-left: 56px;
+  padding-left: @spacing_search_bar_contents;
 }
 
 
