@@ -66,6 +66,10 @@
   .container > * {
     margin: auto;
   }
+  #preferences.container {
+    flex-direction: column;
+    margin-top: 16px;
+  }
 }
 @media screen and (max-width: 600px) {
   body {
@@ -84,6 +88,10 @@
   #search_input_container {
     margin-left: 16px;
     margin-right: 16px;
+  }
+  .container.full #pagination {
+    max-width: 100%;
+    width: 100%;
   }
 }
 html {
@@ -381,6 +389,18 @@ footer {
 #main-logo > img {
   max-width: 250px;
   width: 80%;
+}
+@media screen and (max-width: 600px) {
+  #search_params {
+    overflow-x: scroll;
+  }
+  #search_params,
+  #categories {
+    flex-wrap: nowrap;
+  }
+  #time_and_lang {
+    display: flex;
+  }
 }
 #results {
   margin-top: 32px;

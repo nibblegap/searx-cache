@@ -89,6 +89,10 @@
 
     > * { margin: auto; }
   }
+  #preferences.container {
+    flex-direction: column;
+    margin-top: @spacing_large;
+  }
 });
 
 .mobile-mq({
@@ -109,5 +113,10 @@
   #search_input_container {
     margin-left: @spacing_container;
     margin-right: @spacing_container;
+  }
+
+  .container.full #pagination {
+    max-width: 100%;
+    width: 100%;
   }
 });
