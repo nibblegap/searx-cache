@@ -86,32 +86,27 @@
 
         <input type="radio" class="tab-radio" id="tab_engines_r" value="engines" name="tab">
         <div id="tab_engines" class="tab-content">
-            {% macro support_text(supports, text) -%}
-                {% if not supports %}
-                <i class="danger">{{ caller() }} </i>
-                {% endif %}
-            {%- endmacro %}
 
             {% for categ in all_categories %}
             <!-- <input type="radio" class="tab-radio" id="" value="" name="engines_category_tab"> -->
-            <section id="">
+            <section id="engines">
                 <h3>{{categ}}</h3>
                 {% for search_engine in engines_by_category[categ] %}
                 {% if not search_engine.private %}
-                    <div class="engine {% if rtl -%} rtl {%- endif %}">
-                        <div>
-                            {{ checkbox_toggle('engine_' + search_engine.name | replace(' ', '_') + '__' + categ | replace(' ', '_'), not ((search_engine.name, categ) in disabled_engines)) }}
-                            <span>
-                                <b>{{ search_engine.name }}</b> <i>{{_("Shortcuts")}}</i> {{ shortcuts[search_engine.name] }}
-                            </span>
-                            <div>
-                                {% call support_text(stats[search_engine.name].supports_selected_language) %} {{locales[current_locale]}} {{_("not supported")}} {% endcall %}
-                                {% call support_text(search_engine.safesearch == True) %}{{_("No safe search")}}{% endcall %}
-                                {% call support_text(not(stats[search_engine.name]['warn_time'] or stats[search_engine.name]['warn_timeout'])) %}
-                                    {{_("Slow")}}
-                                {% endcall %}
+                    <div class="engine">
+                        {% set disabled = (search_engine.name, categ) in disabled_engines %}
+                        {{ checkbox_toggle('engine_' + search_engine.name | replace(' ', '_') + '__' + categ | replace(' ', '_'), disabled) }}
+                        <span class="data">
+                            <div><b>{{ search_engine.name }}</b> <i>{{_("Shortcuts")}}</i> {{ shortcuts[search_engine.name] }} 
+                                <i class="danger">({{_('disabled')}})</i>
                             </div>
-                        </div>
+                            <small class="danger"><i>
+                                {% set support_text_str = [(stats[search_engine.name].supports_selected_language, "%s %s " | format(locales[current_locale], _("not supported"))), 
+                                                           (search_engine.safesearch == True, _("No safe search")), 
+                                                           (not(stats[search_engine.name]['warn_time'] or stats[search_engine.name]['warn_timeout']), _("Slow"))] %}
+                                {{ support_text_str | rejectattr(0) | map(attribute=1) | join(", ") }}
+                            </i></small>
+                        </span>
                     </div>
                 {% endif %}
                 {% endfor %}
@@ -179,6 +174,7 @@
         </div> <!-- End Advanced Tab -->
 
 
+        <!-- this layout might not be very optimal without styling, but the benefits of having JS-less tabs are well worth it -->
         <div id="tabs">
             <label for="tab_general_r">{{_("General")}}</label>
             <label for="tab_engines_r">{{_("Engines")}}</label>

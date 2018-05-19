@@ -1,62 +1,29 @@
 #preferences {
-  h1 {
-    margin-bottom: 32px;
-  }
+  h1, .nav-tabs, #notice { margin-bottom: @spacing_x-large; }
 
-  .nav-tabs {
-    margin-bottom: 32px;
-  }
-
-  .options {
-    margin-top: 32px;
-  }
-
-  label {
-    color: @text-color-hl;
-  }
-
-  div.row.form-group {
-    margin-bottom: 24px;
-  }
-
-  div.tab-content {
-    margin-bottom: 48px;
-  }
-
-  #notice {
-    margin-bottom: 32px;
-  }
+  .options { margin-top: @spacing_x-large; }
 
   .tab-content {
+    margin-bottom: 48px;
     display: none;
   }
 
-  input.tab-radio[type="radio"] {
-    display: none;
-  }
-  input.tab-radio[type="radio"]:checked + .tab-content {
-    display: block;
-  }
+  input.tab-radio[type="radio"] { display: none; }
+  input.tab-radio[type="radio"]:checked + .tab-content { display: block; }
 
   .preference {
     margin-bottom: @spacing_large;
-  }
-  .preference.inline {
-    justify-content: space-between;
-    >:first-child {
-      flex: 2;
-    }
-    >:last-child {
-      flex: 1;
+    
+    &.inline {
+      justify-content: space-between;
+      
+      >:first-child { flex: 2; }
+      >:last-child { flex: 1; }
     }
   }
 
-  #tabs {
-    margin-bottom: @spacing_xx-large;
-  }
-  #tabs > * {
-    margin-right: @spacing_xx-large;
-  }
+  #tabs { margin-bottom: @spacing_xx-large; }
+  #tabs > * { margin-right: @spacing_xx-large; }
 
   #controls {
     display: flex;
@@ -64,28 +31,41 @@
     justify-content: flex-end;
   }
 
-
-  section {
-    margin-bottom: @spacing_xx-large;
-  }
-
-  ul > li {
-    margin-bottom: @spacing_medium;
-  }
-
-
-  fieldset {
-    border: none;
-    padding: 0px;
-  }
-
-  #cookies_list {
-  }
-  #cookies_list .cookie-value {
-    word-wrap: break-word;
-  }
+  #cookies_list { }
+  #cookies_list .cookie-value { word-wrap: break-word; }
 
   #action_buttons { margin-top: @spacing_x-huge; }
   #action_buttons > div { margin-bottom: @spacing_x-large; }
   #action_buttons > div > * { margin-bottom: @spacing_medium; }
+
+
+  #engines {
+    h3 {
+      text-transform: capitalize;
+      margin-top: 0;
+    }
+
+    .engine {
+      display: flex;
+      margin-bottom: @spacing_medium;
+
+      .data {
+        width: 100%;
+        margin-left: @spacing_large;
+        margin-right: @spacing_large;
+      }
+
+      input:checked ~ .data { &:extend(.disabled); }
+      input:checked ~ .data .danger { display: inline; }
+      input:not(:checked) ~ .data i.danger { display: none; }
+    }
+  }
 }
+
+.mobile-mq({
+  .preference.inline {
+    flex-direction: column;
+    
+    >:first-child { margin-bottom: @spacing_medium; }
+  }
+});
