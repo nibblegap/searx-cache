@@ -45,3 +45,35 @@
 
 @size-desktop: 1100px;
 @size-mobile: 600px;
+
+
+.container-padding {
+  padding-left: @spacing_container;
+  padding-right: @spacing_container;
+}
+
+
+@color-transition: color .2s ease-in-out;
+@border-color-transition: border-color .2s ease-in-out;
+
+.color-transition { transition: @color-transition; }
+.border-color-transition { transition: @border-color-transition; }
+
+.widget-border(@color: rgba(0, 0, 0, .2)) {
+  border: 2px solid @color;
+}
+
+
+.disabled { opacity: .4; }
+
+
+// media queries
+.tablet-mq(@rules) {
+  @media screen and (max-width: @size-desktop) { @rules(); }
+}
+.mobile-mq(@rules) {
+  @media screen and (max-width: @size-mobile) { @rules(); }
+}
+.mobile-landscape-mq(@rules) {
+  @media screen and (max-height: @size-mobile) and (orientation: landscape) { @rules(); }
+}
