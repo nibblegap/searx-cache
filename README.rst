@@ -18,7 +18,7 @@ Installation
 ~~~~~~~~~~~~
 
 -  clone source:
-   ``git clone hhttps://gitlab.eelo.io/Johnny/my-spot.git && cd my-spot``
+   ``git clone https://gitlab.eelo.io/spot/my-spot.git && cd my-spot``
 -  install dependencies: ``./manage.sh update_packages``
 -  edit your
    `settings.yml <https://github.com/asciimoo/searx/blob/master/searx/settings.yml>`__
