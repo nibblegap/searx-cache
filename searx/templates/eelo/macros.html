@@ -62,7 +62,8 @@
 {%- endmacro %}
 
 {% macro checkbox_toggle(id, blocked) -%}
-    <input type="checkbox" id="{{ id }}" name="{{ id }}"{% if blocked %} checked="checked"{% endif %} class="onoffswitch-checkbox">
+    <input class="checkmark_input" type="checkbox" id="{{ id }}" name="{{ id }}"{% if blocked %} checked="checked"{% endif %} class="onoffswitch-checkbox">
+    <label for="{{ id }}" class="checkmark"></label>
 {%- endmacro %}
 
 {% macro support_toggle(supports) -%}
