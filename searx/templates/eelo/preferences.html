@@ -87,7 +87,7 @@
         <input type="radio" class="tab-radio" id="tab_engines_r" value="engines" name="tab">
         <div id="tab_engines" class="tab-content">
 
-            {% for categ in all_categories %}
+            {% for categ in ['general', 'images'] %}
             <!-- <input type="radio" class="tab-radio" id="" value="" name="engines_category_tab"> -->
             <section id="engines">
                 <h3>{{categ}}</h3>
@@ -97,9 +97,7 @@
                         {% set disabled = (search_engine.name, categ) in disabled_engines %}
                         {{ checkbox_toggle('engine_' + search_engine.name | replace(' ', '_') + '__' + categ | replace(' ', '_'), disabled) }}
                         <span class="data">
-                            <div><b>{{ search_engine.name }}</b> <i>{{_("Shortcuts")}}</i> {{ shortcuts[search_engine.name] }} 
-                                <i class="danger">({{_('disabled')}})</i>
-                            </div>
+                           <b>{{ search_engine.name }}</b><br>
                             <small class="danger"><i>
                                 {% set support_text_str = [(stats[search_engine.name].supports_selected_language, "%s %s " | format(locales[current_locale], _("not supported"))), 
                                                            (search_engine.safesearch == True, _("No safe search")), 
