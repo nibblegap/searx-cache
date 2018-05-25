@@ -34,9 +34,8 @@ $(document).ready(function() {
             source: searx.searchResults.ttAdapter()
         });
 
-        // $('#q').bind('typeahead:active', function(ev) {
-        //     console.log('opened!!');
-        //     $("#search_input_container").addClass("expanded");
-        // });
+        $('#q').bind('typeahead:selected', function(ev) {
+            $("#search_form").submit();
+        });
     }
 });
