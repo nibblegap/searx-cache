@@ -56,6 +56,25 @@
   }
 }
 
+.checkmark .icon {
+  &:extend(.fill-transition);
+  fill: @text-color;
+
+  &.checked { fill: @color_accent; }
+}
+.checkmark_input {
+  display: none;
+
+  &.inverted:checked {
+    & + .checkmark .checked { display: none; }
+    & + .checkmark .unchecked { display: initial; }
+  }
+  &.inverted:not(:checked) {
+    & + .checkmark .checked { display: initial; }
+    & + .checkmark .unchecked { display: none; }
+  }
+}
+
 
 .custom-select {
   appearance: none;
