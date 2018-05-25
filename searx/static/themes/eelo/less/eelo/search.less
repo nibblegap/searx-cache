@@ -1,6 +1,7 @@
 
 #search_form {
   @logo-link-size: 32px;
+  @logo-link-spacing: 4px;
   @input-size: 38px;
 
   #search_input_container {
@@ -13,6 +14,13 @@
     height: @input-size;
     &:hover, &:active { border-color: @color_accent; }
     &:extend(.border-color-transition);
+
+    // used when autocomplete is enabled and the suggestion box is open
+    // &.expanded {
+    //   border-radius: 25px;
+    //   border-bottom-left-radius: 0;
+    //   border-bottom-right-radius: 0;
+    // }
     
 
     // the actual input
@@ -23,8 +31,9 @@
       height: 100%;
       width: 100%;
       min-width: 0;
-      margin-left: @spacing_large;
+      padding-left: @spacing_large;
     }
+    #q:focus { outline: none; }
   
     button[type="submit"] {
       position: relative;
@@ -52,20 +61,52 @@
     height: @logo-link-size;
   }
   #logo_link {
-    padding-left: 4px;
+    padding-left: @logo-link-spacing;
   }
 
   // some minor tweaks for RTL
   #search_input_container.rtl {
     #q {
       margin-left: 0;
-      margin-right: @spacing_large;
+      padding-right: @spacing_large;
     }
     #logo_link {
       padding-left: 0;
-      padding-right: 4px;
+      padding-right: @logo-link-spacing;
     }
   }
+
+  // style overrides for typeahead
+  .twitter-typeahead {
+    position: unset !important;
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+  }
+  input.tt-hint {
+    display: none;
+  }
+  .tt-dropdown-menu {
+    position: absolute;
+    left: 0;
+    right: 0 !important;
+    top: calc(100% + @spacing_large) !important;
+    border-radius: @corner-radius;
+
+    .widget-border();
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background-color: @grey;
+    padding-left: @spacing_large;
+    padding-right: @spacing_large;  
+  }
+
+  &.inline-search {
+    .tt-dropdown-menu {
+      padding-left: @spacing_large + @logo-link-size + @logo-link-spacing;
+    }
+  }
+
 
 
   // advanced search params, search topic, lang and time.
@@ -112,12 +153,14 @@
 
 }
 
-
 // make advanced options scrollable on mobile
 .mobile-mq({
   #search_form {
     #search_params { overflow-x: scroll; }
     #search_params, #categories { flex-wrap: nowrap; }
     #time_and_lang { display: flex; }
+  }
+  .tt-dropdown-menu {
+    padding-left: @spacing_large;
   }
 });
