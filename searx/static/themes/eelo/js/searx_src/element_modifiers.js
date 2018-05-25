@@ -15,11 +15,12 @@
  * (C) 2014 by Thomas Pointhuber, <thomas.pointhuber@gmx.at>
  */
 
-$(document).ready(function(){
+$(document).ready(function() {
     /**
      * focus element if class="autofocus" and id="q"
      */
-    $('#q.autofocus').focus();
+    document.querySelector("#q[autofocus]").focus();
+    $('#q[autofocus]').focus();
 
     /**
      * select full content on click if class="select-all-on-click"
