@@ -504,7 +504,7 @@ def index():
         for engine in categories['images']:
             if (engine.name, 'images') not in disabled_engines:
                 search_images_engines.append({'category': 'images', 'name': engine.name})
-        images_search_query = SearchQuery(search_query.query, search_images_engines, ['images'], search_query.lang,
+        images_search_query = SearchQuery(search_query.query.decode('utf8'), search_images_engines, ['images'], search_query.lang,
                                           search_query.safesearch, 1, search_query.time_range)
         results_images_big = SearchWithPlugins(images_search_query, request.user_plugins,
                                                     request).search().get_ordered_results()
