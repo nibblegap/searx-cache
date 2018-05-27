@@ -20,6 +20,10 @@
     </form><!-- / #search_form_full -->
 {%- endmacro %}
 
+{% macro navbar_menu() -%}
+    <label for="nav_toggle" id="nav_toggle_btn">{{icon("menu", "menu-open")}}{{icon("close", "menu-close")}}</label>
+{%- endmacro %}
+
 
 <!-- Draw favicon -->
 {% macro draw_favicon(favicon) -%}

@@ -32,6 +32,7 @@
       width: 100%;
       min-width: 0;
       padding-left: @spacing_large;
+      background-color: transparent;
     }
     #q:focus { outline: none; }
   
@@ -159,6 +160,9 @@
     #search_params { overflow-x: scroll; }
     #search_params, #categories { flex-wrap: nowrap; }
     #time_and_lang { display: flex; }
+  }
+  #search_input_container {
+    margin-right: @spacing_medium * 2 + 24px;
   }
   .tt-dropdown-menu {
     padding-left: @spacing_large;
