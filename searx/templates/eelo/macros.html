@@ -84,3 +84,21 @@
     </span>
     {% endif %}
 {%- endmacro %}
+
+
+
+{% macro search_link(text, q, method=None, time_range=None, lang=None, category=None) -%}
+<form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation">
+    <input type="hidden" name="q" value="{{ q }}" />
+    {% if time_range %}
+    <input type="hidden" name="time_range" value="{{ time_range }}" />
+    {% endif %}
+    {% if time_range %}
+    <input type="hidden" name="language" value="{{ lang }}" />
+    {% endif %}
+    {% if category %}
+    <input type="hidden" name="category" value="images" />
+    {% endif %}
+    <button type="submit" class="btn btn-flat" >{{ text }}</button>
+</form>
+{% endmacro %}
