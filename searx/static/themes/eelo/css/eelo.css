@@ -696,6 +696,12 @@ nav #eelo_links > * {
   max-height: 120px;
   overflow: hidden;
 }
+#suggestions form {
+  display: inline-block;
+}
+#suggestions form .btn {
+  text-transform: none;
+}
 .infobox {
   margin-top: 32px;
 }
