@@ -62,7 +62,34 @@ $(document).ready(function() {
         });
     }
 });
-;/**
+;
+function configure_image_view(target) {
+  document.getElementById("image_view_image").src = target.href;
+  document.getElementById("image_view_file_link").href = target.href;
+  document.getElementById("image_view_url_link").href = target.dataset.url;
+}
+
+function show_image_view_modal(event) {
+  event.preventDefault();
+  var target = event.target;
+  if (target.tagName == "IMG") {
+      target = target.parentElement;
+  }
+
+  var modal = document.getElementById("image_view_modal");
+  modal.classList.remove("hidden");
+  modal.style.top = window.scrollY + "px";
+  configure_image_view(target);
+  document.body.classList.add("lock");
+}
+
+function close_image_view_modal() {
+  document.getElementById("image_view_modal").classList.add("hidden");
+  document.getElementById("image_view_image").src = "";
+  document.getElementById("image_view_file_link").href = "#";
+  document.getElementById("image_view_url_link").href = "#";
+  document.body.classList.remove("lock");
+};/**
  * searx is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -83,7 +110,7 @@ $(document).ready(function() {
     /**
      * focus element if class="autofocus" and id="q"
      */
-    document.querySelector("#q[autofocus]").focus();
+    // document.querySelector("#q[autofocus]").focus();
     $('#q[autofocus]').focus();
 
     /**
@@ -140,27 +167,22 @@ $(document).ready(function() {
             iframe_load.attr('src', iframe_load.data('src'));
         }
     });
-    
-    /**
-     * Select or deselect every categories on double clic
-     */
-    $(".btn-sm").dblclick(function() {
-    var btnClass = 'btn-' + $(this).data('btn-class'); // primary
-        if($(this).hasClass('btn-default')) {
-            $(".btn-sm > input").attr('checked', 'checked');
-            $(".btn-sm > input").prop("checked", true);
-            $(".btn-sm").addClass(btnClass);
-            $(".btn-sm").addClass('active');
-            $(".btn-sm").removeClass('btn-default');
-        } else {
-            $(".btn-sm > input").attr('checked', '');
-            $(".btn-sm > input").removeAttr('checked');
-            $(".btn-sm > input").checked = false;
-            $(".btn-sm").removeClass(btnClass);
-            $(".btn-sm").removeClass('active');
-            $(".btn-sm").addClass('btn-default');
-        }
+
+
+    // kinda hack, to make the more categories menu work, when JS is enabled.
+    $("#show_more_categories_").click(function(event) {
+        $(event.target).addClass("hidden");
+        $("#show_less_categories_").removeClass("hidden");
+        $("#more_categories_toggle_").attr("checked", true);
     });
+    $("#show_less_categories_").click(function(event) {
+        $(event.target).addClass("hidden");
+        $("#show_more_categories_").removeClass("hidden");
+        $("#more_categories_toggle_").attr("checked", false);
+    });
+    $("#show_more_categories_").removeClass("hidden");
+    $('<div id="more_categories_toggle_" class="hidden"></div>').insertAfter($("#more_categories_toggle"));
+    $("#more_categories_toggle, #show_more_categories, #show_less_categories").remove();
 });
 ;/**
  * searx is free software: you can redistribute it and/or modify

@@ -505,7 +505,7 @@ nav #eelo_links > * {
 #search_form #search_params {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 14px;
   padding-bottom: 16px;
   padding-top: 16px;
   padding-left: 24px;
@@ -520,8 +520,11 @@ nav #eelo_links > * {
   text-align: right;
   padding-right: 32px;
 }
-#search_form #search_params #time_and_lang > :first-child {
-  margin-right: 16px;
+#search_form #search_params #time_and_lang {
+  text-align: right;
+}
+#search_form #search_params #time_and_lang > * {
+  width: 160px;
 }
 #search_form .search_categories,
 #search_form #categories {
@@ -529,30 +532,96 @@ nav #eelo_links > * {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  position: relative;
+  flex: 100%;
 }
 #search_form .search_categories label,
 #search_form #categories label {
-  flex-grow: 1;
   flex-basis: auto;
   font-size: 14px;
   font-weight: normal;
   margin-right: 16px;
 }
-#search_form .search_categories input[type="checkbox"]:checked + label,
-#search_form #categories input[type="checkbox"]:checked + label {
+#search_form .search_categories input[type="radio"]:checked + label,
+#search_form #categories input[type="radio"]:checked + label {
   color: #5068dd;
   font-weight: bold;
+}
+#search_form #more_categories {
+  position: absolute;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  background-color: #eeeeee;
+  padding-bottom: 16px;
+  left: 0;
+  z-index: 998;
+}
+#search_form #more_categories > label {
+  padding: 16px;
+  padding-bottom: 0;
+  white-space: nowrap;
+}
+#more_categories_container {
+  border-left: 1px solid rgba(0, 0, 0, 0.24);
+  padding-left: 16px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+#more_categories_toggle:checked ~ #more_categories,
+#more_categories_toggle_[checked] ~ #more_categories {
+  display: flex;
+}
+#more_categories_toggle:checked ~ #show_more_categories,
+#more_categories_toggle_[checked] ~ #show_more_categories {
+  display: none;
+}
+#more_categories_toggle:checked ~ #show_less_categories,
+#more_categories_toggle_[checked] ~ #show_less_categories {
+  display: initial;
+}
+#more_categories_toggle:not(:checked) ~ #more_categories,
+#more_categories_toggle_:not([checked]) ~ #more_categories {
+  display: none;
+}
+#more_categories_toggle:not(:checked) ~ #show_more_categories,
+#more_categories_toggle_:not([checked]) ~ #show_more_categories {
+  display: initial;
+}
+#more_categories_toggle:not(:checked) ~ #show_less_categories,
+#more_categories_toggle_:not([checked]) ~ #show_less_categories {
+  display: none;
 }
 @media screen and (max-width: 600px) {
   #search_form #search_params {
     overflow-x: scroll;
   }
+  #search_form #search_params #time_and_lang {
+    display: flex;
+  }
+  #search_form #search_params #time_and_lang > * {
+    width: auto;
+  }
   #search_form #search_params,
   #search_form #categories {
     flex-wrap: nowrap;
   }
-  #search_form #time_and_lang {
-    display: flex;
+  #search_form #more_categories {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    top: 0;
+    border: none;
+    border-radius: 0;
+    padding-bottom: 0;
+    background-color: transparent;
+    margin-left: 16px;
+  }
+  #search_form #more_categories > label {
+    padding: 0;
   }
   #search_input_container {
     margin-right: 40px;
@@ -650,6 +719,11 @@ nav #eelo_links > * {
   max-width: 100%;
   width: 100%;
   margin-top: 16px;
+}
+#image_result_mini_gallery_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 @media screen and (max-width: 1100px) {
   #results.image-gallery {

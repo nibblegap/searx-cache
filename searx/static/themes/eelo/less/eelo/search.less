@@ -13,15 +13,7 @@
     border-radius: 50px;
     height: @input-size;
     &:hover, &:active { border-color: @color_accent; }
-    &:extend(.border-color-transition);
-
-    // used when autocomplete is enabled and the suggestion box is open
-    // &.expanded {
-    //   border-radius: 25px;
-    //   border-bottom-left-radius: 0;
-    //   border-bottom-right-radius: 0;
-    // }
-    
+    &:extend(.border-color-transition);    
 
     // the actual input
     #q {
@@ -99,7 +91,7 @@
     box-sizing: border-box !important;
     background-color: @grey;
     padding-left: @spacing_large;
-    padding-right: @spacing_large;  
+    padding-right: @spacing_large;
   }
 
   &.inline-search {
@@ -114,7 +106,7 @@
   #search_params {
     display: flex;
     justify-content: space-between;
-    font-size: @fontsize_x-small;
+    font-size: @fontsize_small;
     padding-bottom: @spacing_large;
     padding-top: @spacing_large;
     padding-left: @spacing_x-large;
@@ -126,9 +118,12 @@
       text-align: right;
       padding-right: 32px;
     }
-    #time_and_lang > :first-child {
-      margin-right: @spacing_large;
+    #time_and_lang {
+      text-align: right;
+      // > :first-child { margin-right: @spacing_large; }
+      > * { width: 160px; }
     }
+    
   }
 
 
@@ -137,29 +132,84 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    position: relative;
+    flex: 100%;
   
     label {
-      flex-grow: 1;
       flex-basis: auto;
       font-size: @fontsize_small;
       font-weight: normal;
       margin-right: @spacing_large;
     }
   
-    input[type="checkbox"]:checked + label {
+    input[type="radio"]:checked + label {
       color: @color_accent;
       font-weight: bold;
     }
   }
 
+  #more_categories {
+    position: absolute;
+    top: @spacing_x-large;
+    display: flex;
+    flex-direction: column;
+    border-radius: @corner-radius;
+    .widget-border();
+    background-color: @grey;
+    padding-bottom: @spacing_large;
+    left: 0;
+    z-index: 998;
+  }
+  #more_categories > label {
+    padding: @spacing_large;
+    padding-bottom: 0;
+    white-space: nowrap;
+  }
+}
+#more_categories_container {
+  border-left: 1px solid rgba(0, 0, 0, 0.24);
+  padding-left: @spacing_large;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+#more_categories_toggle:checked, #more_categories_toggle_[checked] {
+  & ~ #more_categories { display: flex; }
+  & ~ #show_more_categories { display: none; }
+  & ~ #show_less_categories { display: initial; }
+}
+#more_categories_toggle:not(:checked), #more_categories_toggle_:not([checked]) {
+  & ~ #more_categories { display: none; }
+  & ~ #show_more_categories { display: initial; }
+  & ~ #show_less_categories { display: none; }
 }
 
 // make advanced options scrollable on mobile
 .mobile-mq({
   #search_form {
-    #search_params { overflow-x: scroll; }
+    #search_params {
+      overflow-x: scroll;
+
+      #time_and_lang { 
+        display: flex;
+        > * { width: auto; }
+      }
+    }
     #search_params, #categories { flex-wrap: nowrap; }
-    #time_and_lang { display: flex; }
+
+    #more_categories {
+      position: relative;
+      flex-direction: row;
+      align-items: center;
+      top: 0;
+      border: none;
+      border-radius: 0;
+      padding-bottom: 0;
+      background-color: transparent;
+      margin-left: @spacing_large;
+
+      > label { padding: 0; }
+    }
   }
   #search_input_container {
     margin-right: @spacing_medium * 2 + 24px;

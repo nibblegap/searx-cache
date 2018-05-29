@@ -481,6 +481,19 @@ def index():
     search_query = None
     result_container = None
     try:
+        # we dont want users to select multiple categories, this simplifies the experience.
+        if request.form.get("categories"):
+            request.form["categories"] = "general"
+        if request.form.get("category"):
+            for k, v in request.form.items():
+                if k.startswith("category_"):
+                    request.form.pop(k, None)
+            request.form["category_" + request.form['category']] = u"On"
+        # else:
+        #     request.form["category_general"] = u"On"
+
+        print(request.form)
+
         search_query = get_search_query_from_webapp(request.preferences, request.form)
 
         # search = Search(search_query) #  without plugins

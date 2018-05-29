@@ -56,7 +56,16 @@
                     {{ put_results(results[:3]) }}
 
                     {% if image_results %}
-                    <h1>images</h1>
+                    <div id="image_result_mini_gallery_header">
+                        <h1>{{_("Images")}}</h1>
+                        <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
+                            <input type="hidden" name="q" value="{{ q|e }}" />
+                            <input type="hidden" name="time_range" value="{{ time_range }}" />
+                            <input type="hidden" name="language" value="{{ current_language }}" />
+                            <input type="hidden" name="category" value="images" />
+                            <button type="submit" class="btn btn-flat" >{{_("More")}}</button>
+                        </form>
+                    </div>
                     <div id="default_images_container">
                         {{ put_results(image_results) }}
                     </div>
