@@ -37,7 +37,7 @@ Setup MySql (No deady)
 **Here are some commands to init the database**
  ``mysql> use searx;``
  
- ``mysql> create table SEARCH_HISTORY(QUERY varchar(512), CATEGORIES varchar(256), PAGENO int(11), PAGING tinyint(1), SAFE_SEARCH int(11), LANGUAGE varchar(8), TIME_RANGE varchar(16), ENGINES varchar(1024), RESULTS varchar(16384), RESULTS_NUMBER int(11), ANSWERS varchar(2048), CORRECTIONS varchar(256), INFOBOXES varchar(8192), SUGGESTIONS varchar(512), UNRESPONSIVE_ENGINES varchar(1024));``
+ ``mysql> create table SEARCH_HISTORY(QUERY varchar(512), CATEGORIES varchar(256), PAGENO int(11), PAGING tinyint(1), SAFE_SEARCH int(11), LANGUAGE varchar(8), TIME_RANGE varchar(16), ENGINES varchar(1024), RESULTS mediumtext, RESULTS_NUMBER int(11), ANSWERS varchar(2048), CORRECTIONS varchar(256), INFOBOXES varchar(8192), SUGGESTIONS varchar(512), UNRESPONSIVE_ENGINES varchar(1024));``
  
  ``mysql> quit``
  
@@ -51,7 +51,7 @@ Installation
 -  install dependencies: ``./manage.sh update_packages``
 -  edit your
    `settings.yml <https://github.com/asciimoo/searx/blob/master/searx/settings.yml>`__
-   (set your ``secret_key``!)
+   (set your ``secret_key`` and ``mysql password``!)
 -  run ``python searx/webapp.py`` to start the application
 
 For all the details, follow this `step by step
