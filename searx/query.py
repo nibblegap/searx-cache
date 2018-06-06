@@ -164,7 +164,7 @@ class SearchQuery(object):
     """container for all the search parameters (query, language, etc...)"""
 
     def __init__(self, query, engines, categories, lang, safesearch, pageno, time_range):
-        self.query = query.encode('utf-8')
+        self.query = query
         self.engines = engines
         self.categories = categories
         self.lang = lang

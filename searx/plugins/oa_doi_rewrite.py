@@ -33,7 +33,7 @@ def get_doi_resolver(args, preference_doi_resolver):
     return doi_resolver
 
 
-def on_result(request, search, result):
+def on_result(request, searchData, result):
     doi = extract_doi(result['parsed_url'])
     if doi and len(doi) < 50:
         for suffix in ('/', '.pdf', '/full', '/meta', '/abstract'):

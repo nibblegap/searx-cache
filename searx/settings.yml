@@ -1,5 +1,5 @@
 general:
-    debug : debug # Debug mode, only for development
+    debug : False # Debug mode, only for development
     instance_name : "eelo" # displayed name
 
 search:
@@ -20,6 +20,7 @@ mysql:
     user : "searx"
     password : "password" # change this!
     database : "searx"
+    upgrade_history: 86400 # in seconds (1day = 86400s)
 
 ui:
     static_path : "" # Custom static path - leave it blank if you didn't change
