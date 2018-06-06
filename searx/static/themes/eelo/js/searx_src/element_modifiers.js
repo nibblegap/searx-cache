@@ -15,11 +15,12 @@
  * (C) 2014 by Thomas Pointhuber, <thomas.pointhuber@gmx.at>
  */
 
-$(document).ready(function(){
+$(document).ready(function() {
     /**
      * focus element if class="autofocus" and id="q"
      */
-    $('#q.autofocus').focus();
+    // document.querySelector("#q[autofocus]").focus();
+    $('#q[autofocus]').focus();
 
     /**
      * select full content on click if class="select-all-on-click"
@@ -75,25 +76,20 @@ $(document).ready(function(){
             iframe_load.attr('src', iframe_load.data('src'));
         }
     });
-    
-    /**
-     * Select or deselect every categories on double clic
-     */
-    $(".btn-sm").dblclick(function() {
-    var btnClass = 'btn-' + $(this).data('btn-class'); // primary
-        if($(this).hasClass('btn-default')) {
-            $(".btn-sm > input").attr('checked', 'checked');
-            $(".btn-sm > input").prop("checked", true);
-            $(".btn-sm").addClass(btnClass);
-            $(".btn-sm").addClass('active');
-            $(".btn-sm").removeClass('btn-default');
-        } else {
-            $(".btn-sm > input").attr('checked', '');
-            $(".btn-sm > input").removeAttr('checked');
-            $(".btn-sm > input").checked = false;
-            $(".btn-sm").removeClass(btnClass);
-            $(".btn-sm").removeClass('active');
-            $(".btn-sm").addClass('btn-default');
-        }
+
+
+    // kinda hack, to make the more categories menu work, when JS is enabled.
+    $("#show_more_categories_").click(function(event) {
+        $(event.target).addClass("hidden");
+        $("#show_less_categories_").removeClass("hidden");
+        $("#more_categories_toggle_").attr("checked", true);
     });
+    $("#show_less_categories_").click(function(event) {
+        $(event.target).addClass("hidden");
+        $("#show_more_categories_").removeClass("hidden");
+        $("#more_categories_toggle_").attr("checked", false);
+    });
+    $("#show_more_categories_").removeClass("hidden");
+    $('<div id="more_categories_toggle_" class="hidden"></div>').insertAfter($("#more_categories_toggle"));
+    $("#more_categories_toggle, #show_more_categories, #show_less_categories").remove();
 });

@@ -24,7 +24,7 @@ if(searx.autocompleter) {
     searx.searchResults.initialize();
 }
 
-$(document).ready(function(){ 
+$(document).ready(function() {
     if(searx.autocompleter) {
         $('#q').typeahead(null, {
             name: 'search-results',
@@ -32,6 +32,10 @@ $(document).ready(function(){
                 return result;
             },
             source: searx.searchResults.ttAdapter()
+        });
+
+        $('#q').bind('typeahead:selected', function(ev) {
+            $("#search_form").submit();
         });
     }
 });

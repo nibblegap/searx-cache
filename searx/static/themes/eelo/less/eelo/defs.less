@@ -1,4 +1,5 @@
 @black: #020f16;
+@grey: #eeeeee;
 @text-color: #60686f;
 @text-color-hl: #5c6469;
 @link-color: #1f6ed7;
@@ -55,9 +56,11 @@
 
 @color-transition: color .2s ease-in-out;
 @border-color-transition: border-color .2s ease-in-out;
+@fill-transition: fill .2s ease-in-out;
 
 .color-transition { transition: @color-transition; }
 .border-color-transition { transition: @border-color-transition; }
+.fill-transition { transition: @fill-transition; }
 
 .widget-border(@color: rgba(0, 0, 0, .2)) {
   border: 2px solid @color;

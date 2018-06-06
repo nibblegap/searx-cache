@@ -11,6 +11,10 @@ a {
 #search_form #search_input_container {
   transition: border-color 0.2s ease-in-out;
 }
+.fill-transition,
+.checkmark .icon {
+  transition: fill 0.2s ease-in-out;
+}
 .disabled,
 [disabled],
 #preferences #engines .engine input:checked ~ .data {
@@ -85,6 +89,9 @@ a {
   .container > :last-child:not(:first-child) {
     max-width: 100%;
     width: 100%;
+  }
+  main {
+    margin-top: 16px;
   }
   #search_input_container {
     margin-left: 16px;
@@ -179,6 +186,27 @@ input.btn[type="submit"] {
   color: rgba(255, 255, 255, 0.8);
   background-color: rgba(0, 0, 0, 0.5);
 }
+.checkmark .icon {
+  fill: #60686f;
+}
+.checkmark .icon.checked {
+  fill: #5068dd;
+}
+.checkmark_input {
+  display: none;
+}
+.checkmark_input.inverted:checked + .checkmark .checked {
+  display: none;
+}
+.checkmark_input.inverted:checked + .checkmark .unchecked {
+  display: initial;
+}
+.checkmark_input.inverted:not(:checked) + .checkmark .checked {
+  display: initial;
+}
+.checkmark_input.inverted:not(:checked) + .checkmark .unchecked {
+  display: none;
+}
 .custom-select {
   appearance: none;
   -webkit-appearance: none;
@@ -250,23 +278,6 @@ fieldset {
   border: none;
   padding: 0px;
 }
-nav {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  text-transform: capitalize;
-  margin-bottom: 24px;
-}
-nav a {
-  color: #868686;
-}
-nav a:hover {
-  color: #5068dd;
-}
-nav #eelo_links > * {
-  margin-right: 32px;
-}
 footer {
   position: absolute;
   bottom: 0;
@@ -332,6 +343,83 @@ footer {
   display: inline-block;
   margin-right: 8px;
 }
+nav {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: capitalize;
+  margin-bottom: 24px;
+}
+nav a {
+  color: #868686;
+}
+nav a:hover {
+  color: #5068dd;
+}
+nav #eelo_links > * {
+  margin-right: 32px;
+}
+#nav_toggle_btn {
+  display: none;
+}
+@media screen and (max-width: 600px) {
+  nav {
+    position: fixed;
+    right: 0;
+    top: 0;
+    flex-direction: column;
+    height: 100%;
+    background-color: white;
+    z-index: 1000;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    align-items: unset;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    padding: 0;
+  }
+  nav > :first-child {
+    margin-top: 8px;
+  }
+  nav > :last-child {
+    margin-bottom: 8px;
+  }
+  nav a {
+    display: block;
+    padding: 8px 16px;
+  }
+  #nav_toggle_btn {
+    display: block;
+    position: absolute;
+    top: 24px;
+    right: 8px;
+    z-index: 1001;
+  }
+  #nav_toggle:checked ~ #nav_toggle_btn > .menu-open {
+    display: none;
+  }
+  #nav_toggle:checked ~ #nav_toggle_btn > .menu-close {
+    display: initial;
+  }
+  #nav_toggle:checked ~ nav {
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+    transform: translateX(0);
+  }
+  #nav_toggle:checked ~ #nav_toggle_btn {
+    position: fixed;
+  }
+  #nav_toggle:not(:checked) ~ #nav_toggle_btn > .menu-open {
+    display: initial;
+  }
+  #nav_toggle:not(:checked) ~ #nav_toggle_btn > .menu-close {
+    display: none;
+  }
+  #nav_toggle:not(:checked) ~ nav {
+    transform: translateX(100%);
+  }
+}
 #search_form #search_input_container {
   position: relative;
   display: flex;
@@ -350,7 +438,11 @@ footer {
   height: 100%;
   width: 100%;
   min-width: 0;
-  margin-left: 16px;
+  padding-left: 16px;
+  background-color: transparent;
+}
+#search_form #search_input_container #q:focus {
+  outline: none;
 }
 #search_form #search_input_container button[type="submit"] {
   position: relative;
@@ -379,16 +471,41 @@ footer {
 }
 #search_form #search_input_container.rtl #q {
   margin-left: 0;
-  margin-right: 16px;
+  padding-right: 16px;
 }
 #search_form #search_input_container.rtl #logo_link {
   padding-left: 0;
   padding-right: 4px;
 }
+#search_form .twitter-typeahead {
+  position: unset !important;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+}
+#search_form input.tt-hint {
+  display: none;
+}
+#search_form .tt-dropdown-menu {
+  position: absolute;
+  left: 0;
+  right: 0 !important;
+  top: calc(116%) !important;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background-color: #eeeeee;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+#search_form.inline-search .tt-dropdown-menu {
+  padding-left: 52px;
+}
 #search_form #search_params {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 14px;
   padding-bottom: 16px;
   padding-top: 16px;
   padding-left: 24px;
@@ -403,8 +520,11 @@ footer {
   text-align: right;
   padding-right: 32px;
 }
-#search_form #search_params #time_and_lang > :first-child {
-  margin-right: 16px;
+#search_form #search_params #time_and_lang {
+  text-align: right;
+}
+#search_form #search_params #time_and_lang > * {
+  width: 160px;
 }
 #search_form .search_categories,
 #search_form #categories {
@@ -412,30 +532,102 @@ footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  position: relative;
+  flex: 100%;
 }
 #search_form .search_categories label,
 #search_form #categories label {
-  flex-grow: 1;
   flex-basis: auto;
   font-size: 14px;
   font-weight: normal;
   margin-right: 16px;
 }
-#search_form .search_categories input[type="checkbox"]:checked + label,
-#search_form #categories input[type="checkbox"]:checked + label {
+#search_form .search_categories input[type="radio"]:checked + label,
+#search_form #categories input[type="radio"]:checked + label {
   color: #5068dd;
   font-weight: bold;
+}
+#search_form #more_categories {
+  position: absolute;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  background-color: #eeeeee;
+  padding-bottom: 16px;
+  left: 0;
+  z-index: 998;
+}
+#search_form #more_categories > label {
+  padding: 16px;
+  padding-bottom: 0;
+  white-space: nowrap;
+}
+#more_categories_container {
+  border-left: 1px solid rgba(0, 0, 0, 0.24);
+  padding-left: 16px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+#more_categories_toggle:checked ~ #more_categories,
+#more_categories_toggle_[checked] ~ #more_categories {
+  display: flex;
+}
+#more_categories_toggle:checked ~ #show_more_categories,
+#more_categories_toggle_[checked] ~ #show_more_categories {
+  display: none;
+}
+#more_categories_toggle:checked ~ #show_less_categories,
+#more_categories_toggle_[checked] ~ #show_less_categories {
+  display: initial;
+}
+#more_categories_toggle:not(:checked) ~ #more_categories,
+#more_categories_toggle_:not([checked]) ~ #more_categories {
+  display: none;
+}
+#more_categories_toggle:not(:checked) ~ #show_more_categories,
+#more_categories_toggle_:not([checked]) ~ #show_more_categories {
+  display: initial;
+}
+#more_categories_toggle:not(:checked) ~ #show_less_categories,
+#more_categories_toggle_:not([checked]) ~ #show_less_categories {
+  display: none;
 }
 @media screen and (max-width: 600px) {
   #search_form #search_params {
     overflow-x: scroll;
   }
+  #search_form #search_params #time_and_lang {
+    display: flex;
+  }
+  #search_form #search_params #time_and_lang > * {
+    width: auto;
+  }
   #search_form #search_params,
   #search_form #categories {
     flex-wrap: nowrap;
   }
-  #search_form #time_and_lang {
-    display: flex;
+  #search_form #more_categories {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    top: 0;
+    border: none;
+    border-radius: 0;
+    padding-bottom: 0;
+    background-color: transparent;
+    margin-left: 16px;
+  }
+  #search_form #more_categories > label {
+    padding: 0;
+  }
+  #search_input_container {
+    margin-right: 40px;
+  }
+  .tt-dropdown-menu {
+    padding-left: 16px;
   }
 }
 #results {
@@ -527,6 +719,11 @@ footer {
   max-width: 100%;
   width: 100%;
   margin-top: 16px;
+}
+#image_result_mini_gallery_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 @media screen and (max-width: 1100px) {
   #results.image-gallery {

@@ -1,23 +1,27 @@
 <!-- use icons defined in icons.html -->
-{% macro icon(action) -%}
-  <svg class="icon" viewBox="0 0 24 24" width="24px" height="24px">
+{% macro icon(action, classes="") -%}
+  <svg class="icon {{ classes }}" viewBox="0 0 24 24" width="24px" height="24px">
     <use href="#{{ action }}" xlink:href="#{{ action }}"></use>
   </svg>
 {%- endmacro %}
 
 <!-- Search bar base -->
-{% macro search_bar(value="", inline=false, rtl=false) -%}
+{% macro search_bar(value="", inline=false, rtl=false, autofocus=false) -%}
     <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" id="search_form" {% if inline %}class="inline-search" {% endif %} role="search">
         <div id="search_input_container" {% if rtl -%} class="rtl" {%- endif %}>
             {% if inline %}
             <a href="{{ url_for('index') }}" id="logo_link"><img src="{{ url_for('static', filename='themes/eelo/img/logo.png') }}" alt="" id="logo"></a>
             {% endif %}
-            <input type="search" name="q" class="form-control" id="q" placeholder="{{ _('Search for...') }}" autocomplete="off" value="{{ value }}">
+            <input type="search" name="q" class="form-control" id="q" placeholder="{{ _('Search for...') }}" autocomplete="off" value="{{ value }}" {% if autofocus %}autofocus{% endif %}>
             <button type="submit">{{ icon('search') }}</button>
         </div>
         
         {{ caller() }}
-    </form><!-- / #search_form_full -->
+    </form>
+{%- endmacro %}
+
+{% macro navbar_menu() -%}
+    <label for="nav_toggle" id="nav_toggle_btn">{{icon("menu", "menu-open")}}{{icon("close", "menu-close")}}</label>
 {%- endmacro %}
 
 
@@ -62,7 +66,11 @@
 {%- endmacro %}
 
 {% macro checkbox_toggle(id, blocked) -%}
-    <input type="checkbox" id="{{ id }}" name="{{ id }}"{% if blocked %} checked="checked"{% endif %} class="onoffswitch-checkbox">
+    <input class="checkmark_input inverted" type="checkbox" id="{{ id }}" name="{{ id }}"{% if blocked %} checked="checked"{% endif %} class="onoffswitch-checkbox">
+    <label for="{{ id }}" class="checkmark">
+        {{ icon("checkbox_checked", "checked") }}
+        {{ icon("checkbox_unchecked", "unchecked") }}
+    </label>
 {%- endmacro %}
 
 {% macro support_toggle(supports) -%}

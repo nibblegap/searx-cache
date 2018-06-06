@@ -1,6 +1,7 @@
 
 #search_form {
   @logo-link-size: 32px;
+  @logo-link-spacing: 4px;
   @input-size: 38px;
 
   #search_input_container {
@@ -12,8 +13,7 @@
     border-radius: 50px;
     height: @input-size;
     &:hover, &:active { border-color: @color_accent; }
-    &:extend(.border-color-transition);
-    
+    &:extend(.border-color-transition);    
 
     // the actual input
     #q {
@@ -23,8 +23,10 @@
       height: 100%;
       width: 100%;
       min-width: 0;
-      margin-left: @spacing_large;
+      padding-left: @spacing_large;
+      background-color: transparent;
     }
+    #q:focus { outline: none; }
   
     button[type="submit"] {
       position: relative;
@@ -52,27 +54,59 @@
     height: @logo-link-size;
   }
   #logo_link {
-    padding-left: 4px;
+    padding-left: @logo-link-spacing;
   }
 
   // some minor tweaks for RTL
   #search_input_container.rtl {
     #q {
       margin-left: 0;
-      margin-right: @spacing_large;
+      padding-right: @spacing_large;
     }
     #logo_link {
       padding-left: 0;
-      padding-right: 4px;
+      padding-right: @logo-link-spacing;
     }
   }
+
+  // style overrides for typeahead
+  .twitter-typeahead {
+    position: unset !important;
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+  }
+  input.tt-hint {
+    display: none;
+  }
+  .tt-dropdown-menu {
+    position: absolute;
+    left: 0;
+    right: 0 !important;
+    top: calc(100% + @spacing_large) !important;
+    border-radius: @corner-radius;
+
+    .widget-border();
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background-color: @grey;
+    padding-left: @spacing_large;
+    padding-right: @spacing_large;
+  }
+
+  &.inline-search {
+    .tt-dropdown-menu {
+      padding-left: @spacing_large + @logo-link-size + @logo-link-spacing;
+    }
+  }
+
 
 
   // advanced search params, search topic, lang and time.
   #search_params {
     display: flex;
     justify-content: space-between;
-    font-size: @fontsize_x-small;
+    font-size: @fontsize_small;
     padding-bottom: @spacing_large;
     padding-top: @spacing_large;
     padding-left: @spacing_x-large;
@@ -84,9 +118,12 @@
       text-align: right;
       padding-right: 32px;
     }
-    #time_and_lang > :first-child {
-      margin-right: @spacing_large;
+    #time_and_lang {
+      text-align: right;
+      // > :first-child { margin-right: @spacing_large; }
+      > * { width: 160px; }
     }
+    
   }
 
 
@@ -95,29 +132,89 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    position: relative;
+    flex: 100%;
   
     label {
-      flex-grow: 1;
       flex-basis: auto;
       font-size: @fontsize_small;
       font-weight: normal;
       margin-right: @spacing_large;
     }
   
-    input[type="checkbox"]:checked + label {
+    input[type="radio"]:checked + label {
       color: @color_accent;
       font-weight: bold;
     }
   }
 
+  #more_categories {
+    position: absolute;
+    top: @spacing_x-large;
+    display: flex;
+    flex-direction: column;
+    border-radius: @corner-radius;
+    .widget-border();
+    background-color: @grey;
+    padding-bottom: @spacing_large;
+    left: 0;
+    z-index: 998;
+  }
+  #more_categories > label {
+    padding: @spacing_large;
+    padding-bottom: 0;
+    white-space: nowrap;
+  }
 }
-
+#more_categories_container {
+  border-left: 1px solid rgba(0, 0, 0, 0.24);
+  padding-left: @spacing_large;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+#more_categories_toggle:checked, #more_categories_toggle_[checked] {
+  & ~ #more_categories { display: flex; }
+  & ~ #show_more_categories { display: none; }
+  & ~ #show_less_categories { display: initial; }
+}
+#more_categories_toggle:not(:checked), #more_categories_toggle_:not([checked]) {
+  & ~ #more_categories { display: none; }
+  & ~ #show_more_categories { display: initial; }
+  & ~ #show_less_categories { display: none; }
+}
 
 // make advanced options scrollable on mobile
 .mobile-mq({
   #search_form {
-    #search_params { overflow-x: scroll; }
+    #search_params {
+      overflow-x: scroll;
+
+      #time_and_lang { 
+        display: flex;
+        > * { width: auto; }
+      }
+    }
     #search_params, #categories { flex-wrap: nowrap; }
-    #time_and_lang { display: flex; }
+
+    #more_categories {
+      position: relative;
+      flex-direction: row;
+      align-items: center;
+      top: 0;
+      border: none;
+      border-radius: 0;
+      padding-bottom: 0;
+      background-color: transparent;
+      margin-left: @spacing_large;
+
+      > label { padding: 0; }
+    }
+  }
+  #search_input_container {
+    margin-right: @spacing_medium * 2 + 24px;
+  }
+  .tt-dropdown-menu {
+    padding-left: @spacing_large;
   }
 });

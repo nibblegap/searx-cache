@@ -1,10 +1,10 @@
 general:
-    debug : debug # Debug mode, only for development
+    debug : False # Debug mode, only for development
     instance_name : "eelo" # displayed name
 
 search:
-    safe_search : 0 # Filter results. 0: None, 1: Moderate, 2: Strict
-    autocomplete : "" # Existing autocomplete backends: "dbpedia", "duckduckgo", "google", "startpage", "wikipedia" - leave blank to turn it off by default
+    safe_search : 2 # Filter results. 0: None, 1: Moderate, 2: Strict
+    autocomplete : "duckduckgo" # Existing autocomplete backends: "dbpedia", "duckduckgo", "google", "startpage", "wikipedia" - leave blank to turn it off by default
     language : "en-US"
 
 server:
@@ -14,6 +14,13 @@ server:
     base_url : False # Set custom base_url. Possible values: False or "https://your.custom.host/location/"
     image_proxy : False # Proxying image results through searx
     http_protocol_version : "1.0"  # 1.0 and 1.1 are supported
+
+mysql:
+    host : "127.0.0.1"
+    user : "searx"
+    password : "password" # change this!
+    database : "searx"
+    upgrade_history: 86400 # in seconds (1day = 86400s)
 
 ui:
     static_path : "" # Custom static path - leave it blank if you didn't change
