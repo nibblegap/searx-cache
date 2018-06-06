@@ -20,19 +20,21 @@ import sys
 import threading
 from time import time
 from uuid import uuid4
-from flask_babel import gettext
+
 import requests.exceptions
+from flask_babel import gettext
+
 import searx.poolrequests as requests_lib
+from searx import logger
+from searx.answerers import ask
 from searx.engines import (
     categories, engines, settings
 )
-from searx.answerers import ask
-from searx.utils import gen_useragent
+from searx.exceptions import SearxParameterException
+from searx.plugins import plugins
 from searx.query import RawTextQuery, SearchQuery, VALID_LANGUAGE_CODE
 from searx.results import ResultContainer
-from searx import logger
-from searx.plugins import plugins
-from searx.exceptions import SearxParameterException
+from searx.utils import gen_useragent
 
 try:
     from thread import start_new_thread
@@ -202,7 +204,7 @@ def get_search_query_from_webapp(preferences, form):
     raw_text_query.parse_query()
 
     # set query
-    query = raw_text_query.getSearchQuery()
+    query = raw_text_query.getSearchQuery().encode('utf-8')
 
     # get and check page number
     pageno_param = form.get('pageno', '1')
@@ -253,81 +255,19 @@ def get_search_query_from_webapp(preferences, form):
     query_engines = raw_text_query.engines
 
     # query_categories
-    query_categories = []
+    query_category = form.get('category')
+    if query_category is None:
+        query_category = 'general'
 
-    # if engines are calculated from query,
-    # set categories by using that informations
-    if query_engines and raw_text_query.specific:
-        additional_categories = set()
-        for engine in query_engines:
-            if 'from_bang' in engine and engine['from_bang']:
-                additional_categories.add('none')
-            else:
-                additional_categories.add(engine['category'])
-        query_categories = list(additional_categories)
+    for engine in categories[query_category]:
+        if (engine.name, query_category) not in disabled_engines:
+            query_engines.append({'category': query_category, 'name': engine.name})
 
-    # otherwise, using defined categories to
-    # calculate which engines should be used
-    else:
-        # set categories/engines
-        load_default_categories = True
-        for pd_name, pd in form.items():
-            if pd_name == 'categories':
-                query_categories.extend(categ for categ in map(unicode.strip, pd.split(',')) if categ in categories)
-            elif pd_name == 'engines':
-                pd_engines = [{'category': engines[engine].categories[0],
-                               'name': engine}
-                              for engine in map(unicode.strip, pd.split(',')) if engine in engines]
-                if pd_engines:
-                    query_engines.extend(pd_engines)
-                    load_default_categories = False
-            elif pd_name.startswith('category_'):
-                category = pd_name[9:]
-
-                # if category is not found in list, skip
-                if category not in categories:
-                    continue
-
-                if pd != 'off':
-                    # add category to list
-                    query_categories.append(category)
-                elif category in query_categories:
-                    # remove category from list if property is set to 'off'
-                    query_categories.remove(category)
-
-        if not load_default_categories:
-            if not query_categories:
-                query_categories = list(set(engine['category']
-                                            for engine in query_engines))
-        else:
-            # if no category is specified for this search,
-            # using user-defined default-configuration which
-            # (is stored in cookie)
-            if not query_categories:
-                cookie_categories = preferences.get_value('categories')
-                for ccateg in cookie_categories:
-                    if ccateg in categories:
-                        query_categories.append(ccateg)
-
-            # if still no category is specified, using general
-            # as default-category
-            if not query_categories:
-                query_categories = ['general']
-
-            # using all engines for that search, which are
-            # declared under the specific categories
-            for categ in query_categories:
-                query_engines.extend({'category': categ,
-                                      'name': engine.name}
-                                     for engine in categories[categ]
-                                     if (engine.name, categ) not in disabled_engines)
-
-    return SearchQuery(query, query_engines, query_categories,
-                       query_lang, query_safesearch, query_pageno, query_time_range)
+    return SearchQuery(query, query_engines, [query_category], query_lang, query_safesearch, query_pageno,
+                       query_time_range)
 
 
 class Search(object):
-
     """Search information container"""
 
     def __init__(self, search_query):
@@ -417,7 +357,6 @@ class Search(object):
 
 
 class SearchWithPlugins(Search):
-
     """Similar to the Search class but call the plugins."""
 
     def __init__(self, search_query, ordered_plugin_list, request):

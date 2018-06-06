@@ -28,10 +28,12 @@ import hmac
 import json
 import os
 import sys
+import time
+import atexit
 
 import requests
 
-from searx import logger
+from searx import logger, search_database
 
 logger = logger.getChild('webapp')
 
@@ -65,8 +67,8 @@ from searx.utils import (
 )
 from searx.version import VERSION_STRING
 from searx.languages import language_codes as languages
-from searx.search import SearchWithPlugins, get_search_query_from_webapp
-from searx.query import RawTextQuery, SearchQuery
+from searx.search import Search
+from searx.query import RawTextQuery
 from searx.autocomplete import searx_bang, backends as autocomplete_backends
 from searx.plugins import plugins
 from searx.plugins.oa_doi_rewrite import get_doi_resolver
@@ -74,7 +76,8 @@ from searx.preferences import Preferences, ValidationException, LANGUAGE_CODES
 from searx.answerers import answerers
 from searx.url_utils import urlencode, urlparse, urljoin
 from searx.utils import new_hmac
-from searx.search_database import read, save, Search
+from searx.search_database import get_twenty_queries, search
+import threading
 
 # check if the pyopenssl package is installed.
 # It is needed for SSL connection without trouble, see #298
@@ -443,24 +446,19 @@ def config_results(results, query):
         result['title'] = highlight_content(escape(result['title'] or u''), query)
         result['pretty_url'] = prettify_url(result['url'])
 
-        # TODO, check if timezone is calculated right
-        if 'publishedDate' in result:
-            try:  # test if publishedDate >= 1900 (datetime module bug)
-                result['pubdate'] = result['publishedDate'].strftime('%Y-%m-%d %H:%M:%S%z')
-            except ValueError:
-                result['publishedDate'] = None
-            else:
-                if result['publishedDate'].replace(tzinfo=None) >= datetime.now() - timedelta(days=1):
-                    timedifference = datetime.now() - result['publishedDate'].replace(tzinfo=None)
-                    minutes = int((timedifference.seconds / 60) % 60)
-                    hours = int(timedifference.seconds / 60 / 60)
-                    if hours == 0:
-                        result['publishedDate'] = gettext(u'{minutes} minute(s) ago').format(minutes=minutes)
-                    else:
-                        result['publishedDate'] = gettext(u'{hours} hour(s), {minutes} minute(s) ago').format(
-                            hours=hours, minutes=minutes)  # noqa
+        if 'pubdate' in result:
+            publishedDate = datetime.strptime(result['pubdate'], '%Y-%m-%d %H:%M:%S')
+            if publishedDate >= datetime.now() - timedelta(days=1):
+                timedifference = datetime.now() - publishedDate
+                minutes = int((timedifference.seconds / 60) % 60)
+                hours = int(timedifference.seconds / 60 / 60)
+                if hours == 0:
+                    result['publishedDate'] = gettext(u'{minutes} minute(s) ago').format(minutes=minutes)
                 else:
-                    result['publishedDate'] = format_date(result['publishedDate'])
+                    result['publishedDate'] = gettext(u'{hours} hour(s), {minutes} minute(s) ago').format(
+                        hours=hours, minutes=minutes)  # noqa
+            else:
+                result['publishedDate'] = format_date(publishedDate)
 
 
 def index_error():
@@ -468,15 +466,6 @@ def index_error():
     return render(
         'index.html',
     )
-
-
-def start_search(search_query, user_plugins):
-    search = read(search_query, settings['mysql'])
-    if search == None:
-        # result_container = Search(search_query).search() #  without plugins
-        result_container = SearchWithPlugins(search_query, user_plugins, request).search()
-        return save(search_query, result_container, settings['mysql'])
-    return search
 
 
 @app.route('/search', methods=['GET', 'POST'])
@@ -489,23 +478,9 @@ def index():
         )
 
     # search
-    search = None
+    searchData = None
     try:
-        # we dont want users to select multiple categories, this simplifies the experience.
-        if request.form.get("categories"):
-            request.form["categories"] = "general"
-        if request.form.get("category"):
-            for k, v in request.form.items():
-                if k.startswith("category_"):
-                    request.form.pop(k, None)
-            request.form["category_" + request.form['category']] = u"On"
-        # else:
-        #     request.form["category_general"] = u"On"
-
-        print(request.form)
-
-        search_query = get_search_query_from_webapp(request.preferences, request.form)
-        search = start_search(search_query, request.user_plugins)
+        searchData = search(request)
     except Exception as e:
         # log exception
         logger.exception('search error')
@@ -516,55 +491,45 @@ def index():
         else:
             return index_error(), 500
 
-    # serarch images
+    # serarch 5 images and 5 videos
     images = []
-    if search.categories == ['general'] and search.pageno == 1:
-        images_engines = []
-        disabled_engines = request.preferences.engines.get_disabled()
-        for engine in categories['images']:
-            if (engine.name, 'images') not in disabled_engines:
-                images_engines.append({'category': 'images', 'name': engine.name})
-
-        search_query = SearchQuery(search.query.decode('utf8'), images_engines, ['images'], search.language,
-                                   search.safe_search, search.pageno, search.time_range)
-
-        all_images = start_search(search_query, request.user_plugins).results
-
+    videos = []
+    if searchData.categories == ['general'] and searchData.pageno == 1:
+        request.form['category'] = 'images'
+        all_images = search(request).results
         for image in all_images[:min(5, len(all_images))]:
             images.append(image)
 
-    results = list(search.results)
-
-    # UI
-    advanced_search = request.form.get('advanced_search', None)
+        request.form['category'] = 'videos'
+        all_videos = search(request).results
+        for video in all_videos[:min(5, len(all_videos))]:
+            videos.append(video)
 
     # output
-    config_results(results, search.query)
-    config_results(images, search.query)
-
-    output_format = request.form.get('format', 'html')
-    if output_format not in ['html', 'csv', 'json', 'rss']:
-        output_format = 'html'
+    config_results(searchData.results, searchData.query)
+    config_results(images, searchData.query)
+    config_results(videos, searchData.query)
 
     return render(
         'results.html',
-        results=results,
-        q=request.form['q'],
-        selected_categories=search.categories,
-        pageno=search.pageno,
-        time_range=search.time_range,
-        number_of_results=format_decimal(search.results_number),
-        advanced_search=advanced_search,
-        suggestions=search.suggestions,
-        answers=search.answers,
-        corrections=search.corrections,
-        infoboxes=search.infoboxes,
-        paging=search.paging,
-        unresponsive_engines=search.unresponsive_engines,
-        current_language=match_language(search.language,
+        results=searchData.results,
+        q=searchData.query.decode('utf-8'),
+        selected_categories=searchData.categories,
+        pageno=searchData.pageno,
+        time_range=searchData.time_range,
+        number_of_results=format_decimal(searchData.results_number),
+        advanced_search=request.form.get('advanced_search', None),
+        suggestions=searchData.suggestions,
+        answers=searchData.answers,
+        corrections=searchData.corrections,
+        infoboxes=searchData.infoboxes,
+        paging=searchData.paging,
+        unresponsive_engines=searchData.unresponsive_engines,
+        current_language=match_language(searchData.language,
                                         LANGUAGE_CODES,
                                         fallback=settings['search']['language']),
         image_results=images,
+        videos_results=videos,
         base_url=get_base_url(),
         theme=get_current_theme_name(),
         favicons=global_favicons[themes.index(get_current_theme_name())]
@@ -582,7 +547,6 @@ def about():
 @app.route('/autocompleter', methods=['GET', 'POST'])
 def autocompleter():
     """Return autocompleter results"""
-
     # set blocked engines
     disabled_engines = request.preferences.engines.get_disabled()
 
@@ -843,15 +807,47 @@ def page_not_found(e):
     return render('404.html'), 404
 
 
+running = threading.Event()
+
+
+def wait_updating(start_time):
+    wait = settings['mysql']['upgrade_history'] - int(time.time() - start_time)
+    if wait > 0:
+        running.wait(wait)
+
+
+def update_results():
+    start_time = time.time()
+    x = 0
+    while not running.is_set():
+        queries = get_twenty_queries(x)
+        for query in queries:
+            result_container = Search(query).search()
+            searchData = search_database.get_search_data(query, result_container)
+            search_database.update(searchData)
+            if running.is_set():
+                return
+        x += 20
+        if len(queries) < 20:
+            x = 0
+            wait_updating(start_time)
+            start_time = time.time()
+
+
 def run():
     logger.debug('starting webserver on %s:%s', settings['server']['port'], settings['server']['bind_address'])
+    search_database.settings = settings['mysql']
+    threading.Thread(target=update_results, name='results_updater').start()
+    print "engine server starting"
     app.run(
         debug=searx_debug,
         use_debugger=searx_debug,
         port=settings['server']['port'],
         host=settings['server']['bind_address'],
-        threaded=True
+        threaded=False
     )
+    print "wait for shutdown..."
+    running.set()
 
 
 class ReverseProxyPathFix(object):

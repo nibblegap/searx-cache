@@ -29,7 +29,7 @@ default_on = True
 preference_section = 'privacy'
 
 
-def on_result(request, search, result):
+def on_result(request, searchData, result):
     query = result['parsed_url'].query
 
     if query == "":
