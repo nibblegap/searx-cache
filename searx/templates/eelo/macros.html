@@ -41,9 +41,14 @@
 
 <!-- Draw result sub header -->
 {% macro result_sub_header(result) -%}
-    {% if result.publishedDate %}<time class="text-muted" datetime="{{ result.pubdate }}" >{{ result.publishedDate }}</time>{% endif %}
-    {% if result.magnetlink %}<small> &bull; {{ result_link(result.magnetlink, icon('magnet') + _('magnet link'), "magnetlink") }}</small>{% endif %}
-    {% if result.torrentfile %}<small> &bull; {{ result_link(result.torrentfile, icon('download-alt') + _('torrent file'), "torrentfile") }}</small>{% endif %}
+<small class="subheader">
+    {% if result.publishedDate %}
+    <time class="text-muted" datetime="{{ result.pubdate }}" >{{ result.publishedDate }}</time>
+    {% endif %}
+    {% if caller %}
+    <span class="links">{{caller()}}</span>
+    {% endif %}
+</small>
 {%- endmacro %}
 
 <!-- Draw result footer -->

@@ -15,14 +15,13 @@
     <div class="container contents {% if image_gallery %} full {% endif %}">
         <div>
             {% if corrections %}
-            <div class="result">
-                <span class="result_header text-muted form-inline pull-left suggestion_item">{{ _('Try searching for:') }}</span>
-                {% for correction in corrections %}
-                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation" class="form-inline pull-left suggestion_item">
-                        <input type="hidden" name="q" value="{{ correction }}">
-                        <button type="submit" class="btn btn-default btn-xs">{{ correction }}</button>
-                    </form>
-                {% endfor %}
+            <div class="result" id="corrections">
+                <span class="text-muted">{{ _('Did you mean:') }}
+                    {% for correction in corrections %}
+                    {{ search_link(correction, correction, method) }}
+                    {% endfor %}
+                </span>
+                ?
             </div>
             {% endif %}
 
@@ -40,9 +39,15 @@
                 {% include 'eelo/messages/no_results.html' %}
             {% else %}
             
+
                 {% macro put_results(results_slice) -%}
                 {%- for result in results_slice %}
-                <div class="result {% if result['template'] %}result-{{ result.template|replace('.html', '') }}{% else %}result-default{% endif %}">
+                {% set template = result.template|replace('.html', '') if result['template'] else None %}
+                <div class="result {% if template %}result-{{ template }}{% else %} result-default {% endif %}">
+                    {% if template in ["torrent"] %}
+                    <small class="result-template">{{template}}</small>
+                    {% endif %}
+                    
                     {% set index = loop.index %}
                     {% if result.template %}
                         {% include get_result_template('eelo', result['template']) %}
@@ -52,6 +57,7 @@
                 </div>
                 {%- endfor %}
                 {%- endmacro %}
+
 
                 <div id="results" {% if image_gallery %} class="image-gallery" {% endif %}>
                     {{ put_results(results[:3]) }}
