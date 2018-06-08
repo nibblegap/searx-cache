@@ -634,6 +634,14 @@ nav #eelo_links > * {
   margin-top: 32px;
   margin-bottom: 32px;
 }
+.result .result-template {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.4);
+}
+.result .result-template + .result_header {
+  margin-top: 0;
+}
 .result .result_header {
   margin-bottom: 6px;
 }
@@ -641,15 +649,30 @@ nav #eelo_links > * {
   width: 16px;
   height: 16px;
 }
+.result .subheader > :not(:last-child),
+.result .subheader > * > :not(:last-child) {
+  margin-right: 16px;
+}
 .result .result-content {
   margin-top: 8px;
   margin-bottom: 6px;
+}
+.result .result-content p {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.result.result-torrent .extra-info > :not(:last-child) {
+  margin-right: 16px;
 }
 .result .external-link {
   font-size: 14px;
   color: #39a441;
 }
-.result.result-default {
+.result .extra-info {
+  color: rgba(0, 0, 0, 0.4);
+}
+.result.result-default,
+.result.result-torrent {
   margin-bottom: 32px;
 }
 .result.result-images {
@@ -696,10 +719,12 @@ nav #eelo_links > * {
   max-height: 120px;
   overflow: hidden;
 }
-#suggestions form {
+#suggestions form,
+#corrections form {
   display: inline-block;
 }
-#suggestions form .btn {
+#suggestions form .btn,
+#corrections form .btn {
   text-transform: none;
 }
 .infobox {
