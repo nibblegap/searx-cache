@@ -21,14 +21,14 @@
         </div>
 
         {% if infobox.attributes %}
-        <table class="table table-striped infobox_part">
+        <table>
             {% for attribute in infobox.attributes %}
             <tr>
-                <td><bdi>{{ attribute.label }}</bdi></td>
+                <td class="label"><bdi>{{ attribute.label }}</bdi></td>
                 {% if attribute.image %}
-                <td><img class="img-responsive" src="{{ image_proxify(attribute.image.src) }}" alt="{{ attribute.image.alt }}" /></td>
+                <td class="value"><img class="img-responsive" src="{{ image_proxify(attribute.image.src) }}" alt="{{ attribute.image.alt }}" /></td>
                 {% else %}
-                <td><bdi>{{ attribute.value }}</bdi></td>
+                <td class="value"><bdi>{{ attribute.value }}</bdi></td>
                 {% endif %}
             </tr>
             {% endfor %}

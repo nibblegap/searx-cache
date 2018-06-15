@@ -480,7 +480,18 @@ def index():
     # search
     searchData = None
     try:
+        # we dont want users to select multiple categories, this simplifies the experience.
+        if request.form.get("categories"):
+            request.form["categories"] = "general"
+        if request.form.get("category"):
+            for k, v in request.form.items():
+                if k.startswith("category_"):
+                    request.form.pop(k, None)
+            request.form["category_images"] = u"off"
+            request.form["category_" + request.form['category']] = u"On"
+            
         searchData = search(request)
+
     except Exception as e:
         # log exception
         logger.exception('search error')
@@ -491,7 +502,7 @@ def index():
         else:
             return index_error(), 500
 
-    # serarch 5 images and 5 videos
+    # serrch 5 images and 5 videos
     images = []
     videos = []
     if searchData.categories == ['general'] and searchData.pageno == 1:
