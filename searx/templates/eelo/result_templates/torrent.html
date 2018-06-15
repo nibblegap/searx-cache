@@ -38,8 +38,5 @@
     <p>{% if result.content %}{{ result.content|safe }}{% endif %}</p>
 </div>
 
-{% if rtl %}
-{{ result_footer_rtl(result) }}
-{% else %}
+
 {{ result_footer(result) }}
-{% endif %}

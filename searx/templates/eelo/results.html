@@ -40,9 +40,11 @@
             {% else %}
             
 
-                {% macro put_results(results_slice) -%}
+                {% macro put_results(results_slice, no_image=False) -%}
                 {%- for result in results_slice %}
                 {% set template = result.template|replace('.html', '') if result['template'] else None %}
+                {% if no_image and template == "images" and not image_gallery %}
+                {% else %}
                 <div class="result {% if template %}result-{{ template }}{% else %} result-default {% endif %}">
                     {% if template in ["torrent"] %}
                     <small class="result-template">{{template}}</small>
@@ -55,12 +57,13 @@
                         {% include 'eelo/result_templates/default.html' %}
                     {% endif %}
                 </div>
+                {% endif %}
                 {%- endfor %}
                 {%- endmacro %}
 
 
                 <div id="results" {% if image_gallery %} class="image-gallery" {% endif %}>
-                    {{ put_results(results[:3]) }}
+                    {{ put_results(results[:3], True) }}
 
                     {% if image_results %}
                     <div id="image_result_mini_gallery_header">
@@ -72,7 +75,7 @@
                     </div>
                     {% endif %}
     
-                    {{ put_results(results[4:]) }}
+                    {{ put_results(results[4:], True) }}
                 </div>
 
 
