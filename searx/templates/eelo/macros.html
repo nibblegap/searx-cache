@@ -107,3 +107,14 @@
     <button type="submit" class="btn btn-flat" >{{ text }}</button>
 </form>
 {% endmacro %}
+
+
+{% macro collapser(text, id, classes) -%}
+<div class="collapser">
+    <input type="checkbox" class="hidden" id="{{id}}">
+    <label for="{{id}}" class="{{classes}}">{{text}}</label>
+    <div class="collapse">
+        {{ caller() }}
+    </div>
+</div>
+{%- endmacro %}

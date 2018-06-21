@@ -207,6 +207,12 @@ input.btn[type="submit"] {
 .checkmark_input.inverted:not(:checked) + .checkmark .unchecked {
   display: none;
 }
+.collapser input:checked ~ .collapse {
+  display: initial;
+}
+.collapser input:not(:checked) ~ .collapse {
+  display: none;
+}
 .custom-select {
   appearance: none;
   -webkit-appearance: none;
@@ -286,6 +292,9 @@ footer {
   text-align: center;
   color: #c1c1c1;
   padding-bottom: 8px;
+}
+footer .links > :first-child {
+  margin-right: 8px;
 }
 .hidden,
 #icons {
@@ -782,8 +791,11 @@ nav #eelo_links > * {
   width: 100%;
   margin-top: 16px;
 }
+.infobox table {
+  margin-top: 16px;
+}
 .infobox table tr {
-  vertical-align: baseline;
+  vertical-align: top;
 }
 .infobox table tr td {
   padding: 0;
