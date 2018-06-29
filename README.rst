@@ -19,7 +19,7 @@ Setup MySql
 
 **Install MySql**
  ``$ sudo apt-get install mysql-server
- $ pip install mymysql``
+ $ pip install pymysql``
 
 **Start MySql**
  ``$ sudo service mysql start
@@ -38,7 +38,7 @@ Setup MySql
 **Here are some commands to init the database**
  ``mysql> use searx;``
 
- ``mysql> create table SEARCH_HISTORY(QUERY varchar(512), CATEGORIY varchar(256), PAGENO int(11), PAGING tinyint(1), SAFE_SEARCH int(11), LANGUAGE varchar(8), TIME_RANGE varchar(16), ENGINES varchar(4096), RESULTS mediumtext), RESULTS_NUMBER int(11), ANSWERS varchar(2048), CORRECTIONS varchar(256), INFOBOXES varchar(8192), SUGGESTIONS varchar(1024), UNRESPONSIVE_ENGINES varchar(1024));``
+ ``mysql> create table SEARCH_HISTORY(QUERY varchar(512), CATEGORY varchar(256), PAGENO int(11), PAGING tinyint(1), SAFE_SEARCH int(11), LANGUAGE varchar(8), TIME_RANGE varchar(16), ENGINES varchar(4096), RESULTS mediumtext, RESULTS_NUMBER int(11), ANSWERS varchar(2048), CORRECTIONS varchar(256), INFOBOXES varchar(8192), SUGGESTIONS varchar(1024), UNRESPONSIVE_ENGINES varchar(1024));``
  
  ``mysql> quit``
  
