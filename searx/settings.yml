@@ -15,11 +15,10 @@ server:
     image_proxy : False # Proxying image results through searx
     http_protocol_version : "1.0"  # 1.0 and 1.1 are supported
 
-mysql:
+redis:
     host : "127.0.0.1"
     user : "searx"
     password : "password" # change this!
-    database : "searx"
     upgrade_history: 86400 # in seconds (1day = 86400s)
 
 ui:
