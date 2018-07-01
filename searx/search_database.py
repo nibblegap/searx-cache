@@ -2,7 +2,7 @@ import json
 import threading
 import urllib
 
-import pymysql
+import redis
 
 from searx.plugins import plugins
 from searx.query import SearchQuery
@@ -32,59 +32,60 @@ class SearchData(object):
         self.unresponsive_engines = unresponsive_engines
 
 
+def _get_connection():
+    return redis.StrictRedis(settings['host'], decode_responses=True)
+
+
 def read(q):
     time_range = q.time_range
     if q.time_range is None:
         q.time_range = ""
-    connection = pymysql.connect(host=settings['host'], user=settings['user'], password=settings['password'],
-                                 database=settings['database'])
-    try:
-        with connection.cursor() as cursor:
-            sql = "SELECT RESULTS, PAGING, RESULTS_NUMBER, ANSWERS, CORRECTIONS, INFOBOXES, SUGGESTIONS, " \
-                  "UNRESPONSIVE_ENGINES FROM SEARCH_HISTORY WHERE QUERY='%s' AND CATEGORY='%s' AND PAGENO=%s AND " \
-                  "SAFE_SEARCH=%s AND LANGUAGE='%s' AND TIME_RANGE='%s' AND ENGINES='%s'"
-            cursor.execute(
-                sql % (e(q.query), q.categories[0], q.pageno, q.safesearch, q.lang, time_range, je(q.engines)))
-            for response in cursor:
-                results = jd(response[0])
-                for result in results:
-                    result['parsed_url'] = urlparse(result['url'])
-                return SearchData(q, results, response[1] != 0, response[2], jds(response[3]),
-                                  jds(response[4]), jd(response[5]), jds(response[6]), jds(response[7]))
-    finally:
-        connection.close()
-    return None
+
+    conn = _get_connection()
+    key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
+        e(q.query), je(q.engines), q.categories[0], q.lang, q.safesearch, q.pageno, time_range)
+    response = conn.hgetall(key)
+    if not response:
+        return None
+    results = jd(response['results'])
+    for result in results:
+        result['parsed_url'] = urlparse(result['url'])
+    return SearchData(q, results, int(response['paging']) != 0, int(response['results_number']),
+                      jds(response['answers']), jds(response['corrections']), jd(response['infoboxes']),
+                      jds(response['suggestions']), jds(response['unresponsive_engines']))
 
 
 def save(d):
-    connection = pymysql.connect(host=settings['host'], user=settings['user'], password=settings['password'],
-                                 database=settings['database'])
-    try:
-        with connection.cursor() as cursor:
-            sql = "INSERT INTO SEARCH_HISTORY(QUERY, CATEGORY, PAGENO, SAFE_SEARCH, LANGUAGE, TIME_RANGE, ENGINES, " \
-                  "RESULTS, PAGING, RESULTS_NUMBER, ANSWERS, CORRECTIONS, INFOBOXES, SUGGESTIONS, " \
-                  "UNRESPONSIVE_ENGINES) VALUES('%s', '%s', %s, %s, '%s', '%s', '%s', '%s', %s, %s, '%s', '%s', '%s'," \
-                  " '%s', '%s')"
-            cursor.execute(sql % (e(d.query), d.categories[0], d.pageno, d.safe_search, d.language, d.time_range,
-                                  je(d.engines), je(d.results), d.paging, d.results_number, jes(d.answers),
-                                  jes(d.corrections), je(d.infoboxes), jes(d.suggestions), jes(d.unresponsive_engines)))
-            connection.commit()
-    finally:
-        connection.close()
+    conn = _get_connection()
+    key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
+        e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
+    mapping = {
+        'query': e(d.query), 'category': d.categories[0], 'pageno': d.pageno, 'safe_search': d.safe_search,
+        'language': d.language, 'time_range': d.time_range, 'engines': je(d.engines), 'results': je(d.results),
+        'paging': d.paging, 'results_number': d.results_number, 'answers': jes(d.answers),
+        'corrections': jes(d.corrections), 'infoboxes': je(d.infoboxes), 'suggestions': jes(d.suggestions),
+        'unresponsive_engines': jes(d.unresponsive_engines)
+    }
+    conn.zadd('SEARCH_HISTORY_KEYS', conn.incr('SEARCH_HISTORY_INDEX'), key)
+    conn.hmset(key, mapping)
 
 
 def get_twenty_queries(x):
     result = []
-    connection = pymysql.connect(host=settings['host'], user=settings['user'], password=settings['password'],
-                                 database=settings['database'])
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT QUERY, ENGINES, CATEGORY, LANGUAGE , SAFE_SEARCH, PAGENO, TIME_RANGE FROM "
-                           "SEARCH_HISTORY LIMIT %s,20" % x)
-            for row in cursor:
-                result.append(SearchQuery(d(row[0]), jd(row[1]), [row[2]], row[3], row[4], row[5], row[6]))
-    finally:
-        connection.close()
+
+    conn = _get_connection()
+    keys = conn.zrange('SEARCH_HISTORY_KEYS', int(x), int(x) + 20)
+    if not keys:
+        return result
+
+    pipe = conn.pipeline()
+    for key in keys:
+        pipe.hgetall(key)
+    output = pipe.execute()
+    for row in output:
+        result.append(SearchQuery(d(row['query']), jd(row['engines']), [row['category']], row['language'],
+                                  int(row['safe_search']), int(row['pageno']), row['time_range']))
+
     return result
 
 
@@ -150,17 +151,13 @@ def search(request):
 
 
 def update(d):
-    connection = pymysql.connect(host=settings['host'], user=settings['user'], password=settings['password'],
-                                 database=settings['database'])
-    try:
-        with connection.cursor() as cursor:
-            sql = "UPDATE SEARCH_HISTORY SET RESULTS='%s', PAGING=%s, RESULTS_NUMBER=%s, ANSWERS='%s', CORRECTIONS='%s', INFOBOXES='%s', SUGGESTIONS='%s', " \
-                  "UNRESPONSIVE_ENGINES='%s' WHERE QUERY='%s' AND CATEGORY='%s' AND PAGENO=%s AND " \
-                  "SAFE_SEARCH=%s AND LANGUAGE='%s' AND TIME_RANGE='%s' AND ENGINES='%s'"
-            cursor.execute(sql % (je(d.results), d.paging, d.results_number, jes(d.answers), jes(d.corrections),
-                                  je(d.infoboxes), jes(d.suggestions), jes(d.unresponsive_engines),
-                                  e(d.query), d.categories[0], d.pageno, d.safe_search, d.language, d.time_range,
-                                  je(d.engines)))
-            connection.commit()
-    finally:
-        connection.close()
+    conn = redis.StrictRedis(settings['host'])
+    key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
+        e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
+    current = conn.hgetall(key)
+    current.update({
+        'results': je(d.results), 'paging': d.paging, 'results_number': d.results_number,
+        'answers': jes(d.answers), 'corrections': jes(d.corrections), 'infoboxes': je(d.infoboxes),
+        'suggestions': jes(d.suggestions), 'unresponsive_engines': jes(d.unresponsive_engines)
+    })
+    conn.hmset(key, current)

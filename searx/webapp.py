@@ -811,7 +811,7 @@ running = threading.Event()
 
 
 def wait_updating(start_time):
-    wait = settings['mysql']['upgrade_history'] - int(time.time() - start_time)
+    wait = settings['redis']['upgrade_history'] - int(time.time() - start_time)
     if wait > 0:
         running.wait(wait)
 
@@ -836,7 +836,7 @@ def update_results():
 
 def run():
     logger.debug('starting webserver on %s:%s', settings['server']['port'], settings['server']['bind_address'])
-    search_database.settings = settings['mysql']
+    search_database.settings = settings['redis']
     threading.Thread(target=update_results, name='results_updater').start()
     print "engine server starting"
     app.run(
