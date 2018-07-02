@@ -7,13 +7,16 @@ nav {
 a {
   transition: color 0.2s ease-in-out;
 }
-.border-color-transition,
-#search_form #search_input_container {
+.border-color-transition {
   transition: border-color 0.2s ease-in-out;
 }
 .fill-transition,
 .checkmark .icon {
   transition: fill 0.2s ease-in-out;
+}
+.box-shadow-transition,
+#search_form #search_input_container {
+  transition: box-shadow 0.2s ease-in-out;
 }
 .disabled,
 [disabled],
@@ -439,7 +442,7 @@ nav #eelo_links > * {
 }
 #search_form #search_input_container:hover,
 #search_form #search_input_container:active {
-  border-color: #5068dd;
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.13);
 }
 #search_form #search_input_container #q {
   font-size: 16px;
@@ -550,6 +553,7 @@ nav #eelo_links > * {
   font-size: 14px;
   font-weight: normal;
   margin-right: 16px;
+  cursor: pointer;
 }
 #search_form .search_categories input[type="radio"]:checked + label,
 #search_form #categories input[type="radio"]:checked + label {
@@ -579,6 +583,9 @@ nav #eelo_links > * {
   display: flex;
   align-items: center;
   position: relative;
+}
+#show_more_categories_ {
+  cursor: default;
 }
 #more_categories_toggle:checked ~ #more_categories,
 #more_categories_toggle_[checked] ~ #more_categories {
@@ -632,7 +639,7 @@ nav #eelo_links > * {
   #search_form #more_categories > label {
     padding: 0;
   }
-  #search_input_container {
+  #search_form.inline-search > #search_input_container {
     margin-right: 40px;
   }
   .tt-dropdown-menu {
@@ -753,6 +760,7 @@ nav #eelo_links > * {
 #default_images_container {
   column-count: 5;
   column-gap: 8px;
+  margin-bottom: 32px;
 }
 #default_images_container .img-thumb-link {
   display: block;
@@ -810,6 +818,9 @@ nav #eelo_links > * {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+#image_result_mini_gallery_header .title {
+  font-size: 18px;
 }
 @media screen and (max-width: 1100px) {
   #results.image-gallery {

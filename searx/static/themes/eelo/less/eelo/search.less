@@ -12,8 +12,8 @@
     .widget-border(rgba(0, 0, 0, 0.24));
     border-radius: 50px;
     height: @input-size;
-    &:hover, &:active { border-color: @color_accent; }
-    &:extend(.border-color-transition);    
+    &:hover, &:active { box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.13); }
+    &:extend(.box-shadow-transition);
 
     // the actual input
     #q {
@@ -140,6 +140,7 @@
       font-size: @fontsize_small;
       font-weight: normal;
       margin-right: @spacing_large;
+      cursor: pointer;
     }
   
     input[type="radio"]:checked + label {
@@ -173,6 +174,7 @@
   align-items: center;
   position: relative;
 }
+#show_more_categories_ { cursor: default; }
 #more_categories_toggle:checked, #more_categories_toggle_[checked] {
   & ~ #more_categories { display: flex; }
   & ~ #show_more_categories { display: none; }
@@ -211,7 +213,7 @@
       > label { padding: 0; }
     }
   }
-  #search_input_container {
+  #search_form.inline-search > #search_input_container {
     margin-right: @spacing_medium * 2 + 24px;
   }
   .tt-dropdown-menu {
