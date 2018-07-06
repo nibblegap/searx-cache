@@ -1,4 +1,5 @@
 {% extends "eelo/base.html" %}
+{% from "eelo/macros.html" import search_link %}
 
 
 {%- macro search_url() %}{{ base_url }}?q={{ q|urlencode }}{% if selected_categories %}&amp;categories={{ selected_categories|join(",") | replace(' ','+') }}{% endif %}{% if pageno > 1 %}&amp;pageno={{ pageno }}{% endif %}{% if time_range %}&amp;time_range={{ time_range }}{% endif %}{% if current_language != 'all' %}&amp;language={{ current_language }}{% endif %}{% endmacro -%}
@@ -14,14 +15,13 @@
     <div class="container contents {% if image_gallery %} full {% endif %}">
         <div>
             {% if corrections %}
-            <div class="result">
-                <span class="result_header text-muted form-inline pull-left suggestion_item">{{ _('Try searching for:') }}</span>
-                {% for correction in corrections %}
-                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation" class="form-inline pull-left suggestion_item">
-                        <input type="hidden" name="q" value="{{ correction }}">
-                        <button type="submit" class="btn btn-default btn-xs">{{ correction }}</button>
-                    </form>
-                {% endfor %}
+            <div class="result" id="corrections">
+                <span class="text-muted">{{ _('Did you mean:') }}
+                    {% for correction in corrections %}
+                    {{ search_link(correction, correction, method) }}
+                    {% endfor %}
+                </span>
+                ?
             </div>
             {% endif %}
 
@@ -39,9 +39,17 @@
                 {% include 'eelo/messages/no_results.html' %}
             {% else %}
             
-                {% macro put_results(results_slice) -%}
+
+                {% macro put_results(results_slice, no_image=False) -%}
                 {%- for result in results_slice %}
-                <div class="result {% if result['template'] %}result-{{ result.template|replace('.html', '') }}{% else %}result-default{% endif %}">
+                {% set template = result.template|replace('.html', '') if result['template'] else None %}
+                {% if no_image and template == "images" and not image_gallery %}
+                {% else %}
+                <div class="result {% if template %}result-{{ template }}{% else %} result-default {% endif %}">
+                    {% if template in ["torrent"] %}
+                    <small class="result-template">{{template}}</small>
+                    {% endif %}
+                    
                     {% set index = loop.index %}
                     {% if result.template %}
                         {% include get_result_template('eelo', result['template']) %}
@@ -49,29 +57,25 @@
                         {% include 'eelo/result_templates/default.html' %}
                     {% endif %}
                 </div>
+                {% endif %}
                 {%- endfor %}
                 {%- endmacro %}
 
+
                 <div id="results" {% if image_gallery %} class="image-gallery" {% endif %}>
-                    {{ put_results(results[:3]) }}
+                    {{ put_results(results[:3], True) }}
 
                     {% if image_results %}
                     <div id="image_result_mini_gallery_header">
-                        <h1>{{_("Images")}}</h1>
-                        <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
-                            <input type="hidden" name="q" value="{{ q|e }}" />
-                            <input type="hidden" name="time_range" value="{{ time_range }}" />
-                            <input type="hidden" name="language" value="{{ current_language }}" />
-                            <input type="hidden" name="category" value="images" />
-                            <button type="submit" class="btn btn-flat" >{{_("More")}}</button>
-                        </form>
+                        <b class="title">{{_("Images")}}</b>
+                        {{ search_link(_("More"), q|e, method=method, time_range=time_range, lang=current_language, category="images") }}
                     </div>
                     <div id="default_images_container">
                         {{ put_results(image_results) }}
                     </div>
                     {% endif %}
     
-                    {{ put_results(results[4:]) }}
+                    {{ put_results(results[4:], True) }}
                 </div>
 
 
@@ -109,18 +113,13 @@
 
 
             {% if suggestions %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">{{ _('Suggestions') }}</h4>
-                </div>
-                <div class="panel-body">
+            <div id="suggestions" class="infobox">
+                <h4 class="panel-title">{{ _('Suggestions') }}</h4>
+                <p>
                     {% for suggestion in suggestions %}
-                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation" class="form-inline pull-{% if rtl %}right{% else %}left{% endif %} suggestion_item">
-                        <input type="hidden" name="q" value="{{ suggestion }}">
-                        <button type="submit" class="btn btn-default btn-xs">{{ suggestion }}</button>
-                    </form>
+                    {{ search_link(suggestion, suggestion, method) }}
                     {% endfor %}
-                </div>
+                </p>
             </div>
             {% endif %}
         </div>

@@ -76,6 +76,12 @@
 }
 
 
+.collapser {
+  input:checked ~ .collapse { display: initial; }
+  input:not(:checked) ~ .collapse { display: none; }
+}
+
+
 .custom-select {
   appearance: none;
   -webkit-appearance: none;

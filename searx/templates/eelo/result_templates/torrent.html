@@ -1,25 +1,42 @@
-{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, icon %}
+{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, result_link, icon %}
 
 {{ result_header(result, favicons) }}
-{{ result_sub_header(result) }}
+{% call result_sub_header(result) %}
+    {% if result.magnetlink %}
+    {{ result_link(result.magnetlink, _('magnet link'), "magnetlink") }}
+    {% endif %}
+    {% if result.torrentfile %}
+    {{ result_link(result.torrentfile, _('torrent file'), "torrentfile") }}
+    {% endif %}
+{% endcall %}
 
-<p class="result-content">{{ icon('transfer') }} {{ _('Seeder') }} <span class="badge">{{ result.seed }}</span> &bull; {{ _('Leecher') }} <span class="badge">{{ result.leech }}</span>
-{% if result.filesize %}<br />{{ icon('floppy-disk') }} {{ _('Filesize') }} 
-    <span class="badge">
-        {% if result.filesize < 1024 %}{{ result.filesize }} {{ _('Bytes') }}
-        {% elif result.filesize < 1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024) }} {{ _('kiB') }}
-        {% elif result.filesize < 1024*1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024/1024) }} {{ _('MiB') }}
-        {% elif result.filesize < 1024*1024*1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024/1024/1024) }} {{ _('GiB') }}
-        {% else %}{{ '{0:0.2f}'.format(result.filesize/1024/1024/1024/1024) }} {{ _('TiB') }}{% endif %}
-    </span>{% endif %}
-{% if result.files %}<br />{{ icon('file') }} {{ _('Number of Files') }} <span class="badge">{{ result.files }}</span>{% endif %}
+<div class="result-content">
 
-{% if result.content %}<br />{{ result.content|safe }}{% endif %}
+    <div class="extra-info">
+        {% if result.seed and result.leech -%}
+        <span>{{ _('Seeders') }}: {{ result.seed }}</span>
+        <span>{{ _('Leechers') }}: {{ result.leech }}</span>
+        {%- endif %}
+    
+        {% if result.filesize %}
+        <span class="badge"> {{ _('Filesize') }}:
+            {% if result.filesize < 1024 %}{{ result.filesize }} {{ _('Bytes') }}
+            {% elif result.filesize < 1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024) }} {{ _('kiB') }}
+            {% elif result.filesize < 1024*1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024/1024) }} {{ _('MiB') }}
+            {% elif result.filesize < 1024*1024*1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024/1024/1024) }} {{ _('GiB') }}
+            {% else %}{{ '{0:0.2f}'.format(result.filesize/1024/1024/1024/1024) }} {{ _('TiB') }}{% endif %}
+        </span>
+        {% endif %}
+    
+        {% if result.files %}
+        <span>
+            {{ _('Files') }}: {{ result.files }}
+        </span>
+        {% endif %}
+    </div>
 
-</p>
+    <p>{% if result.content %}{{ result.content|safe }}{% endif %}</p>
+</div>
 
-{% if rtl %}
-{{ result_footer_rtl(result) }}
-{% else %}
+
 {{ result_footer(result) }}
-{% endif %}

@@ -41,9 +41,14 @@
 
 <!-- Draw result sub header -->
 {% macro result_sub_header(result) -%}
-    {% if result.publishedDate %}<time class="text-muted" datetime="{{ result.pubdate }}" >{{ result.publishedDate }}</time>{% endif %}
-    {% if result.magnetlink %}<small> &bull; {{ result_link(result.magnetlink, icon('magnet') + _('magnet link'), "magnetlink") }}</small>{% endif %}
-    {% if result.torrentfile %}<small> &bull; {{ result_link(result.torrentfile, icon('download-alt') + _('torrent file'), "torrentfile") }}</small>{% endif %}
+<small class="subheader">
+    {% if result.publishedDate %}
+    <time class="text-muted" datetime="{{ result.pubdate }}" >{{ result.publishedDate }}</time>
+    {% endif %}
+    {% if caller %}
+    <span class="links">{{caller()}}</span>
+    {% endif %}
+</small>
 {%- endmacro %}
 
 <!-- Draw result footer -->
@@ -83,4 +88,33 @@
         {{ _("not supported") }}
     </span>
     {% endif %}
+{%- endmacro %}
+
+
+
+{% macro search_link(text, q, method=None, time_range=None, lang=None, category=None) -%}
+<form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation">
+    <input type="hidden" name="q" value="{{ q }}" />
+    {% if time_range %}
+    <input type="hidden" name="time_range" value="{{ time_range }}" />
+    {% endif %}
+    {% if time_range %}
+    <input type="hidden" name="language" value="{{ lang }}" />
+    {% endif %}
+    {% if category %}
+    <input type="hidden" name="category" value="images" />
+    {% endif %}
+    <button type="submit" class="btn btn-flat" >{{ text }}</button>
+</form>
+{% endmacro %}
+
+
+{% macro collapser(text, id, classes) -%}
+<div class="collapser">
+    <input type="checkbox" class="hidden" id="{{id}}">
+    <label for="{{id}}" class="{{classes}}">{{text}}</label>
+    <div class="collapse">
+        {{ caller() }}
+    </div>
+</div>
 {%- endmacro %}

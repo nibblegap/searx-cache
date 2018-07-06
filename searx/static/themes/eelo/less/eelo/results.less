@@ -4,6 +4,13 @@
 }
 
 .result {
+  .result-template {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: @text-muted-color;
+
+    & + .result_header { margin-top: 0; }
+  }
   .result_header {
     margin-bottom: @spacing_small;
   
@@ -12,18 +19,62 @@
       height: 16px;
     }
   }
+  .subheader > :not(:last-child), .subheader > * > :not(:last-child) {
+    margin-right: @spacing_large; 
+  }
   .result-content {
     margin-top: @spacing_medium;
     margin-bottom: @spacing_small;
+
+    p, pre {
+      margin-top: @spacing_medium;
+      margin-bottom: @spacing_medium;
+    }
   }
+
+  &.result-torrent {
+    .extra-info > :not(:last-child) { margin-right: @spacing_large; }
+  }
+  &.result-videos {
+    position: relative;
+    .result-content {
+      display: flex;
+      margin: 0px;
+
+      .result_header { margin-top: 0; }
+
+      & > .thumbnail { flex: 1; }
+      & > :not(.thumbnail) {
+        flex: 3;
+        padding-left: @spacing_large;
+      }
+      .thumbnail > img { width: 100%; }
+    }
+  } 
   
   .external-link {
     font-size: @fontsize_small;
     color: #39a441;
   }
+
+  .extra-info {
+    color: @text-muted-color;
+  }
+
+
+  .code-block {
+    background-color: @dim-color-superlighter;
+    padding: 0 @spacing_large;
+    border-radius: @corner-radius;
+    border: 1px solid @dim-color-light;
+
+    pre {
+      white-space: pre-wrap;
+    }
+  }
 }
 
-.result.result-default {
+.result.result-default, .result.result-torrent, .result.result-videos {
   margin-bottom: @spacing_xx-large;
 }
 .result.result-images {
@@ -69,11 +120,20 @@
 #default_images_container {
   column-count: 5;
   column-gap: @spacing_medium;
+  margin-bottom: @spacing_xx-large;
 
   .img-thumb-link {
     display: block;
     max-height: 120px;
     overflow: hidden;
+  }
+}
+
+
+#suggestions, #corrections {
+  form {
+    display: inline-block;
+    .btn { text-transform: none; }
   }
 }
 
@@ -111,12 +171,30 @@
   .footer {
 
   }
+
+  table { margin-top: @spacing_large; }
+  table tr {
+    vertical-align: top;
+
+    td {
+      padding: 0;
+      padding-bottom: @spacing_medium;
+    }
+
+    & > .label {
+      text-align: right;
+      color: @text-muted-color;
+      padding-right: @spacing_large;
+    }
+  }
 }
 
 #image_result_mini_gallery_header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  .title { font-size: @fontsize_large; }
 }
 
 
