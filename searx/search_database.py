@@ -4,12 +4,11 @@ import urllib
 
 import redis
 
+from searx import settings
 from searx.plugins import plugins
 from searx.query import SearchQuery
 from searx.search import Search, get_search_query_from_webapp
 from searx.url_utils import urlparse
-
-settings = None
 
 
 class SearchData(object):
@@ -32,16 +31,16 @@ class SearchData(object):
         self.unresponsive_engines = unresponsive_engines
 
 
-def _get_connection():
-    return redis.StrictRedis(settings['host'], decode_responses=True)
+def _get_connection(host):
+    return redis.StrictRedis(host if host else settings['redis']['host'], decode_responses=True)
 
 
-def read(q):
+def read(q, host):
     time_range = q.time_range
     if q.time_range is None:
         q.time_range = ""
 
-    conn = _get_connection()
+    conn = _get_connection(host)
     key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
         e(q.query), je(q.engines), q.categories[0], q.lang, q.safesearch, q.pageno, time_range)
     response = conn.hgetall(key)
@@ -55,8 +54,8 @@ def read(q):
                       jds(response['suggestions']), jds(response['unresponsive_engines']))
 
 
-def save(d):
-    conn = _get_connection()
+def save(d, host):
+    conn = _get_connection(host)
     key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
         e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
     mapping = {
@@ -70,10 +69,10 @@ def save(d):
     conn.hmset(key, mapping)
 
 
-def get_twenty_queries(x):
+def get_twenty_queries(x, host):
     result = []
 
-    conn = _get_connection()
+    conn = _get_connection(host)
     keys = conn.zrange('SEARCH_HISTORY_KEYS', int(x), int(x) + 20)
     if not keys:
         return result
@@ -134,13 +133,13 @@ def get_search_data(q, r):
                       r.infoboxes, r.suggestions, r.unresponsive_engines)
 
 
-def search(request):
+def search(request, host):
     search_query = get_search_query_from_webapp(request.preferences, request.form)
-    searchData = read(search_query)
+    searchData = read(search_query, host)
     if searchData is None:
         result_container = Search(search_query).search()
         searchData = get_search_data(search_query, result_container)
-        threading.Thread(target=save, args=(searchData,), name='save_search_' + str(searchData)).start()
+        threading.Thread(target=save, args=(searchData, host), name='save_search_' + str(searchData)).start()
 
     ordered_plugin = request.user_plugins
     plugins.call(ordered_plugin, 'post_search', request, searchData)
@@ -150,8 +149,8 @@ def search(request):
     return searchData
 
 
-def update(d):
-    conn = redis.StrictRedis(settings['host'])
+def update(d, host):
+    conn = redis.StrictRedis(host)
     key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
         e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
     current = conn.hgetall(key)
