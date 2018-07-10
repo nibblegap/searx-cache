@@ -490,7 +490,7 @@ def index():
             request.form["category_images"] = u"off"
             request.form["category_" + request.form['category']] = u"On"
             
-        searchData = search(request)
+        searchData = search(request, settings['redis']['host'])
 
     except Exception as e:
         # log exception
@@ -507,12 +507,13 @@ def index():
     videos = []
     if searchData.categories == ['general'] and searchData.pageno == 1:
         request.form['category'] = 'images'
-        all_images = search(request).results
+        host = settings['redis']['host']
+        all_images = search(request, host).results
         for image in all_images[:min(5, len(all_images))]:
             images.append(image)
 
         request.form['category'] = 'videos'
-        all_videos = search(request).results
+        all_videos = search(request, host).results
         for video in all_videos[:min(5, len(all_videos))]:
             videos.append(video)
 
@@ -831,11 +832,12 @@ def update_results():
     start_time = time.time()
     x = 0
     while not running.is_set():
-        queries = get_twenty_queries(x)
+        host = settings['redis']['host']
+        queries = get_twenty_queries(x, host)
         for query in queries:
             result_container = Search(query).search()
             searchData = search_database.get_search_data(query, result_container)
-            search_database.update(searchData)
+            search_database.update(searchData, host)
             if running.is_set():
                 return
         x += 20
@@ -847,7 +849,6 @@ def update_results():
 
 def run():
     logger.debug('starting webserver on %s:%s', settings['server']['port'], settings['server']['bind_address'])
-    search_database.settings = settings['redis']
     threading.Thread(target=update_results, name='results_updater').start()
     print "engine server starting"
     app.run(
