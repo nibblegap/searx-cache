@@ -49,7 +49,7 @@ def read(q, host):
     results = jd(response['results'])
     for result in results:
         result['parsed_url'] = urlparse(result['url'])
-    return SearchData(q, results, int(response['paging']) != 0, int(response['results_number']),
+    return SearchData(q, results, response['paging'], int(response['results_number']),
                       jds(response['answers']), jds(response['corrections']), jd(response['infoboxes']),
                       jds(response['suggestions']), jds(response['unresponsive_engines']))
 
