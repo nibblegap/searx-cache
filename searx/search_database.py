@@ -109,7 +109,7 @@ def jes(set):
 
 
 def jds(coded):
-    return set(jd(coded))
+    return jd(coded)
 
 
 def get_search_data(q, r):
