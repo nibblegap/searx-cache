@@ -14,7 +14,7 @@ See the `documentation <https://asciimoo.github.io/searx>`__ and the `wiki <http
 |OpenCollective searx backers|
 |OpenCollective searx sponsors|
 
-Setup MySql
+Setup Redis
 ~~~~~~~~~~~
 
 **Install Redis**
