@@ -91,5 +91,8 @@ People who contributed to Spot:
 - Daniel Ramirez Martinez for e Foundation
 - Olivier Deckmyn
 - Omer Akram
-
+- Michael Tran @trankmichael
+- Joseph Nuthalapati @josephkiranbabu
+- @maiki
+- Richard Didier @zeph33
 
