@@ -1,3 +1,6 @@
+Spot for /e/ (e.foundation) was forked from Searx
+
+
 Searx was created by Adam Tauber and is maintained by Adam Tauber, Alexandre Flament and Noémi Ványi.
 
 Major contributing authors:
@@ -83,3 +86,9 @@ generally made searx better:
 - Joseph Nuthalapati @josephkiranbabu
 - @maiki
 - Richard Didier @zeph33
+
+People who contributed to Spot:
+- Johnny Kalajdzic 
+- Daniel Ramirez Martinez for e Foundation
+- Olivier Deckmyn
+- Omer Akram
