@@ -85,6 +85,7 @@ generally made searx better:
 - Joseph Nuthalapati @josephkiranbabu
 - @maiki
 - Richard Didier @zeph33
+- Omer Akram
 
 People who contributed to Spot:
 - Johnny Kalajdzic
