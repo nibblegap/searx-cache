@@ -85,7 +85,6 @@ generally made searx better:
 - Joseph Nuthalapati @josephkiranbabu
 - @maiki
 - Richard Didier @zeph33
-- Omer Akram
 
 People who contributed to Spot:
 
@@ -93,8 +92,4 @@ People who contributed to Spot:
 - Daniel Ramirez Martinez for e Foundation
 - Olivier Deckmyn
 - Omer Akram
-- Michael Tran @trankmichael
-- Joseph Nuthalapati @josephkiranbabu
-- @maiki
-- Richard Didier @zeph33
 
