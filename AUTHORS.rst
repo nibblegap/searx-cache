@@ -1,5 +1,4 @@
-Spot for /e/ (e.foundation) was forked from Searx
-
+Spot for /e/ (e.foundation) was forked from Searx https://github.com/asciimoo/searx
 
 Searx was created by Adam Tauber and is maintained by Adam Tauber, Alexandre Flament and Noémi Ványi.
 
@@ -92,4 +91,5 @@ People who contributed to Spot:
 - Daniel Ramirez Martinez for e Foundation
 - Olivier Deckmyn
 - Omer Akram
+
 
