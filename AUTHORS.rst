@@ -88,7 +88,8 @@ generally made searx better:
 - Richard Didier @zeph33
 
 People who contributed to Spot:
-- Johnny Kalajdzic 
+- Johnny Kalajdzic
 - Daniel Ramirez Martinez for e Foundation
 - Olivier Deckmyn
 - Omer Akram
+
