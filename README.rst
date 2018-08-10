@@ -1,5 +1,5 @@
-spot
-=====
+spot for /e/ (https://e.foundation)
+===================================
 
 A privacy-respecting, hackable `metasearch
 engine <https://en.wikipedia.org/wiki/Metasearch_engine>`__.
