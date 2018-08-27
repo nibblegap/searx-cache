@@ -856,7 +856,7 @@ def run():
         use_debugger=searx_debug,
         port=settings['server']['port'],
         host=settings['server']['bind_address'],
-        threaded=False
+        threaded=True
     )
     print "wait for shutdown..."
     running.set()
