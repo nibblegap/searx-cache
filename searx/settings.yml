@@ -215,6 +215,7 @@ engines:
   - name : 500px
     engine : www500px
     shortcut : px
+    disabled: true
 
   - name : 1x
     engine : www1x
