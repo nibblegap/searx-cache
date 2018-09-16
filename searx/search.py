@@ -259,9 +259,17 @@ def get_search_query_from_webapp(preferences, form):
     if query_category is None:
         query_category = 'general'
 
-    for engine in categories[query_category]:
-        if (engine.name, query_category) not in disabled_engines:
-            query_engines.append({'category': query_category, 'name': engine.name})
+    def append_to_engines(cat):
+        for engine in categories[cat]:
+            if (engine.name, cat) not in disabled_engines:
+                query_engines.append({'category': cat, 'name': engine.name})
+
+    if query_category == 'general':
+        append_to_engines(query_category)
+        append_to_engines('images')
+        append_to_engines('videos')
+    else:
+        append_to_engines(query_category)
 
     return SearchQuery(query, query_engines, [query_category], query_lang, query_safesearch, query_pageno,
                        query_time_range)
