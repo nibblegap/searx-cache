@@ -100,6 +100,7 @@ engines:
   - name : bing videos
     engine : bing_videos
     shortcut : biv
+    disabled: true
 
   - name : bitbucket
     engine : xpath
