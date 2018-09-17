@@ -1,18 +1,14 @@
 """
  Bing (Videos)
-
  @website     https://www.bing.com/videos
  @provide-api yes (http://datamarket.azure.com/dataset/bing/search)
-
  @using-api   no
  @results     HTML
  @stable      no
  @parse       url, title, content, thumbnail
 """
 
-from json import loads
 from lxml import html
-from searx.engines.bing_images import _fetch_supported_languages, supported_languages_url
 from searx.engines.xpath import extract_text
 from searx.url_utils import urlencode
 from searx.utils import match_language
@@ -48,6 +44,7 @@ def request(query, params):
         'ADLT=' + safesearch_types.get(params['safesearch'], 'DEMOTE')
 
     # language cookie
+    # NOTE: supported_languages initiated dynamically
     language = match_language(params['language'], supported_languages).lower()
     params['cookies']['_EDGE_S'] = 'mkt=' + language + '&F=1'
 

@@ -29,7 +29,7 @@ import json
 import os
 import sys
 import time
-import atexit
+import copy
 
 import requests
 
@@ -477,8 +477,10 @@ def index():
             'index.html',
         )
 
+    images = []
+    videos = []
     # search
-    searchData = None
+    search_data = None
     try:
         # we dont want users to select multiple categories, this simplifies the experience.
         if request.form.get("categories"):
@@ -490,54 +492,53 @@ def index():
             request.form["category_images"] = u"off"
             request.form["category_" + request.form['category']] = u"On"
             
-        searchData = search(request, settings['redis']['host'])
+        search_data = search(request, settings['redis']['host'])
 
     except Exception as e:
         # log exception
         logger.exception('search error')
 
         # is it an invalid input parameter or something else ?
-        if (issubclass(e.__class__, SearxParameterException)):
+        if issubclass(e.__class__, SearxParameterException):
             return index_error(), 400
         else:
             return index_error(), 500
 
-    # serrch 5 images and 5 videos
-    images = []
-    videos = []
-    if searchData.categories == ['general'] and searchData.pageno == 1:
-        request.form['category'] = 'images'
-        host = settings['redis']['host']
-        all_images = search(request, host).results
-        for image in all_images[:min(5, len(all_images))]:
-            images.append(image)
-
-        request.form['category'] = 'videos'
-        all_videos = search(request, host).results
-        for video in all_videos[:min(5, len(all_videos))]:
-            videos.append(video)
+    if search_data.categories == ['general'] and search_data.pageno == 1:
+        result_copy = copy.copy(search_data.results)
+        for res in result_copy:
+            if res.get('category') == 'images':
+                if len(images) < 5:
+                    images.append(res)
+                search_data.results.remove(res)
+            elif res.get('category') == 'videos':
+                if len(videos) < 5:
+                    videos.append(res)
+                search_data.results.remove(res)
+            elif res.get('category') is None:
+                search_data.results.remove(res)
 
     # output
-    config_results(searchData.results, searchData.query)
-    config_results(images, searchData.query)
-    config_results(videos, searchData.query)
+    config_results(search_data.results, search_data.query)
+    config_results(images, search_data.query)
+    config_results(videos, search_data.query)
 
     return render(
         'results.html',
-        results=searchData.results,
-        q=searchData.query.decode('utf-8'),
-        selected_categories=searchData.categories,
-        pageno=searchData.pageno,
-        time_range=searchData.time_range,
-        number_of_results=format_decimal(searchData.results_number),
+        results=search_data.results,
+        q=search_data.query.decode('utf-8'),
+        selected_categories=search_data.categories,
+        pageno=search_data.pageno,
+        time_range=search_data.time_range,
+        number_of_results=format_decimal(search_data.results_number),
         advanced_search=request.form.get('advanced_search', None),
-        suggestions=searchData.suggestions,
-        answers=searchData.answers,
-        corrections=searchData.corrections,
-        infoboxes=searchData.infoboxes,
-        paging=searchData.paging,
-        unresponsive_engines=searchData.unresponsive_engines,
-        current_language=match_language(searchData.language,
+        suggestions=search_data.suggestions,
+        answers=search_data.answers,
+        corrections=search_data.corrections,
+        infoboxes=search_data.infoboxes,
+        paging=search_data.paging,
+        unresponsive_engines=search_data.unresponsive_engines,
+        current_language=match_language(search_data.language,
                                         LANGUAGE_CODES,
                                         fallback=settings['search']['language']),
         image_results=images,
