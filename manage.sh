@@ -1,15 +1,15 @@
 #!/bin/sh
 
 BASE_DIR="$(dirname -- "`readlink -f -- "$0"`")"
-export PATH="$BASE_DIR/node_modules/.bin":$PATH
+
+cd -- "$BASE_DIR"
+set -e
 
 # subshell
 PYTHONPATH="$BASE_DIR"
 SEARX_DIR="$BASE_DIR/searx"
 ACTION="$1"
 
-cd -- "$BASE_DIR"
-set -e
 
 #
 # Python
@@ -109,7 +109,14 @@ tests() {
 # Web
 #
 
+npm_path_setup() {
+    which npm || (printf 'Error: npm is not found\n'; exit 1)
+    export PATH="$(npm bin)":$PATH
+}
+
 npm_packages() {
+    npm_path_setup
+
     echo '[!] install NPM packages'
     cd -- "$BASE_DIR"
     npm install less@2.7 less-plugin-clean-css grunt-cli
@@ -124,10 +131,14 @@ npm_packages() {
 }
 
 build_style() {
+    npm_path_setup
+
     lessc --clean-css="--s1 --advanced --compatibility=ie9" "$BASE_DIR/searx/static/$1" "$BASE_DIR/searx/static/$2"
 }
 
 styles() {
+    npm_path_setup
+
     echo '[!] Building legacy style'
     build_style themes/legacy/less/style.less themes/legacy/css/style.css
     build_style themes/legacy/less/style-rtl.less themes/legacy/css/style-rtl.css
