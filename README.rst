@@ -13,7 +13,7 @@ Setup Redis
 ~~~~~~~~~~~
 
 **Install Redis**
- ``$ sudo apt-get install redis-server
+``$ sudo apt-get install redis-server
  $ pip install redis``
 
 Installation
