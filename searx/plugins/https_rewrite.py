@@ -25,8 +25,6 @@ from flask_babel import gettext
 from searx import searx_dir
 from searx.url_utils import urlparse
 
-if sys.version_info[0] == 3:
-    unicode = str
 
 name = "HTTPS rewrite"
 description = gettext('Rewrite HTTP links to HTTPS if possible')

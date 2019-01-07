@@ -195,7 +195,7 @@ class TestGoogleEngine(SearxTestCase):
         self.assertEqual(type(languages), dict)
         self.assertEqual(len(languages), 0)
 
-        html = u"""
+        html = """
         <html>
             <body>
                 <table>
@@ -233,14 +233,14 @@ class TestGoogleEngine(SearxTestCase):
         self.assertIn('zh-CN', languages)
         self.assertIn('zh-TW', languages)
 
-        self.assertEquals(type(languages['en']), dict)
-        self.assertEquals(type(languages['zh-CN']), dict)
-        self.assertEquals(type(languages['zh-TW']), dict)
+        self.assertEqual(type(languages['en']), dict)
+        self.assertEqual(type(languages['zh-CN']), dict)
+        self.assertEqual(type(languages['zh-TW']), dict)
 
         self.assertIn('name', languages['en'])
         self.assertIn('name', languages['zh-CN'])
         self.assertIn('name', languages['zh-TW'])
 
-        self.assertEquals(languages['en']['name'], 'English')
-        self.assertEquals(languages['zh-CN']['name'], u'中文 (简体)')
-        self.assertEquals(languages['zh-TW']['name'], u'中文 (繁體)')
+        self.assertEqual(languages['en']['name'], 'English')
+        self.assertEqual(languages['zh-CN']['name'], '中文 (简体)')
+        self.assertEqual(languages['zh-TW']['name'], '中文 (繁體)')

@@ -22,7 +22,7 @@ default_on = True
 
 
 # Self User Agent regex
-p = re.compile(b'.*user[ -]agent.*', re.IGNORECASE)
+p = re.compile('.*user[ -]agent.*', re.IGNORECASE)
 
 
 # attach callback to the post search hook
@@ -31,7 +31,7 @@ p = re.compile(b'.*user[ -]agent.*', re.IGNORECASE)
 def post_search(request, searchData):
     if searchData.pageno > 1:
         return True
-    if searchData.query == b'ip':
+    if searchData.query == 'ip':
         x_forwarded_for = request.headers.getlist("X-Forwarded-For")
         if x_forwarded_for:
             ip = x_forwarded_for[0]

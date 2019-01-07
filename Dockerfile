@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM python:3.7-alpine
 LABEL maintainer="searx <https://github.com/asciimoo/searx>"
 LABEL description="A privacy-respecting, hackable metasearch engine."
 
@@ -12,9 +12,6 @@ COPY requirements.txt ./requirements.txt
 
 RUN apk -U add \
     build-base \
-    python \
-    python-dev \
-    py-pip \
     libxml2 \
     libxml2-dev \
     libxslt \
@@ -27,7 +24,6 @@ RUN apk -U add \
  && pip install --no-cache -r requirements.txt \
  && apk del \
     build-base \
-    python-dev \
     libffi-dev \
     openssl-dev \
     libxslt-dev \

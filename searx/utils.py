@@ -21,23 +21,9 @@ from searx.languages import language_codes
 from searx import settings
 from searx import logger
 
-try:
-    from cStringIO import StringIO
-except:
-    from io import StringIO
+from io import StringIO
+from html.parser import HTMLParser
 
-try:
-    from HTMLParser import HTMLParser
-except:
-    from html.parser import HTMLParser
-
-if sys.version_info[0] == 3:
-    unichr = chr
-    unicode = str
-    IS_PY2 = False
-    basestring = str
-else:
-    IS_PY2 = True
 
 logger = logger.getChild('utils')
 
@@ -67,19 +53,18 @@ def highlight_content(content, query):
     if content.find('<') != -1:
         return content
 
-    query = query.decode('utf-8')
     if content.lower().find(query.lower()) > -1:
-        query_regex = u'({0})'.format(re.escape(query))
+        query_regex = '({0})'.format(re.escape(query))
         content = re.sub(query_regex, '<span class="highlight">\\1</span>',
                          content, flags=re.I | re.U)
     else:
         regex_parts = []
         for chunk in query.split():
             if len(chunk) == 1:
-                regex_parts.append(u'\\W+{0}\\W+'.format(re.escape(chunk)))
+                regex_parts.append('\\W+{0}\\W+'.format(re.escape(chunk)))
             else:
-                regex_parts.append(u'{0}'.format(re.escape(chunk)))
-        query_regex = u'({0})'.format('|'.join(regex_parts))
+                regex_parts.append('{0}'.format(re.escape(chunk)))
+        query_regex = '({0})'.format('|'.join(regex_parts))
         content = re.sub(query_regex, '<span class="highlight">\\1</span>',
                          content, flags=re.I | re.U)
 
@@ -116,11 +101,11 @@ class HTMLTextExtractor(HTMLParser):
     def handle_charref(self, number):
         if not self.is_valid_tag():
             return
-        if number[0] in (u'x', u'X'):
+        if number[0] in ('x', 'X'):
             codepoint = int(number[1:], 16)
         else:
             codepoint = int(number)
-        self.result.append(unichr(codepoint))
+        self.result.append(chr(codepoint))
 
     def handle_entityref(self, name):
         if not self.is_valid_tag():
@@ -130,7 +115,7 @@ class HTMLTextExtractor(HTMLParser):
         self.result.append(name)
 
     def get_text(self):
-        return u''.join(self.result).strip()
+        return ''.join(self.result).strip()
 
 
 def html_to_text(html):
@@ -155,22 +140,14 @@ class UnicodeWriter:
         self.encoder = getincrementalencoder(encoding)()
 
     def writerow(self, row):
-        if IS_PY2:
-            row = [s.encode("utf-8") if hasattr(s, 'encode') else s for s in row]
         self.writer.writerow(row)
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
-        if IS_PY2:
-            data = data.decode("utf-8")
-        else:
-            data = data.strip('\x00')
+        data = data.strip('\x00')
         # ... and reencode it into the target encoding
         data = self.encoder.encode(data)
         # write to the target stream
-        if IS_PY2:
-            self.stream.write(data)
-        else:
-            self.stream.write(data.decode("utf-8"))
+        self.stream.write(data)
         # empty queue
         self.queue.truncate(0)
 
@@ -245,7 +222,7 @@ def dict_subset(d, properties):
 def prettify_url(url, max_length=74):
     if len(url) > max_length:
         chunk_len = int(max_length / 2 + 1)
-        return u'{0}[...]{1}'.format(url[:chunk_len], url[-chunk_len:])
+        return '{0}[...]{1}'.format(url[:chunk_len], url[-chunk_len:])
     else:
         return url
 
@@ -384,17 +361,14 @@ def load_module(filename, module_dir):
 
 
 def new_hmac(secret_key, url):
-    if sys.version_info[0] == 2:
-        return hmac.new(bytes(secret_key), url, hashlib.sha256).hexdigest()
-    else:
-        return hmac.new(bytes(secret_key, 'utf-8'), url, hashlib.sha256).hexdigest()
+    return hmac.new(bytes(secret_key, 'utf-8'), url, hashlib.sha256).hexdigest()
 
 
 def to_string(obj):
-    if isinstance(obj, basestring):
+    if isinstance(obj, str):
         return obj
     if isinstance(obj, Number):
-        return unicode(obj)
+        return str(obj)
     if hasattr(obj, '__str__'):
         return obj.__str__()
     if hasattr(obj, '__repr__'):

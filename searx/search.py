@@ -16,7 +16,6 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 '''
 
 import gc
-import sys
 import threading
 from time import time
 from uuid import uuid4
@@ -36,13 +35,7 @@ from searx.query import RawTextQuery, SearchQuery, VALID_LANGUAGE_CODE
 from searx.results import ResultContainer
 from searx.utils import gen_useragent
 
-try:
-    from thread import start_new_thread
-except:
-    from _thread import start_new_thread
-
-if sys.version_info[0] == 3:
-    unicode = str
+from _thread import start_new_thread
 
 logger = logger.getChild('search')
 
@@ -139,7 +132,7 @@ def search_one_request_safe(engine_name, query, request_params, result_container
         else:
             result_container.add_unresponsive_engine((
                 engine_name,
-                u'{0}: {1}'.format(gettext('unexpected crash'), e),
+                '{0}: {1}'.format(gettext('unexpected crash'), e),
             ))
             # others errors
             logger.exception('engine {0} : exception : {1}'.format(engine_name, e))
@@ -205,7 +198,7 @@ def get_search_query_from_webapp(preferences, form):
     raw_text_query.parse_query()
 
     # set query
-    query = raw_text_query.getSearchQuery().encode('utf-8')
+    query = raw_text_query.getSearchQuery()
 
     # get and check page number
     pageno_param = form.get('pageno', '1')

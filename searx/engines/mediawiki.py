@@ -76,7 +76,7 @@ def response(resp):
         if result.get('snippet', '').startswith('#REDIRECT'):
             continue
         url = base_url.format(language=resp.search_params['language']) +\
-            'wiki/' + quote(result['title'].replace(' ', '_').encode('utf-8'))
+            'wiki/' + quote(result['title'].replace(' ', '_'))
 
         # append result
         results.append({'url': url,

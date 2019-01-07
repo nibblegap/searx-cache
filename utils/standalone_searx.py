@@ -56,7 +56,7 @@ args = parser.parse_args()
 # search results for the query
 form = {
     "q":args.query,
-    "categories":args.category.decode('utf-8'),
+    "categories":args.category,
     "pageno":str(args.pageno),
     "language":args.lang,
     "time_range":args.timerange

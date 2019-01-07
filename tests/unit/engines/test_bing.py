@@ -8,11 +8,11 @@ class TestBingEngine(SearxTestCase):
 
     def test_request(self):
         bing.supported_languages = ['en', 'fr', 'zh-CHS', 'zh-CHT', 'pt-PT', 'pt-BR']
-        query = u'test_query'
+        query = 'test_query'
         dicto = defaultdict(dict)
         dicto['pageno'] = 0
         dicto['language'] = 'fr-FR'
-        params = bing.request(query.encode('utf-8'), dicto)
+        params = bing.request(query, dicto)
         self.assertTrue('url' in params)
         self.assertTrue(query in params['url'])
         self.assertTrue('language%3AFR' in params['url'])

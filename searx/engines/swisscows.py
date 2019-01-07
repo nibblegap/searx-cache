@@ -28,10 +28,10 @@ search_string = '?{query}&page={page}'
 supported_languages_url = base_url
 
 # regex
-regex_json = re.compile(b'initialData: {"Request":(.|\n)*},\s*environment')
-regex_json_remove_start = re.compile(b'^initialData:\s*')
-regex_json_remove_end = re.compile(b',\s*environment$')
-regex_img_url_remove_start = re.compile(b'^https?://i\.swisscows\.ch/\?link=')
+regex_json = re.compile('initialData: {"Request":(.|\n)*},\s*environment')
+regex_json_remove_start = re.compile('^initialData:\s*')
+regex_json_remove_end = re.compile(',\s*environment$')
+regex_img_url_remove_start = re.compile('^https?://i\.swisscows\.ch/\?link=')
 
 
 # do search-request
@@ -63,16 +63,16 @@ def response(resp):
     if not json_regex:
         return []
 
-    json_raw = regex_json_remove_end.sub(b'', regex_json_remove_start.sub(b'', json_regex.group()))
-    json = loads(json_raw.decode('utf-8'))
+    json_raw = regex_json_remove_end.sub('', regex_json_remove_start.sub('', json_regex.group()))
+    json = loads(json_raw)
 
     # parse results
     for result in json['Results'].get('items', []):
-        result_title = result['Title'].replace(u'\uE000', '').replace(u'\uE001', '')
+        result_title = result['Title'].replace('\\uE000', '').replace('\\uE001', '')
 
         # parse image results
         if result.get('ContentType', '').startswith('image'):
-            img_url = unquote(regex_img_url_remove_start.sub(b'', result['Url'].encode('utf-8')).decode('utf-8'))
+            img_url = unquote(regex_img_url_remove_start.sub('', result['Url']))
 
             # append result
             results.append({'url': result['SourceUrl'],
@@ -83,8 +83,8 @@ def response(resp):
 
         # parse general results
         else:
-            result_url = result['Url'].replace(u'\uE000', '').replace(u'\uE001', '')
-            result_content = result['Description'].replace(u'\uE000', '').replace(u'\uE001', '')
+            result_url = result['Url'].replace('\\uE000', '').replace('\\uE001', '')
+            result_content = result['Description'].replace('\\uE000', '').replace('\\uE001', '')
 
             # append result
             results.append({'url': result_url,
@@ -94,7 +94,7 @@ def response(resp):
     # parse images
     for result in json.get('Images', []):
         # decode image url
-        img_url = unquote(regex_img_url_remove_start.sub(b'', result['Url'].encode('utf-8')).decode('utf-8'))
+        img_url = unquote(regex_img_url_remove_start.sub('', result['Url']))
 
         # append result
         results.append({'url': result['SourceUrl'],

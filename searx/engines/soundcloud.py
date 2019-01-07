@@ -17,11 +17,7 @@ from dateutil import parser
 from searx import logger
 from searx.poolrequests import get as http_get
 from searx.url_utils import quote_plus, urlencode
-
-try:
-    from cStringIO import StringIO
-except:
-    from io import StringIO
+from io import StringIO
 
 # engine dependent config
 categories = ['music']
