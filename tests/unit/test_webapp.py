@@ -71,53 +71,6 @@ class ViewsTestCase(SearxTestCase):
             result.data
         )
 
-    def test_index_json(self):
-        result = self.app.post('/', data={'q': 'test', 'format': 'json'})
-
-        result_dict = json.loads(result.data.decode('utf-8'))
-
-        self.assertEqual('test', result_dict['query'])
-        self.assertEqual(result_dict['results'][0]['content'], 'first test content')
-        self.assertEqual(result_dict['results'][0]['url'], 'http://first.test.xyz')
-
-    def test_index_csv(self):
-        result = self.app.post('/', data={'q': 'test', 'format': 'csv'})
-
-        self.assertEqual(
-            b'title,url,content,host,engine,score\r\n'
-            b'First Test,http://first.test.xyz,first test content,first.test.xyz,startpage,\r\n'  # noqa
-            b'Second Test,http://second.test.xyz,second test content,second.test.xyz,youtube,\r\n',  # noqa
-            result.data
-        )
-
-    def test_index_rss(self):
-        result = self.app.post('/', data={'q': 'test', 'format': 'rss'})
-
-        self.assertIn(
-            b'<description>Search results for "test" - searx</description>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<opensearch:totalResults>3</opensearch:totalResults>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<title>First Test</title>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<link>http://first.test.xyz</link>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<description>first test content</description>',
-            result.data
-        )
-
     def test_about(self):
         result = self.app.get('/about')
         self.assertEqual(result.status_code, 200)
