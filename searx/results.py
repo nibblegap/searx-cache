@@ -203,14 +203,14 @@ class ResultContainer(object):
             result['parsed_url'] = result['parsed_url']._replace(scheme="http")
             result['url'] = result['parsed_url'].geturl()
 
-        result['engines'] = set([result['engine']])
+        result['engines'] = [result['engine']]
 
         # strip multiple spaces and cariage returns from content
         if result.get('content'):
             result['content'] = WHITESPACE_REGEX.sub(' ', result['content'])
 
         # check for duplicates
-        duplicated = False
+        duplicated = None
         for merged_result in self._merged_results:
             if compare_urls(result['parsed_url'], merged_result['parsed_url'])\
                and result.get('template') == merged_result.get('template'):
@@ -233,7 +233,8 @@ class ResultContainer(object):
             duplicated['positions'].append(position)
 
             # add engine to list of result-engines
-            duplicated['engines'].add(result['engine'])
+            if result['engine'] not in duplicated['engines']:
+                duplicated['engines'].append(result['engine'])
 
             # using https if possible
             if duplicated['parsed_url'].scheme != 'https' and result['parsed_url'].scheme == 'https':
