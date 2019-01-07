@@ -486,8 +486,6 @@ def index():
     # search
     search_data = None
     try:
-        print(request.form)
-
         if is_general_first_page:
             request.form['categories'] = ['general', 'videos', 'images']
         else:
