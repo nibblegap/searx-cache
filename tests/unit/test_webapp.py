@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import json
-from mock import Mock
+from mock import Mock, patch
+from mockredis import mock_strict_redis_client
 from searx import webapp
 from searx.testing import SearxTestCase
 from searx.search import Search
@@ -19,12 +20,14 @@ class ViewsTestCase(SearxTestCase):
             {
                 'content': 'first test content',
                 'title': 'First Test',
+                'category': 'general',
                 'url': 'http://first.test.xyz',
                 'engines': ['youtube', 'startpage'],
                 'engine': 'startpage',
                 'parsed_url': ParseResult(scheme='http', netloc='first.test.xyz', path='/', params='', query='', fragment=''),  # noqa
             }, {
                 'content': 'second test content',
+                'category': 'general',
                 'title': 'Second Test',
                 'url': 'http://second.test.xyz',
                 'engines': ['youtube', 'startpage'],
@@ -33,16 +36,16 @@ class ViewsTestCase(SearxTestCase):
             },
         ]
 
-        def search_mock(search_self, *args):
-            search_self.result_container = Mock(get_ordered_results=lambda: self.test_results,
-                                                answers=set(),
-                                                corrections=set(),
-                                                suggestions=set(),
-                                                infoboxes=[],
-                                                unresponsive_engines=set(),
-                                                results=self.test_results,
-                                                results_number=lambda: 3,
-                                                results_length=lambda: len(self.test_results))
+        def search_mock(*args):
+            return Mock(get_ordered_results=lambda: self.test_results,
+                        answers=set(),
+                        corrections=set(),
+                        suggestions=set(),
+                        infoboxes=[],
+                        unresponsive_engines=set(),
+                        results=self.test_results,
+                        results_number=lambda: 3,
+                        results_length=lambda: len(self.test_results))
 
         Search.search = search_mock
 
@@ -60,6 +63,7 @@ class ViewsTestCase(SearxTestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'<div class="title"><h1>searx</h1></div>', result.data)
 
+    @patch('redis.StrictRedis', mock_strict_redis_client)
     def test_index_html(self):
         result = self.app.post('/', data={'q': 'test'})
         self.assertIn(

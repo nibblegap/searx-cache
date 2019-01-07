@@ -32,7 +32,8 @@ class SearchData(object):
 
 
 def _get_connection(host):
-    return redis.StrictRedis(host if host else settings['redis']['host'], decode_responses=True)
+    host = host if host else settings['redis']['host']
+    return redis.StrictRedis(host=host, decode_responses=True)
 
 
 def read(q, host):
