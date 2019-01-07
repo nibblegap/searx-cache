@@ -1,0 +1,29 @@
+image: $CI_REGISTRY_IMAGE/env:latest
+
+stages:
+ - build
+ - test
+
+front-end:
+  stage: build
+  before_script:
+    - ./manage.sh npm_packages
+    - ./manage.sh update_dev_packages
+  script:
+    - ./manage.sh locales
+    - ./manage.sh styles
+    - ./manage.sh grunt_build
+
+coding-rules:
+  stage: build
+  before_script:
+    - ./manage.sh update_dev_packages
+  script:
+    - ./manage.sh pep8_check
+
+unittest:
+  stage: test
+  before_script:
+    - ./manage.sh update_dev_packages
+  script:
+    - ./manage.sh unit_tests
