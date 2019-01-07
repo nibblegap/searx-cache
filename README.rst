@@ -9,25 +9,22 @@ Spot was forked from searx: read `documentation <https://asciimoo.github.io/sear
 |OpenCollective searx backers|
 |OpenCollective searx sponsors|
 
-Setup Redis
-~~~~~~~~~~~
 
-**Install Redis**
- ``$ sudo apt-get install redis-server
- $ pip install redis``
-
-Installation
+Getting Started
 ~~~~~~~~~~~~
 
--  clone source:
-   ``git clone https://gitlab.e.foundation/spot/my-spot.git && cd my-spot``
--  install dependencies: ``./manage.sh update_packages``
--  edit your
-   `settings.yml <https://github.com/asciimoo/searx/blob/master/searx/settings.yml>`__
-   (set your ``secret_key``!)
--  run ``python searx/webapp.py`` to start the application
+You can run spot with docker-compose to run the **redis** database and
+the **spot** service. First of all you have to install **docker** and
+**docker-compose** on your host, then follow instructions below to run spot
+with one command.
 
-For all the details, follow this `step by step
+- Run the docker-compose **up** command to start the project ``docker-compose up --build``
+- Getting the ip of the spot service and go to http://<spot-ip>:8888
+
+.. note::  Here the command to get the IP of the spot service
+ ``docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_spot_1``
+
+You can also install **redis** and **spot** on your host, for all the details, follow this `step by step
 installation <https://github.com/asciimoo/searx/wiki/Installation>`__.
 
 Bugs
