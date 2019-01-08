@@ -477,21 +477,22 @@ def index():
             'index.html',
         )
 
+    selected_category = request.form.get('category') or 'general'
+    first_page = request.form.get('pageno')
+    is_general_first_page = selected_category == 'general' and (first_page is None or first_page == u'1')
+
     images = []
     videos = []
     # search
     search_data = None
     try:
-        # we dont want users to select multiple categories, this simplifies the experience.
-        if request.form.get("categories"):
-            request.form["categories"] = "general"
-        if request.form.get("category"):
-            for k, v in request.form.items():
-                if k.startswith("category_"):
-                    request.form.pop(k, None)
-            request.form["category_images"] = u"off"
-            request.form["category_" + request.form['category']] = u"On"
-            
+        print(request.form)
+
+        if is_general_first_page:
+            request.form['categories'] = ['general', 'videos', 'images']
+        else:
+            request.form['categories'] = [selected_category]
+
         search_data = search(request, settings['redis']['host'])
 
     except Exception as e:
@@ -504,7 +505,7 @@ def index():
         else:
             return index_error(), 500
 
-    if search_data.categories == ['general'] and search_data.pageno == 1:
+    if is_general_first_page:
         result_copy = copy.copy(search_data.results)
         for res in result_copy:
             if res.get('category') == 'images':
@@ -527,7 +528,7 @@ def index():
         'results.html',
         results=search_data.results,
         q=search_data.query.decode('utf-8'),
-        selected_categories=search_data.categories,
+        selected_category=selected_category,
         pageno=search_data.pageno,
         time_range=search_data.time_range,
         number_of_results=format_decimal(search_data.results_number),

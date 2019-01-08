@@ -11,7 +11,7 @@
         {% include 'eelo/search_full.html' %}
     </div>
 
-    {% set image_gallery = 'images' in selected_categories %}
+    {% set image_gallery = selected_category == 'images' %}
     <div class="container contents {% if image_gallery %} full {% endif %}">
         <div>
             {% if corrections %}
@@ -81,7 +81,7 @@
 
                 {% if paging %}
                 {% macro search_form_attrs(pageno) -%}
-                    {% for category in selected_categories %}<input type="hidden" name="category_{{ category }}" value="1"/>{% endfor %}
+                    <input type="hidden" name="category" value="{{selected_category}}">
                     <input type="hidden" name="q" value="{{ q|e }}" />
                     <input type="hidden" name="pageno" value="{{ pageno }}" />
                     <input type="hidden" name="time_range" value="{{ time_range }}" />

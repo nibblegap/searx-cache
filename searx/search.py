@@ -255,24 +255,25 @@ def get_search_query_from_webapp(preferences, form):
     # query_engines
     query_engines = raw_text_query.engines
 
-    # query_categories
-    query_category = form.get('category')
-    if query_category is None:
-        query_category = 'general'
+    # we only need to check the categories parameter set by the caller (not by the user)
+    # so we can assume it contains a list of categories
+    query_categories = form.get('categories')
 
     def append_to_engines(cat):
-        for engine in categories[cat]:
+        # protect agains custom category provided by the user
+        engines = categories.get(cat)
+        if engines is None:
+            return
+        for engine in engines:
             if (engine.name, cat) not in disabled_engines:
                 query_engines.append({'category': cat, 'name': engine.name})
 
-    if query_category == 'general':
-        append_to_engines(query_category)
-        append_to_engines('images')
-        append_to_engines('videos')
-    else:
-        append_to_engines(query_category)
+    # on top of the category field we have query_categories, which will be the engines to
+    # use to perform the search.
+    for category in query_categories:
+        append_to_engines(category)
 
-    return SearchQuery(query, query_engines, [query_category], query_lang, query_safesearch, query_pageno,
+    return SearchQuery(query, query_engines, query_categories, query_lang, query_safesearch, query_pageno,
                        query_time_range)
 
 
