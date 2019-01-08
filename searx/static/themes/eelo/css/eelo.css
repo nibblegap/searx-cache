@@ -465,6 +465,8 @@ nav #eelo_links > * {
   background: none;
   padding: 0;
   display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 #search_form #search_input_container button[type="submit"] .icon {
@@ -617,6 +619,7 @@ nav #eelo_links > * {
   }
   #search_form #search_params #time_and_lang {
     display: flex;
+    margin-left: 32px;
   }
   #search_form #search_params #time_and_lang > * {
     width: auto;

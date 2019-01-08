@@ -54,7 +54,7 @@
 <!-- Draw result footer -->
 {% macro result_footer(result) -%}
 
-<div class="external-link">{{ result.pretty_url }}</div>
+<a class="external-link" href="{{result.url}}">{{ result.pretty_url }}</a>
 {%- endmacro %}
 
 <!-- Draw result footer -->
