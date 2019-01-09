@@ -481,7 +481,6 @@ def index():
             request.form['categories'] = ['general', 'videos', 'images']
         else:
             request.form['categories'] = [selected_category]
-
         search_data = search(request, settings['redis']['host'])
 
     except Exception as e:

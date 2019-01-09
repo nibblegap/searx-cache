@@ -24,6 +24,7 @@ a {
   opacity: .4;
 }
 #pagination {
+  margin-top: 48px;
   display: flex;
   justify-content: space-between;
 }
@@ -154,27 +155,45 @@ a {
   border: 2px solid rgba(0, 0, 0, 0.2);
   padding: 4px 12px;
   background-color: transparent;
-  transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 .btn {
   padding: 8px 16px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   background-color: transparent;
   border-radius: 8px;
   text-align: center;
   font-size: 16px;
   font-weight: bold;
-  color: #5c6469;
+  cursor: pointer;
+}
+.btn:not(:disabled) {
+  color: #5068dd;
+  border-color: #5068dd;
+}
+.btn:hover:not(:disabled) {
+  border-color: #2344a2;
+  color: #2344a2;
 }
 .btn.primary,
 input.btn[type="submit"] {
-  color: #5068dd;
+  background-color: #5068dd;
+  color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.2);
 }
-.btn:hover {
-  border-color: #5068dd;
+.btn.primary:hover,
+input.btn[type="submit"]:hover {
+  color: #ffffff;
+  background-color: #2344a2;
+}
+.btn.danger {
+  color: #e06572;
+  border-color: #e06572;
 }
 .btn.danger:hover {
-  border-color: #e06572;
+  border-color: rgba(0, 0, 0, 0.2);
+  background-color: #e06572;
+  color: #ffffff;
 }
 .btn.btn-flat {
   border: none;
@@ -182,7 +201,7 @@ input.btn[type="submit"] {
   background-color: transparent;
 }
 .btn.btn-flat:hover {
-  color: #5068dd;
+  color: #2344a2;
 }
 .btn.plain-white {
   border-color: rgba(255, 255, 255, 0.4);
@@ -513,6 +532,10 @@ nav #eelo_links > * {
   padding-left: 16px;
   padding-right: 16px;
 }
+#search_form .tt-dropdown-menu .tt-cursor,
+#search_form .tt-dropdown-menu .tt-highlight {
+  font-weight: bold;
+}
 #search_form.inline-search .tt-dropdown-menu {
   padding-left: 52px;
 }
@@ -570,14 +593,20 @@ nav #eelo_links > * {
   border-radius: 8px;
   border: 2px solid rgba(0, 0, 0, 0.2);
   background-color: #eeeeee;
-  padding-bottom: 16px;
+  padding-bottom: 8px;
+  padding-top: 8px;
   left: 0;
   z-index: 998;
 }
 #search_form #more_categories > label {
   padding: 16px;
-  padding-bottom: 0;
+  padding-bottom: 8px;
+  padding-top: 8px;
   white-space: nowrap;
+  margin-right: 0;
+}
+#search_form #more_categories > label:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 #more_categories_container {
   border-left: 1px solid rgba(0, 0, 0, 0.24);
@@ -802,8 +831,17 @@ nav #eelo_links > * {
   width: 100%;
   margin-top: 16px;
 }
+.infobox .footer .links a {
+  padding-left: 0;
+  padding-top: 0;
+  padding-bottom: 16px;
+  padding-right: 32px;
+  display: inline-block;
+  font-size: 14px;
+}
 .infobox table {
   margin-top: 16px;
+  width: 100%;
 }
 .infobox table tr {
   vertical-align: top;

@@ -13,7 +13,7 @@
   padding: 4px 12px;
   background-color: transparent;
 
-  transition: @border-color-transition, @color-transition;
+  transition: @border-color-transition, @color-transition, @background-color-transition;
 }
 
 .btn {
@@ -21,20 +21,42 @@
 
   padding: 8px 16px;
 
-  text-transform: uppercase;
+  text-transform: capitalize;
   background-color: transparent;
   border-radius: @corner-radius;
   text-align: center;
   font-size: @fontsize_medium;
   font-weight: bold;
-  color: @color_base-text-hl;
+  cursor: pointer;
+
+  &:not(:disabled) {
+    color: @color_accent;
+    border-color: @color_accent;
+  }
+  &:hover:not(:disabled) { 
+    border-color: @color_accent__dark;
+    color: @color_accent__dark;
+  }
 
   &.primary, input&[type="submit"] {
-    color: @color_accent;
+    background-color: @color_accent;
+    color: @color_accent__op;
+    border-color: @dim-color-light;
+    &:hover {
+      color: @color_accent__op;
+      background-color: @color_accent__dark;
+    }
   }
-  &:hover { border-color: @color_accent; }
-  &.danger { &:extend(.danger); }
-  &.danger:hover { border-color: @color_danger; }
+  &.danger { 
+    &:extend(.danger); 
+    color: @color_danger;
+    border-color: @color_danger;
+  }
+  &.danger:hover { 
+    border-color: @dim-color-light; 
+    background-color: @color_danger;
+    color: @color_danger__op;
+  }
 
   &.btn-flat {
     border: none;
@@ -43,7 +65,7 @@
   }
 
   &.btn-flat:hover {
-    color: @color_accent;
+    color: @color_accent__dark;
   }
 
   &.btn-block { &:extend(.block); }

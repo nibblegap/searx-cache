@@ -39,9 +39,10 @@
     <div class="footer">
         {% if infobox.urls %}
         <div class="links">
+            <p>{{_("More information:")}}</p>
             <bdi>
             {% for url in infobox.urls %}
-            <p>{{ result_link(url.url, url.title, 'btn btn-default btn-block') }}</p>
+            {{ result_link(url.url, url.title, 'btn btn-flat') }}
             {% endfor %}
             </bdi>
         </div>
