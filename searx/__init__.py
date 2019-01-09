@@ -91,3 +91,9 @@ logger.info('Initialisation done')
 
 if 'SEARX_SECRET' in environ:
     settings['server']['secret_key'] = environ['SEARX_SECRET']
+if 'BASE_URL' in environ:
+    settings['server']['base_url'] = environ['BASE_URL']
+if 'IMAGE_PROXY' in environ:
+    settings['server']['image_proxy'] = environ['IMAGE_PROXY']
+if 'SEARX_REDIS_HOST' in environ:
+    settings['redis']['host'] = environ['SEARX_REDIS_HOST']

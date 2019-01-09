@@ -1,0 +1,10 @@
+version: '3.6'
+
+services:
+  redis:
+    image: redis:5-alpine
+
+  spot:
+    build: .
+    environment:
+      SEARX_REDIS_HOST: redis
