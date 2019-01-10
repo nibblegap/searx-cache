@@ -1,6 +1,6 @@
 babel==2.3.4
 mock==2.0.0
-cov-core==1.15.0
 pep8==1.7.0
 mockredispy==2.9.3
 pytest==4.1.0
+pytest-cov==2.6.1

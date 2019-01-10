@@ -27,3 +27,4 @@ unittest:
     - ./manage.sh update_dev_packages
   script:
     - ./manage.sh unit_tests
+  coverage: '/TOTAL.*\s+(\d+%)$/'

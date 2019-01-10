@@ -40,7 +40,7 @@ pep8_check() {
 
 unit_tests() {
     echo '[!] Running unit tests'
-    PYTHONPATH="$BASE_DIR" pytest --disable-pytest-warnings "$BASE_DIR/tests/unit"
+    PYTHONPATH="$BASE_DIR" pytest --cov=searx --disable-pytest-warnings "$BASE_DIR/tests/unit"
 }
 
 py_test_coverage() {
