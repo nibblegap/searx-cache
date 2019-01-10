@@ -29,13 +29,13 @@ class TestSwisscowsEngine(SearxTestCase):
         self.assertRaises(AttributeError, swisscows.response, '')
         self.assertRaises(AttributeError, swisscows.response, '[]')
 
-        response = mock.Mock(text=b'<html></html>')
+        response = mock.Mock(text='<html></html>')
         self.assertEqual(swisscows.response(response), [])
 
-        response = mock.Mock(text=b'<html></html>')
+        response = mock.Mock(text='<html></html>')
         self.assertEqual(swisscows.response(response), [])
 
-        html = b"""
+        html = """
         <script>
             App.Dispatcher.dispatch("initialize", {
                 html5history: true,
@@ -111,9 +111,9 @@ class TestSwisscowsEngine(SearxTestCase):
         results = swisscows.response(response)
         self.assertEqual(type(results), list)
         self.assertEqual(len(results), 3)
-        self.assertEqual(results[0]['title'], 'This should be the title')
+        self.assertEqual(results[0]['title'], 'This should be the title')
         self.assertEqual(results[0]['url'], 'http://this.should.be.the.link/')
-        self.assertEqual(results[0]['content'], 'This should be the content.')
+        self.assertEqual(results[0]['content'], 'This should be the content.')
         self.assertEqual(results[1]['title'], 'Datei:This should1.svg')
         self.assertEqual(results[1]['url'], 'http://de.wikipedia.org/wiki/Datei:This should1.svg')
         self.assertEqual(results[1]['img_src'], 'http://ts2.mm.This/should1.png')

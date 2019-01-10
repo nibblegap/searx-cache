@@ -1,13 +1,10 @@
 import re
-import sys
 from collections import defaultdict
 from operator import itemgetter
 from threading import RLock
 from searx.engines import engines
 from searx.url_utils import urlparse, unquote
 
-if sys.version_info[0] == 3:
-    basestring = str
 
 CONTENT_LEN_IGNORED_CHARS_REGEX = re.compile(r'[,;:!?\./\\\\ ()-_]', re.M | re.U)
 WHITESPACE_REGEX = re.compile('( |\t|\n)+', re.M | re.U)
@@ -15,7 +12,7 @@ WHITESPACE_REGEX = re.compile('( |\t|\n)+', re.M | re.U)
 
 # return the meaningful length of the content for a result
 def result_content_len(content):
-    if isinstance(content, basestring):
+    if isinstance(content, str):
         return len(CONTENT_LEN_IGNORED_CHARS_REGEX.sub('', content))
     else:
         return 0
@@ -170,15 +167,15 @@ class ResultContainer(object):
             self.paging = True
 
         for i, result in enumerate(results):
-            if 'url' in result and not isinstance(result['url'], basestring):
+            if 'url' in result and not isinstance(result['url'], str):
                 continue
             try:
-                result['url'] = result['url'].decode('utf-8')
+                result['url'] = result['url']
             except:
                 pass
-            if 'title' in result and not isinstance(result['title'], basestring):
+            if 'title' in result and not isinstance(result['title'], str):
                 continue
-            if 'content' in result and not isinstance(result['content'], basestring):
+            if 'content' in result and not isinstance(result['content'], str):
                 continue
             position = i + 1
             self._merge_result(result, position)
@@ -316,7 +313,7 @@ class ResultContainer(object):
         resultnum_sum = sum(self._number_of_results)
         if not resultnum_sum or not self._number_of_results:
             return 0
-        return resultnum_sum / len(self._number_of_results)
+        return resultnum_sum // len(self._number_of_results)
 
     def add_unresponsive_engine(self, engine_error):
         self.unresponsive_engines.add(engine_error)

@@ -70,7 +70,7 @@ def response(resp):
     # parse results
     for img in dom.xpath('//a'):
         r = {
-            'title': u' '.join(img.xpath('.//div[class="rg_ilmbg"]//text()')),
+            'title': ' '.join(img.xpath('.//div[class="rg_ilmbg"]//text()')),
             'content': '',
             'template': 'images.html',
         }

@@ -1,11 +1,7 @@
 from os import listdir
 from os.path import realpath, dirname, join, isdir
-from sys import version_info
 from searx.utils import load_module
 from collections import defaultdict
-
-if version_info[0] == 3:
-    unicode = str
 
 
 answerers_dir = dirname(realpath(__file__))
@@ -34,12 +30,12 @@ def get_answerers_by_keywords(answerers):
 
 def ask(query):
     results = []
-    query_parts = list(filter(None, query.query.split()))
+    query_parts = list([_f for _f in query.query.split() if _f])
 
-    if query_parts[0].decode('utf-8') not in answerers_by_keywords:
+    if query_parts[0] not in answerers_by_keywords:
         return results
 
-    for answerer in answerers_by_keywords[query_parts[0].decode('utf-8')]:
+    for answerer in answerers_by_keywords[query_parts[0]]:
         result = answerer(query)
         if result:
             results.append(result)

@@ -244,7 +244,7 @@ class TestTwitterEngine(SearxTestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['title'], '@TitleName')
         self.assertEqual(results[0]['url'], 'https://twitter.com/this.is.the.url')
-        self.assertIn(u'This is the content', results[0]['content'])
+        self.assertIn('This is the content', results[0]['content'])
         # self.assertIn(u'This is the content étude à€', results[0]['content'])
 
         html = """
@@ -466,7 +466,7 @@ class TestTwitterEngine(SearxTestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['title'], '@TitleName')
         self.assertEqual(results[0]['url'], 'https://twitter.com/this.is.the.url')
-        self.assertIn(u'This is the content', results[0]['content'])
+        self.assertIn('This is the content', results[0]['content'])
 
         html = """
         <li class="b_algo" u="0|5109|4755453613245655|UAGjXgIrPH5yh-o5oNHRx_3Zta87f_QO">

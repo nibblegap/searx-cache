@@ -14,11 +14,9 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 
 (C) 2015 by Adam Tauber, <asciimoo@gmail.com>
 '''
-from sys import exit, version_info
+from sys import exit
 from searx import logger
 
-if version_info[0] == 3:
-    unicode = str
 
 logger = logger.getChild('plugins')
 
@@ -31,8 +29,8 @@ from searx.plugins import (oa_doi_rewrite,
                            tracker_url_remover,
                            vim_hotkeys)
 
-required_attrs = (('name', (str, unicode)),
-                  ('description', (str, unicode)),
+required_attrs = (('name', str),
+                  ('description', str),
                   ('default_on', bool))
 
 optional_attrs = (('js_dependencies', tuple),

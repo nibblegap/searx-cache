@@ -1,6 +1,6 @@
 import json
 import threading
-import urllib
+import urllib.parse
 
 import redis
 
@@ -90,11 +90,11 @@ def get_twenty_queries(x, host):
 
 
 def e(obj):
-    return urllib.quote_plus(obj)
+    return urllib.parse.quote_plus(obj)
 
 
 def d(coded):
-    return urllib.unquote_plus(coded)
+    return urllib.parse.unquote_plus(coded)
 
 
 def je(obj):

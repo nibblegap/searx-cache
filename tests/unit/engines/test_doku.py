@@ -23,7 +23,7 @@ class TestDokuEngine(SearxTestCase):
         response = mock.Mock(text='<html></html>')
         self.assertEqual(doku.response(response), [])
 
-        html = u"""
+        html = """
         <div class="search_quickresult">
             <h3>Pages trouvées :</h3>
             <ul class="search_quickhits">
@@ -37,7 +37,7 @@ class TestDokuEngine(SearxTestCase):
         expected = [{'content': '', 'title': 'xfconf-query', 'url': 'http://localhost:8090/xfconf-query'}]
         self.assertEqual(doku.response(response), expected)
 
-        html = u"""
+        html = """
         <dl class="search_results">
             <dt><a href="/xvnc?s[]=query" class="wikilink1" title="xvnc">xvnc</a>: 40 Occurrences trouvées</dt>
             <dd>er = /usr/bin/Xvnc

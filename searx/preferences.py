@@ -1,13 +1,9 @@
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from zlib import compress, decompress
-from sys import version
 
 from searx import settings, autocomplete
 from searx.languages import language_codes as languages
 from searx.url_utils import parse_qs, urlencode
-
-if version[0] == '3':
-    unicode = str
 
 
 COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 5  # 5 years
@@ -287,11 +283,11 @@ class Preferences(object):
         settings_kv['disabled_plugins'] = ','.join(self.plugins.disabled)
         settings_kv['enabled_plugins'] = ','.join(self.plugins.enabled)
 
-        return urlsafe_b64encode(compress(urlencode(settings_kv).encode('utf-8'))).decode('utf-8')
+        return urlsafe_b64encode(compress(urlencode(settings_kv).encode()))
 
     def parse_encoded_data(self, input_data):
-        decoded_data = decompress(urlsafe_b64decode(input_data.encode('utf-8')))
-        self.parse_dict({x: y[0] for x, y in parse_qs(unicode(decoded_data)).items()})
+        decoded_data = decompress(urlsafe_b64decode(input_data.encode()))
+        self.parse_dict({x: y[0] for x, y in parse_qs(str(decoded_data)).items()})
 
     def parse_dict(self, input_data):
         for user_setting_name, user_setting in input_data.items():

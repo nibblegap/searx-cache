@@ -46,7 +46,7 @@ except:
     from sys import exit
 
     exit(1)
-from cgi import escape
+from html import escape
 from datetime import datetime, timedelta
 from werkzeug.contrib.fixers import ProxyFix
 from flask import (
@@ -87,16 +87,7 @@ except ImportError:
     logger.critical("The pyopenssl package has to be installed.\n"
                     "Some HTTPS connections will fail")
 
-try:
-    from cStringIO import StringIO
-except:
-    from io import StringIO
-
-if sys.version_info[0] == 3:
-    unicode = str
-    PY3 = True
-else:
-    PY3 = False
+from io import StringIO
 
 # serve pages with HTTP/1.1
 from werkzeug.serving import WSGIRequestHandler
@@ -282,11 +273,11 @@ def proxify(url):
     if not settings.get('result_proxy'):
         return url
 
-    url_params = dict(mortyurl=url.encode('utf-8'))
+    url_params = dict(mortyurl=url)
 
     if settings['result_proxy'].get('key'):
         url_params['mortyhash'] = hmac.new(settings['result_proxy']['key'],
-                                           url.encode('utf-8'),
+                                           url,
                                            hashlib.sha256).hexdigest()
 
     return '{0}?{1}'.format(settings['result_proxy']['url'],
@@ -303,10 +294,10 @@ def image_proxify(url):
     if settings.get('result_proxy'):
         return proxify(url)
 
-    h = new_hmac(settings['server']['secret_key'], url.encode('utf-8'))
+    h = new_hmac(settings['server']['secret_key'], url)
 
     return '{0}?{1}'.format(url_for('image_proxy'),
-                            urlencode(dict(url=url.encode('utf-8'), h=h)))
+                            urlencode(dict(url=url, h=h)))
 
 
 def render(template_name, override_theme=None, **kwargs):
@@ -384,7 +375,7 @@ def render(template_name, override_theme=None, **kwargs):
 
     kwargs['results_on_new_tab'] = request.preferences.get_value('results_on_new_tab')
 
-    kwargs['unicode'] = unicode
+    kwargs['unicode'] = str
 
     kwargs['preferences'] = request.preferences
 
@@ -443,7 +434,7 @@ def config_results(results, query):
     for result in results:
         if 'content' in result and result['content']:
             result['content'] = highlight_content(escape(result['content'][:1024]), query)
-        result['title'] = highlight_content(escape(result['title'] or u''), query)
+        result['title'] = highlight_content(escape(result['title'] or ''), query)
         result['pretty_url'] = prettify_url(result['url'])
 
         if 'pubdate' in result:
@@ -453,9 +444,9 @@ def config_results(results, query):
                 minutes = int((timedifference.seconds / 60) % 60)
                 hours = int(timedifference.seconds / 60 / 60)
                 if hours == 0:
-                    result['publishedDate'] = gettext(u'{minutes} minute(s) ago').format(minutes=minutes)
+                    result['publishedDate'] = gettext('{minutes} minute(s) ago').format(minutes=minutes)
                 else:
-                    result['publishedDate'] = gettext(u'{hours} hour(s), {minutes} minute(s) ago').format(
+                    result['publishedDate'] = gettext('{hours} hour(s), {minutes} minute(s) ago').format(
                         hours=hours, minutes=minutes)  # noqa
             else:
                 result['publishedDate'] = format_date(publishedDate)
@@ -525,7 +516,7 @@ def index():
     return render(
         'results.html',
         results=search_data.results,
-        q=search_data.query.decode('utf-8'),
+        q=search_data.query,
         selected_category=selected_category,
         pageno=search_data.pageno,
         time_range=search_data.time_range,
@@ -563,10 +554,7 @@ def autocompleter():
     disabled_engines = request.preferences.engines.get_disabled()
 
     # parse query
-    if PY3:
-        raw_text_query = RawTextQuery(request.form.get('q', b''), disabled_engines)
-    else:
-        raw_text_query = RawTextQuery(request.form.get('q', u'').encode('utf-8'), disabled_engines)
+    raw_text_query = RawTextQuery(request.form.get('q', ''), disabled_engines)
     raw_text_query.parse_query()
 
     # check if search query is set
@@ -673,7 +661,7 @@ def preferences():
 
 @app.route('/image_proxy', methods=['GET'])
 def image_proxy():
-    url = request.args.get('url').encode('utf-8')
+    url = request.args.get('url')
 
     if not url:
         return '', 400
@@ -850,7 +838,7 @@ def update_results():
 def run():
     logger.debug('starting webserver on %s:%s', settings['server']['port'], settings['server']['bind_address'])
     threading.Thread(target=update_results, name='results_updater').start()
-    print "engine server starting"
+    print("engine server starting")
     app.run(
         debug=searx_debug,
         use_debugger=searx_debug,
@@ -858,7 +846,7 @@ def run():
         host=settings['server']['bind_address'],
         threaded=True
     )
-    print "wait for shutdown..."
+    print("wait for shutdown...")
     running.set()
 
 

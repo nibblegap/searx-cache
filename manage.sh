@@ -16,14 +16,14 @@ ACTION="$1"
 #
 
 update_packages() {
-    pip install --upgrade pip
-    pip install --upgrade setuptools
-    pip install -r "$BASE_DIR/requirements.txt"
+    pip3 install --upgrade pip
+    pip3 install --upgrade setuptools
+    pip3 install -r "$BASE_DIR/requirements.txt"
 }
 
 update_dev_packages() {
     update_packages
-    pip install -r "$BASE_DIR/requirements-dev.txt"
+    pip3 install -r "$BASE_DIR/requirements-dev.txt"
 }
 
 install_geckodriver() {
@@ -36,7 +36,7 @@ install_geckodriver() {
         return
     fi
     GECKODRIVER_VERSION="v0.19.1"
-    PLATFORM="`python -c "import six; import platform; six.print_(platform.system().lower(), platform.architecture()[0])"`"
+    PLATFORM="`python3 -c "import platform; print(platform.system().lower(), platform.architecture()[0])"`"
     case "$PLATFORM" in
         "linux 32bit" | "linux2 32bit") ARCH="linux32";;
         "linux 64bit" | "linux2 64bit") ARCH="linux64";;
@@ -80,19 +80,19 @@ pep8_check() {
 
 unit_tests() {
     echo '[!] Running unit tests'
-    python -m nose2 -s "$BASE_DIR/tests/unit"
+    python3 -m nose2 -s "$BASE_DIR/tests/unit"
 }
 
 py_test_coverage() {
     echo '[!] Running python test coverage'
-    PYTHONPATH="`pwd`" python -m nose2 -C --log-capture --with-coverage --coverage "$SEARX_DIR" -s "$BASE_DIR/tests/unit" \
+    PYTHONPATH="`pwd`" python3 -m nose2 -C --log-capture --with-coverage --coverage "$SEARX_DIR" -s "$BASE_DIR/tests/unit" \
     && coverage report \
     && coverage html
 }
 
 robot_tests() {
     echo '[!] Running robot tests'
-    PYTHONPATH="`pwd`" python "$SEARX_DIR/testing.py" robot
+    PYTHONPATH="`pwd`" python3 "$SEARX_DIR/testing.py" robot
 }
 
 tests() {

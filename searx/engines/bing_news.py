@@ -82,7 +82,7 @@ def request(query, params):
 def response(resp):
     results = []
 
-    rss = etree.fromstring(resp.content)
+    rss = etree.fromstring(resp.content.encode())
 
     ns = rss.nsmap
 

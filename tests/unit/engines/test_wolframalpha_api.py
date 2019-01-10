@@ -20,7 +20,7 @@ class TestWolframAlphaAPIEngine(SearxTestCase):
         self.assertEqual('https://www.wolframalpha.com/input/?i=test_query', params['headers']['Referer'])
 
     def test_replace_pua_chars(self):
-        self.assertEqual('i', wolframalpha_api.replace_pua_chars(u'\uf74e'))
+        self.assertEqual('i', wolframalpha_api.replace_pua_chars('\uf74e'))
 
     def test_response(self):
         self.assertRaises(AttributeError, wolframalpha_api.response, None)
@@ -35,11 +35,11 @@ class TestWolframAlphaAPIEngine(SearxTestCase):
         xml = '''<?xml version='1.0' encoding='UTF-8'?>
         <queryresult success='false' error='false' />
         '''
-        response = mock.Mock(text=xml.encode('utf-8'))
+        response = mock.Mock(text=xml)
         self.assertEqual(wolframalpha_api.response(response), [])
 
         # test basic case
-        xml = b"""<?xml version='1.0' encoding='UTF-8'?>
+        xml = """<?xml version='1.0' encoding='UTF-8'?>
         <queryresult success='true'
             error='false'
             numpods='3'
@@ -107,7 +107,7 @@ class TestWolframAlphaAPIEngine(SearxTestCase):
         self.assertIn('result_plaintext', results[1]['content'])
 
         # test calc
-        xml = b"""<?xml version='1.0' encoding='UTF-8'?>
+        xml = """<?xml version='1.0' encoding='UTF-8'?>
         <queryresult success='true'
             error='false'
             numpods='2'

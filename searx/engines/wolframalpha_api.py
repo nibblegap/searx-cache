@@ -45,15 +45,15 @@ def request(query, params):
 
 # replace private user area characters to make text legible
 def replace_pua_chars(text):
-    pua_chars = {u'\uf522': u'\u2192',  # rigth arrow
-                 u'\uf7b1': u'\u2115',  # set of natural numbers
-                 u'\uf7b4': u'\u211a',  # set of rational numbers
-                 u'\uf7b5': u'\u211d',  # set of real numbers
-                 u'\uf7bd': u'\u2124',  # set of integer numbers
-                 u'\uf74c': 'd',        # differential
-                 u'\uf74d': u'\u212f',  # euler's number
-                 u'\uf74e': 'i',        # imaginary number
-                 u'\uf7d9': '='}        # equals sign
+    pua_chars = {'  ': '→',  # rigth arrow
+                 '': 'ℕ',  # set of natural numbers
+                 '  ': 'ℚ',  # set of rational numbers
+                 '': 'ℝ',  # set of real numbers
+                 '  ': '   ℤ',  # set of integer numbers
+                 '': 'd',        # differential
+                 '': '     ℯ',  # euler's number
+                 '': 'i',        # imaginary number
+                 '': '='}        # equals sign
 
     for k, v in pua_chars.items():
         text = text.replace(k, v)
@@ -65,7 +65,7 @@ def replace_pua_chars(text):
 def response(resp):
     results = []
 
-    search_results = etree.XML(resp.text)
+    search_results = etree.XML(resp.text.encode())
 
     # return empty array if there are no results
     if search_results.xpath(failure_xpath):

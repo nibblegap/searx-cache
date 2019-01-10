@@ -30,7 +30,7 @@ class TestPubmedEngine(SearxTestCase):
 </IdList></eSearchResult>
 """
 
-        response = mock.Mock(text=xml_mock.encode('utf-8'))
+        response = mock.Mock(text=xml_mock)
         results = pubmed.response(response)
         self.assertEqual(type(results), list)
         self.assertEqual(len(results), 1)

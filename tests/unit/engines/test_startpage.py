@@ -58,7 +58,7 @@ class TestStartpageEngine(SearxTestCase):
             </p>
         </li>
         """
-        response = mock.Mock(text=html.encode('utf-8'))
+        response = mock.Mock(text=html)
         results = startpage.response(response)
         self.assertEqual(type(results), list)
         self.assertEqual(len(results), 1)
@@ -129,7 +129,7 @@ class TestStartpageEngine(SearxTestCase):
             </p>
         </li>
         """
-        response = mock.Mock(text=html.encode('utf-8'))
+        response = mock.Mock(text=html)
         results = startpage.response(response)
         self.assertEqual(type(results), list)
         self.assertEqual(len(results), 1)
