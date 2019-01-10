@@ -46,7 +46,7 @@ except:
     from sys import exit
 
     exit(1)
-from html import escape
+from cgi import escape
 from datetime import datetime, timedelta
 from werkzeug.contrib.fixers import ProxyFix
 from flask import (
