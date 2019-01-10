@@ -1,10 +1,10 @@
 import mock
 from collections import defaultdict
 from searx.engines import fdroid
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestFdroidEngine(SearxTestCase):
+class TestFdroidEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

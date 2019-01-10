@@ -1,8 +1,8 @@
 from searx.engines import dummy
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestDummyEngine(SearxTestCase):
+class TestDummyEngine(TestCase):
 
     def test_request(self):
         test_params = [

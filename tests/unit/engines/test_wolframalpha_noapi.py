@@ -3,10 +3,10 @@ from collections import defaultdict
 import mock
 from requests import Request
 from searx.engines import wolframalpha_noapi
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestWolframAlphaNoAPIEngine(SearxTestCase):
+class TestWolframAlphaNoAPIEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

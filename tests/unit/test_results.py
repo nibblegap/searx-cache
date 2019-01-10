@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from searx.results import ResultContainer
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
 def fake_result(url='https://aa.bb/cc?dd=ee#ff',
@@ -17,7 +17,7 @@ def fake_result(url='https://aa.bb/cc?dd=ee#ff',
 
 
 #  TODO
-class ResultContainerTestCase(SearxTestCase):
+class ResultContainerTestCase(TestCase):
 
     def test_empty(self):
         c = ResultContainer()

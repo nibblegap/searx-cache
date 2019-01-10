@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import duckduckgo_definitions
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestDDGDefinitionsEngine(SearxTestCase):
+class TestDDGDefinitionsEngine(TestCase):
 
     def test_result_to_text(self):
         url = ''

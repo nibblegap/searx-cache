@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import stackoverflow
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestStackoverflowEngine(SearxTestCase):
+class TestStackoverflowEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

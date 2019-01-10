@@ -1,10 +1,10 @@
 import mock
 from collections import defaultdict
 from searx.engines import pdbe
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestPdbeEngine(SearxTestCase):
+class TestPdbeEngine(TestCase):
     def test_request(self):
         query = 'test_query'
         dicto = defaultdict(dict)

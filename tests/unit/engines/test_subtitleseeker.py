@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import subtitleseeker
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestSubtitleseekerEngine(SearxTestCase):
+class TestSubtitleseekerEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

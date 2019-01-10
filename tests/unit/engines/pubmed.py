@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import pubmed
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestPubmedEngine(SearxTestCase):
+class TestPubmedEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

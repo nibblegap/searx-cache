@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import mediawiki
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestMediawikiEngine(SearxTestCase):
+class TestMediawikiEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

@@ -3,10 +3,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import google_news
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestGoogleNewsEngine(SearxTestCase):
+class TestGoogleNewsEngine(TestCase):
 
     def test_request(self):
         google_news.supported_languages = ['en-US', 'fr-FR']

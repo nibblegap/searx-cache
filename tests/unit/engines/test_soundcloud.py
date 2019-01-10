@@ -1,11 +1,11 @@
 from collections import defaultdict
 import mock
 from searx.engines import soundcloud
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from searx.url_utils import quote_plus
 
 
-class TestSoundcloudEngine(SearxTestCase):
+class TestSoundcloudEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

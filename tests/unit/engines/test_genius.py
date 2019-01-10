@@ -2,10 +2,10 @@ from collections import defaultdict
 import mock
 from datetime import datetime
 from searx.engines import genius
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestGeniusEngine(SearxTestCase):
+class TestGeniusEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

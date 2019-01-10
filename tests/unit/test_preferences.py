@@ -1,6 +1,6 @@
 from searx.preferences import (EnumStringSetting, MapSetting, MissingArgumentException, SearchLanguageSetting,
                                MultipleChoiceSetting, PluginsSetting, ValidationException)
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
 class PluginStub(object):
@@ -10,7 +10,7 @@ class PluginStub(object):
         self.default_on = default_on
 
 
-class TestSettings(SearxTestCase):
+class TestSettings(TestCase):
     # map settings
 
     def test_map_setting_invalid_initialization(self):

@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import wikipedia
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestWikipediaEngine(SearxTestCase):
+class TestWikipediaEngine(TestCase):
 
     def test_request(self):
         wikipedia.supported_languages = ['fr', 'en']

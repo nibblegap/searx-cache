@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import frinkiac
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestFrinkiacEngine(SearxTestCase):
+class TestFrinkiacEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

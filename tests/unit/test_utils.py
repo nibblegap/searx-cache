@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import mock
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from searx import utils
 
 
-class TestUtils(SearxTestCase):
+class TestUtils(TestCase):
 
     def test_gen_useragent(self):
         self.assertIsInstance(utils.gen_useragent(), str)
@@ -87,7 +87,7 @@ class TestUtils(SearxTestCase):
         self.assertEqual(utils.match_language('he-IL', ['iw-IL'], aliases), 'iw-IL')
 
 
-class TestHTMLTextExtractor(SearxTestCase):
+class TestHTMLTextExtractor(TestCase):
 
     def setUp(self):
         self.html_text_extractor = utils.HTMLTextExtractor()
@@ -110,7 +110,7 @@ class TestHTMLTextExtractor(SearxTestCase):
         self.assertIn(entity, self.html_text_extractor.result)
 
 
-class TestUnicodeWriter(SearxTestCase):
+class TestUnicodeWriter(TestCase):
 
     def setUp(self):
         self.unicode_writer = utils.UnicodeWriter(mock.MagicMock())

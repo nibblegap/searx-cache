@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import dailymotion
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestDailymotionEngine(SearxTestCase):
+class TestDailymotionEngine(TestCase):
 
     def test_request(self):
         dailymotion.supported_languages = ['en', 'fr']

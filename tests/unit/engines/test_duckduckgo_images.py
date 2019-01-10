@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import duckduckgo_images
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestDuckduckgoImagesEngine(SearxTestCase):
+class TestDuckduckgoImagesEngine(TestCase):
 
     def test_request(self):
         duckduckgo_images.supported_languages = ['de-CH', 'en-US']

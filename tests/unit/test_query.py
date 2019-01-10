@@ -1,8 +1,8 @@
 from searx.query import RawTextQuery
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestQuery(SearxTestCase):
+class TestQuery(TestCase):
 
     def test_simple_query(self):
         query_text = 'the query'

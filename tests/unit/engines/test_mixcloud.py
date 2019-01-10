@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import mixcloud
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestMixcloudEngine(SearxTestCase):
+class TestMixcloudEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

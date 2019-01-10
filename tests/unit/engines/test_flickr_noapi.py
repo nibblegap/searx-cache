@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import flickr_noapi
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestFlickrNoapiEngine(SearxTestCase):
+class TestFlickrNoapiEngine(TestCase):
 
     def test_build_flickr_url(self):
         url = flickr_noapi.build_flickr_url("uid", "pid")

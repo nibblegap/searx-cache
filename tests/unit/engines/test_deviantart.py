@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import deviantart
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestDeviantartEngine(SearxTestCase):
+class TestDeviantartEngine(TestCase):
 
     def test_request(self):
         dicto = defaultdict(dict)
