@@ -119,9 +119,6 @@ def get_search_data(q, r):
         results_number = 0
     results = r.get_ordered_results()
     for result in results:
-        result['engines'] = list(result['engines'])
-        if not type(result['engines']) is list:
-            print(result['engines'])
         if 'publishedDate' in result:
             try:
                 result['pubdate'] = result['publishedDate'].strftime('%Y-%m-%d %H:%M:%S')
