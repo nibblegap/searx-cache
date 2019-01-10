@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import json
-from mock import Mock
+from mock import Mock, patch
+from mockredis import mock_strict_redis_client
 from searx import webapp
 from searx.testing import SearxTestCase
 from searx.search import Search
@@ -19,12 +20,14 @@ class ViewsTestCase(SearxTestCase):
             {
                 'content': 'first test content',
                 'title': 'First Test',
+                'category': 'general',
                 'url': 'http://first.test.xyz',
                 'engines': ['youtube', 'startpage'],
                 'engine': 'startpage',
                 'parsed_url': ParseResult(scheme='http', netloc='first.test.xyz', path='/', params='', query='', fragment=''),  # noqa
             }, {
                 'content': 'second test content',
+                'category': 'general',
                 'title': 'Second Test',
                 'url': 'http://second.test.xyz',
                 'engines': ['youtube', 'startpage'],
@@ -33,16 +36,16 @@ class ViewsTestCase(SearxTestCase):
             },
         ]
 
-        def search_mock(search_self, *args):
-            search_self.result_container = Mock(get_ordered_results=lambda: self.test_results,
-                                                answers=set(),
-                                                corrections=set(),
-                                                suggestions=set(),
-                                                infoboxes=[],
-                                                unresponsive_engines=set(),
-                                                results=self.test_results,
-                                                results_number=lambda: 3,
-                                                results_length=lambda: len(self.test_results))
+        def search_mock(*args):
+            return Mock(get_ordered_results=lambda: self.test_results,
+                        answers=set(),
+                        corrections=set(),
+                        suggestions=set(),
+                        infoboxes=[],
+                        unresponsive_engines=set(),
+                        results=self.test_results,
+                        results_number=lambda: 3,
+                        results_length=lambda: len(self.test_results))
 
         Search.search = search_mock
 
@@ -60,6 +63,7 @@ class ViewsTestCase(SearxTestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'<div class="title"><h1>searx</h1></div>', result.data)
 
+    @patch('redis.StrictRedis', mock_strict_redis_client)
     def test_index_html(self):
         result = self.app.post('/', data={'q': 'test'})
         self.assertIn(
@@ -68,53 +72,6 @@ class ViewsTestCase(SearxTestCase):
         )
         self.assertIn(
             b'<p class="content">first <span class="highlight">test</span> content<br class="last"/></p>',  # noqa
-            result.data
-        )
-
-    def test_index_json(self):
-        result = self.app.post('/', data={'q': 'test', 'format': 'json'})
-
-        result_dict = json.loads(result.data.decode('utf-8'))
-
-        self.assertEqual('test', result_dict['query'])
-        self.assertEqual(result_dict['results'][0]['content'], 'first test content')
-        self.assertEqual(result_dict['results'][0]['url'], 'http://first.test.xyz')
-
-    def test_index_csv(self):
-        result = self.app.post('/', data={'q': 'test', 'format': 'csv'})
-
-        self.assertEqual(
-            b'title,url,content,host,engine,score\r\n'
-            b'First Test,http://first.test.xyz,first test content,first.test.xyz,startpage,\r\n'  # noqa
-            b'Second Test,http://second.test.xyz,second test content,second.test.xyz,youtube,\r\n',  # noqa
-            result.data
-        )
-
-    def test_index_rss(self):
-        result = self.app.post('/', data={'q': 'test', 'format': 'rss'})
-
-        self.assertIn(
-            b'<description>Search results for "test" - searx</description>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<opensearch:totalResults>3</opensearch:totalResults>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<title>First Test</title>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<link>http://first.test.xyz</link>',
-            result.data
-        )
-
-        self.assertIn(
-            b'<description>first test content</description>',
             result.data
         )
 

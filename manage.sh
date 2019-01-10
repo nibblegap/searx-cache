@@ -110,7 +110,7 @@ tests() {
 #
 
 npm_path_setup() {
-    which npm || (printf 'Error: npm is not found\n'; exit 1)
+    which npm &>/dev/null || whereis npm &>/dev/null || (printf 'Error: npm is not found\n'; exit 1)
     export PATH="$(npm bin)":$PATH
 }
 
@@ -152,6 +152,7 @@ styles() {
 }
 
 grunt_build() {
+    npm_path_setup
     echo '[!] Grunt build : oscar theme'
     grunt --gruntfile "$SEARX_DIR/static/themes/oscar/gruntfile.js"
     echo '[!] Grunt build : simple theme'
