@@ -32,14 +32,14 @@ class TestWolframAlphaAPIEngine(TestCase):
         request = Request(headers={'Referer': referer_url})
 
         # test failure
-        xml = '''<?xml version='1.0' encoding='UTF-8'?>
+        xml = b'''<?xml version='1.0' encoding='UTF-8'?>
         <queryresult success='false' error='false' />
         '''
         response = mock.Mock(text=xml)
         self.assertEqual(wolframalpha_api.response(response), [])
 
         # test basic case
-        xml = """<?xml version='1.0' encoding='UTF-8'?>
+        xml = b"""<?xml version='1.0' encoding='UTF-8'?>
         <queryresult success='true'
             error='false'
             numpods='3'
@@ -107,7 +107,7 @@ class TestWolframAlphaAPIEngine(TestCase):
         self.assertIn('result_plaintext', results[1]['content'])
 
         # test calc
-        xml = """<?xml version='1.0' encoding='UTF-8'?>
+        xml = b"""<?xml version='1.0' encoding='UTF-8'?>
         <queryresult success='true'
             error='false'
             numpods='2'

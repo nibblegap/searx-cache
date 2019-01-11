@@ -33,13 +33,13 @@ class TestBingNewsEngine(TestCase):
         self.assertRaises(AttributeError, bing_news.response, '')
         self.assertRaises(AttributeError, bing_news.response, '[]')
 
-        response = mock.Mock(content='<html></html>')
+        response = mock.Mock(content=b'<html></html>')
         self.assertEqual(bing_news.response(response), [])
 
-        response = mock.Mock(content='<html></html>')
+        response = mock.Mock(content=b'<html></html>')
         self.assertEqual(bing_news.response(response), [])
 
-        html = """<?xml version="1.0" encoding="utf-8" ?>
+        html = b"""<?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0" xmlns:News="https://www.bing.com:443/news/search?q=python&amp;setmkt=en-US&amp;first=1&amp;format=RSS">
     <channel>
         <title>python - Bing News</title>
@@ -84,7 +84,7 @@ class TestBingNewsEngine(TestCase):
         self.assertEqual(results[1]['content'], 'Another Article Content')
         self.assertNotIn('img_src', results[1])
 
-        html = """<?xml version="1.0" encoding="utf-8" ?>
+        html = b"""<?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0" xmlns:News="https://www.bing.com:443/news/search?q=python&amp;setmkt=en-US&amp;first=1&amp;format=RSS">
     <channel>
         <title>python - Bing News</title>
@@ -119,7 +119,7 @@ class TestBingNewsEngine(TestCase):
         self.assertEqual(results[0]['content'], 'Article Content')
         self.assertEqual(results[0]['img_src'], 'http://another.bing.com/image')
 
-        html = """<?xml version="1.0" encoding="utf-8" ?>
+        html = b"""<?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0" xmlns:News="https://www.bing.com:443/news/search?q=python&amp;setmkt=en-US&amp;first=1&amp;format=RSS">
     <channel>
         <title>python - Bing News</title>
@@ -138,6 +138,6 @@ class TestBingNewsEngine(TestCase):
         self.assertEqual(type(results), list)
         self.assertEqual(len(results), 0)
 
-        html = """<?xml version="1.0" encoding="utf-8" ?>gabarge"""
+        html = b"""<?xml version="1.0" encoding="utf-8" ?>gabarge"""
         response = mock.Mock(content=html)
         self.assertRaises(lxml.etree.XMLSyntaxError, bing_news.response, response)
