@@ -43,13 +43,6 @@ unit_tests() {
     PYTHONPATH="$BASE_DIR" pytest --cov=searx --disable-pytest-warnings "$BASE_DIR/tests/unit"
 }
 
-py_test_coverage() {
-    echo '[!] Running python test coverage'
-    PYTHONPATH="`pwd`" python3 -m nose2 -C --log-capture --with-coverage --coverage "$SEARX_DIR" -s "$BASE_DIR/tests/unit" \
-    && coverage report \
-    && coverage html
-}
-
 tests() {
     set -e
     pep8_check
@@ -128,7 +121,6 @@ Commands
     ------------------
     update_packages      - Check & update production dependency changes
     update_dev_packages  - Check & update development and production dependency changes
-    install_geckodriver  - Download & install geckodriver if not already installed (required for robot_tests)
     npm_packages         - Download & install npm dependencies (source manage.sh to update the PATH)
 
     Build
@@ -141,9 +133,7 @@ Commands
     -----
     unit_tests           - Run unit tests
     pep8_check           - Pep8 validation
-    robot_tests          - Run selenium tests
     tests                - Run all python tests (pep8, unit, robot_tests)
-    py_test_coverage     - Unit test coverage
 "
 }
 
