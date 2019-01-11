@@ -20,6 +20,7 @@ with one command.
 
 - Run the docker-compose **up** command to start the project ``docker-compose up --build``
 - Getting the ip of the spot service and go to http://<spot-ip>:8888
+- Or you can use the command line ``curl -X POST -F 'category=general' -F 'language=en-US' -F 'q=lequipe' -F 'time_range=' -F 'output=json' http://<spot-ip>:8888/``
 
 .. note::  Here the command to get the IP of the spot service
  ``docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_spot_1``
