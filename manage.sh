@@ -41,13 +41,19 @@ pep8_check() {
 
 unit_tests() {
     echo '[!] Running unit tests'
-    PYTHONPATH="$BASE_DIR" pytest --cov=searx --disable-pytest-warnings "$BASE_DIR/tests/unit"
+    PYTHONPATH="$BASE_DIR" pytest --cov=searx "$BASE_DIR/tests/unit"
+}
+
+functional_tests() {
+    echo '[!] Running unit tests'
+    PYTHONPATH="$BASE_DIR" pytest "$BASE_DIR/tests/functional"
 }
 
 tests() {
     set -e
     pep8_check
     unit_tests
+    functional_tests
     set +e
 }
 
@@ -133,8 +139,9 @@ Commands
     Tests
     -----
     unit_tests           - Run unit tests
+    functional_tests     - Run functional tests
     pep8_check           - Pep8 validation
-    tests                - Run all python tests (pep8, unit, robot_tests)
+    tests                - Run all python tests (pep8, unit, functional)
 "
 }
 

@@ -21,10 +21,24 @@ coding-rules:
   script:
     - ./manage.sh pep8_check
 
-unittest:
+unit-test:
   stage: test
   before_script:
     - ./manage.sh update_dev_packages
   script:
     - ./manage.sh unit_tests
   coverage: '/TOTAL.*\s+(\d+%)$/'
+
+functional-test:
+  stage: test
+  image: docker:stable
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+  before_script:
+    - docker run -id --rm -v $(pwd):/ws -e DOCKER_HOST=tcp://$(cat /etc/hosts | grep docker | cut -f1):2375/ -w /ws --name spotenv $CI_REGISTRY_IMAGE/env:latest sh
+    - docker exec -i spotenv ./manage.sh update_dev_packages
+  script:
+    - docker exec -i spotenv ./manage.sh functional_tests

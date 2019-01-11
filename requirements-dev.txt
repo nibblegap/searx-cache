@@ -4,3 +4,4 @@ pycodestyle==2.4.0
 mockredispy==2.9.3
 pytest==4.1.0
 pytest-cov==2.6.1
+pytest-dockerc==1.0.5
