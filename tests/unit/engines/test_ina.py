@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import ina
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestInaEngine(SearxTestCase):
+class TestInaEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

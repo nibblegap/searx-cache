@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import load_engine, duckduckgo
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestDuckduckgoEngine(SearxTestCase):
+class TestDuckduckgoEngine(TestCase):
 
     def test_request(self):
         duckduckgo = load_engine({'engine': 'duckduckgo', 'name': 'duckduckgo'})

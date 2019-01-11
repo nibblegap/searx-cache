@@ -2,10 +2,10 @@ from collections import defaultdict
 from datetime import datetime
 import mock
 from searx.engines import currency_convert
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestCurrencyConvertEngine(SearxTestCase):
+class TestCurrencyConvertEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

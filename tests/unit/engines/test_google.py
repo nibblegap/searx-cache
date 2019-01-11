@@ -3,10 +3,10 @@ from collections import defaultdict
 import mock
 import lxml
 from searx.engines import google
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestGoogleEngine(SearxTestCase):
+class TestGoogleEngine(TestCase):
 
     def mock_response(self, text):
         response = mock.Mock(text=text, url='https://www.google.com/search?q=test&start=0&gbv=1&gws_rd=cr')

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
 #  TODO
-class SearchTestCase(SearxTestCase):
+class SearchTestCase(TestCase):
 
     def test_(self):
         pass

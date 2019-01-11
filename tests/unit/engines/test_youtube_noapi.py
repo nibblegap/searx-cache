@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import youtube_noapi
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestYoutubeNoAPIEngine(SearxTestCase):
+class TestYoutubeNoAPIEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

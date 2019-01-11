@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import bing_videos
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestBingVideosEngine(SearxTestCase):
+class TestBingVideosEngine(TestCase):
 
     def test_request(self):
         bing_videos.supported_languages = ['fr-FR', 'en-US']

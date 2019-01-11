@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import twitter
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestTwitterEngine(SearxTestCase):
+class TestTwitterEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

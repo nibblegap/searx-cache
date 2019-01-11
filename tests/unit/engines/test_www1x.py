@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import www1x
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestWww1xEngine(SearxTestCase):
+class TestWww1xEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

@@ -1,11 +1,11 @@
 from collections import defaultdict
 import mock
 from searx.engines import bing_news
-from searx.testing import SearxTestCase
+from unittest import TestCase
 import lxml
 
 
-class TestBingNewsEngine(SearxTestCase):
+class TestBingNewsEngine(TestCase):
 
     def test_request(self):
         bing_news.supported_languages = ['en', 'fr']

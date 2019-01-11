@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import searchcode_code
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestSearchcodeCodeEngine(SearxTestCase):
+class TestSearchcodeCodeEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

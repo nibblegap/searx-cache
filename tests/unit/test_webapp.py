@@ -4,12 +4,12 @@ import json
 from mock import Mock, patch
 from mockredis import mock_strict_redis_client
 from searx import webapp
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from searx.search import Search
 from searx.url_utils import ParseResult
 
 
-class ViewsTestCase(SearxTestCase):
+class ViewsTestCase(TestCase):
 
     def setUp(self):
         webapp.app.config['TESTING'] = True  # to get better error messages

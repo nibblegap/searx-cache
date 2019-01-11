@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import digbt
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestDigBTEngine(SearxTestCase):
+class TestDigBTEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import qwant
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestQwantEngine(SearxTestCase):
+class TestQwantEngine(TestCase):
 
     def test_request(self):
         qwant.supported_languages = ['en-US', 'fr-CA', 'fr-FR']

@@ -3,10 +3,10 @@ from lxml.html import fromstring
 from collections import defaultdict
 import mock
 from searx.engines import wikidata
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestWikidataEngine(SearxTestCase):
+class TestWikidataEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

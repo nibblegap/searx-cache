@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import yacy
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestYacyEngine(SearxTestCase):
+class TestYacyEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

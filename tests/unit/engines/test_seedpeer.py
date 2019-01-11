@@ -1,11 +1,11 @@
 import mock
 from collections import defaultdict
 from searx.engines import seedpeer
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from datetime import datetime
 
 
-class TestSeedPeerEngine(SearxTestCase):
+class TestSeedPeerEngine(TestCase):
 
     html = ''
     with open('./tests/unit/engines/seedpeer_fixture.html') as fixture:

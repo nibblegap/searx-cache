@@ -3,10 +3,10 @@
 from mock import Mock
 
 from searx.answerers import answerers
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class AnswererTest(SearxTestCase):
+class AnswererTest(TestCase):
 
     def test_unicode_input(self):
         query = Mock()

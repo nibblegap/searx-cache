@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import scanr_structures
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestScanrStructuresEngine(SearxTestCase):
+class TestScanrStructuresEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

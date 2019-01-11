@@ -1,7 +1,7 @@
 from collections import defaultdict
 import mock
 from searx.engines import archlinux
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 domains = {
     'en': 'https://wiki.archlinux.org',
@@ -13,7 +13,7 @@ domains = {
 }
 
 
-class TestArchLinuxEngine(SearxTestCase):
+class TestArchLinuxEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

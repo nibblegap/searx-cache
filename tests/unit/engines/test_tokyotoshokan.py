@@ -1,11 +1,11 @@
 import mock
 from collections import defaultdict
 from searx.engines import tokyotoshokan
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from datetime import datetime
 
 
-class TestTokyotoshokanEngine(SearxTestCase):
+class TestTokyotoshokanEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

@@ -3,10 +3,10 @@ from collections import defaultdict
 from datetime import datetime
 import mock
 from searx.engines import yahoo_news
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestYahooNewsEngine(SearxTestCase):
+class TestYahooNewsEngine(TestCase):
 
     def test_request(self):
         yahoo_news.supported_languages = ['en', 'fr']

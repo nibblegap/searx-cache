@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import photon
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestPhotonEngine(SearxTestCase):
+class TestPhotonEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

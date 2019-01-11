@@ -1,11 +1,11 @@
 from collections import defaultdict
 import mock
 from searx.engines import duden
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from datetime import datetime
 
 
-class TestDudenEngine(SearxTestCase):
+class TestDudenEngine(TestCase):
 
     def test_request(self):
         query = 'Haus'

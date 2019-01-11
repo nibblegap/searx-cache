@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import vimeo
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestVimeoEngine(SearxTestCase):
+class TestVimeoEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

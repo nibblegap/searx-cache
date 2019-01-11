@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from searx import plugins
 from mock import Mock
 
@@ -9,7 +9,7 @@ def get_search_mock(query, **kwargs):
     return Mock(query=query, answers=set(), **kwargs)
 
 
-class PluginStoreTest(SearxTestCase):
+class PluginStoreTest(TestCase):
 
     def test_PluginStore_init(self):
         store = plugins.PluginStore()
@@ -36,7 +36,7 @@ class PluginStoreTest(SearxTestCase):
         self.assertTrue(testplugin.asdf.called)
 
 
-class SelfIPTest(SearxTestCase):
+class SelfIPTest(TestCase):
 
     def test_PluginStore_init(self):
         store = plugins.PluginStore()

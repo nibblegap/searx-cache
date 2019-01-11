@@ -1,11 +1,11 @@
 from collections import defaultdict
 import mock
 from searx.engines import reddit
-from searx.testing import SearxTestCase
+from unittest import TestCase
 from datetime import datetime
 
 
-class TestRedditEngine(SearxTestCase):
+class TestRedditEngine(TestCase):
 
     def test_request(self):
         query = 'test_query'

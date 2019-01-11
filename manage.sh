@@ -26,46 +26,6 @@ update_dev_packages() {
     pip3 install -r "$BASE_DIR/requirements-dev.txt"
 }
 
-install_geckodriver() {
-    echo '[!] Checking geckodriver'
-    # TODO : check the current geckodriver version
-    set -e
-    geckodriver -V > /dev/null 2>&1 || NOTFOUND=1
-    set +e
-    if [ -z "$NOTFOUND" ]; then
-        return
-    fi
-    GECKODRIVER_VERSION="v0.19.1"
-    PLATFORM="`python3 -c "import platform; print(platform.system().lower(), platform.architecture()[0])"`"
-    case "$PLATFORM" in
-        "linux 32bit" | "linux2 32bit") ARCH="linux32";;
-        "linux 64bit" | "linux2 64bit") ARCH="linux64";;
-        "windows 32 bit") ARCH="win32";;
-        "windows 64 bit") ARCH="win64";;
-        "mac 64bit") ARCH="macos";;
-    esac
-    GECKODRIVER_URL="https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-$ARCH.tar.gz";
-
-    if [ -z "$1" ]; then
-        if [ -z "$VIRTUAL_ENV" ]; then
-            printf "geckodriver can't be installed because VIRTUAL_ENV is not set, you should download it from\n  %s" "$GECKODRIVER_URL"
-            exit
-        else
-            GECKODRIVER_DIR="$VIRTUAL_ENV/bin"
-        fi
-    else
-        GECKODRIVER_DIR="$1"
-        mkdir -p -- "$GECKODRIVER_DIR"
-    fi
-
-    printf "Installing %s/geckodriver from\n  %s" "$GECKODRIVER_DIR" "$GECKODRIVER_URL"
-
-    FILE="`mktemp`"
-    wget -qO "$FILE" -- "$GECKODRIVER_URL" && tar xz -C "$GECKODRIVER_DIR" -f "$FILE" geckodriver
-    rm -- "$FILE"
-    chmod 777 -- "$GECKODRIVER_DIR/geckodriver"
-}
-
 locales() {
     pybabel compile -d "$SEARX_DIR/translations"
 }
@@ -80,7 +40,7 @@ pep8_check() {
 
 unit_tests() {
     echo '[!] Running unit tests'
-    python3 -m nose2 -s "$BASE_DIR/tests/unit"
+    PYTHONPATH="$BASE_DIR" pytest --cov=searx --disable-pytest-warnings "$BASE_DIR/tests/unit"
 }
 
 py_test_coverage() {
@@ -90,17 +50,10 @@ py_test_coverage() {
     && coverage html
 }
 
-robot_tests() {
-    echo '[!] Running robot tests'
-    PYTHONPATH="`pwd`" python3 "$SEARX_DIR/testing.py" robot
-}
-
 tests() {
     set -e
     pep8_check
     unit_tests
-    install_geckodriver
-    robot_tests
     set +e
 }
 

@@ -1,10 +1,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import swisscows
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestSwisscowsEngine(SearxTestCase):
+class TestSwisscowsEngine(TestCase):
 
     def test_request(self):
         swisscows.supported_languages = ['de-AT', 'de-DE']

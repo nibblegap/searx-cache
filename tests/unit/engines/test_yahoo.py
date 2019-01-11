@@ -2,10 +2,10 @@
 from collections import defaultdict
 import mock
 from searx.engines import yahoo
-from searx.testing import SearxTestCase
+from unittest import TestCase
 
 
-class TestYahooEngine(SearxTestCase):
+class TestYahooEngine(TestCase):
 
     def test_parse_url(self):
         test_url = 'http://r.search.yahoo.com/_ylt=A0LEb9JUSKcAEGRXNyoA;_ylu=X3oDMTEzZm1qazYwBHNlYwNzcgRwb3MDMQRjb' +\
