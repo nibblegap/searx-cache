@@ -6,8 +6,6 @@ EXPOSE 8888
 WORKDIR /usr/local/searx
 CMD ["python", "searx/webapp.py"]
 
-RUN adduser -D -h /usr/local/searx -s /bin/sh searx searx
-
 COPY requirements.txt ./requirements.txt
 
 RUN apk -U add \
@@ -22,6 +20,7 @@ RUN apk -U add \
     ca-certificates \
  && pip install --upgrade pip \
  && pip install --no-cache -r requirements.txt \
+ && pip install --no-cache coverage \
  && apk del \
     build-base \
     libffi-dev \
@@ -33,10 +32,6 @@ RUN apk -U add \
  && rm -f /var/cache/apk/*
 
 COPY searx /usr/local/searx/searx
-
-RUN chown -R searx:searx /usr/local/searx
-
-USER searx
 
 RUN sed -i "s/127.0.0.1/0.0.0.0/g" searx/settings.yml
 

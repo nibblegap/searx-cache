@@ -8,6 +8,7 @@ set -e
 # subshell
 PYTHONPATH="$BASE_DIR"
 SEARX_DIR="$BASE_DIR/searx"
+COV_DIR="$BASE_DIR/coverage"
 ACTION="$1"
 
 
@@ -41,12 +42,26 @@ pep8_check() {
 
 unit_tests() {
     echo '[!] Running unit tests'
-    PYTHONPATH="$BASE_DIR" pytest --cov=searx "$BASE_DIR/tests/unit"
+    mkdir -p "$COV_DIR"
+    chmod a+w "$COV_DIR"
+    PYTHONPATH="$BASE_DIR" COVERAGE_FILE="$COV_DIR"/unit pytest --cov=searx "$BASE_DIR/tests/unit"
 }
 
 functional_tests() {
     echo '[!] Running unit tests'
-    PYTHONPATH="$BASE_DIR" pytest "$BASE_DIR/tests/functional"
+    mkdir -p "$COV_DIR"
+    chmod a+w "$COV_DIR"
+    PYTHONPATH="$BASE_DIR" COMPOSE_FILE=docker-compose.yml:docker-compose-coverage.yml \
+        pytest "$BASE_DIR/tests/functional"
+    docker run -itd --rm --name tmp-vol -v spot-coverage:/coverage alpine
+    docker cp tmp-vol:/coverage/func $COV_DIR
+    docker stop tmp-vol
+}
+
+coverage() {
+    sed -i 's!/usr/local/searx!'$BASE_DIR'!g' "$COV_DIR"/func
+    coverage3 combine coverage/func coverage/unit
+    coverage3 report
 }
 
 tests() {
