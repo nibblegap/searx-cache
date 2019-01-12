@@ -32,9 +32,9 @@ RUN apk -U add \
     ca-certificates \
  && rm -f /var/cache/apk/*
 
-COPY . .
+COPY searx /usr/local/searx/searx
 
-RUN chown -R searx:searx *
+RUN chown -R searx:searx /usr/local/searx
 
 USER searx
 
