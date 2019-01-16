@@ -23,7 +23,7 @@ from io import open
 from ssl import OPENSSL_VERSION_INFO, OPENSSL_VERSION
 try:
     from yaml import load
-except:
+except ImportError:
     from sys import exit, stderr
     stderr.write('[E] install pyyaml\n')
     exit(2)
@@ -37,6 +37,7 @@ def check_settings_yml(file_name):
         return file_name
     else:
         return None
+
 
 # find location of settings.yml
 if 'SEARX_SETTINGS_PATH' in environ:

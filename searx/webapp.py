@@ -40,8 +40,9 @@ logger = logger.getChild('webapp')
 try:
     from pygments import highlight
     from pygments.lexers import get_lexer_by_name
+    from pygments.util import ClassNotFound
     from pygments.formatters import HtmlFormatter
-except:
+except ImportError:
     logger.critical("cannot import dependency: pygments")
     from sys import exit
 
@@ -178,7 +179,7 @@ def code_highlighter(codelines, language=None):
     try:
         # find lexer by programing language
         lexer = get_lexer_by_name(language, stripall=True)
-    except:
+    except ClassNotFound:
         # if lexer is not found, using default one
         logger.debug('highlighter cannot find lexer for {0}'.format(language))
         lexer = get_lexer_by_name('text', stripall=True)

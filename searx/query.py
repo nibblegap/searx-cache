@@ -49,7 +49,7 @@ class RawTextQuery(object):
         self.query_parts = []
 
         # split query, including whitespaces
-        raw_query_parts = re.split(r'(\s+)' if isinstance(self.query, str) else b'(\s+)', self.query)
+        raw_query_parts = re.split(r'(\s+)' if isinstance(self.query, str) else r'(\s+)'.encode(), self.query)
 
         parse_next = True
 

@@ -89,9 +89,8 @@ url_map = 'https://www.openstreetmap.org/'\
 
 # search-url
 search_path = '/search'
-search_url = ('https://{hostname}' +
-              search_path +
-              '?{query}&start={offset}&gws_rd=cr&gbv=1&lr={lang}&hl={lang_short}&ei=x')
+search_url = ('https://{hostname}' + search_path + '?{query}'
+              '&start={offset}&gws_rd=cr&gbv=1&lr={lang}&hl={lang_short}&ei=x')
 
 time_range_search = "&tbs=qdr:{range}"
 time_range_dict = {'day': 'd',

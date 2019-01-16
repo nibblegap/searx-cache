@@ -6,6 +6,7 @@ import re
 
 from babel.core import get_global
 from babel.dates import format_date
+from babel import UnknownLocaleError
 from codecs import getincrementalencoder
 from imp import load_source
 from numbers import Number
@@ -205,7 +206,7 @@ def format_date_by_locale(date, locale_string):
     # to avoid crashing if locale is not supported by babel
     try:
         formatted_date = format_date(date, locale=locale_string)
-    except:
+    except UnknownLocaleError:
         formatted_date = format_date(date, "YYYY-MM-dd")
 
     return formatted_date
@@ -255,7 +256,7 @@ def get_torrent_size(filesize, filesize_multiplier):
             filesize = int(filesize * 1000 * 1000)
         elif filesize_multiplier == 'KiB':
             filesize = int(filesize * 1000)
-    except:
+    except ValueError:
         filesize = None
 
     return filesize

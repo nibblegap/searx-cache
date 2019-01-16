@@ -171,7 +171,7 @@ class ResultContainer(object):
                 continue
             try:
                 result['url'] = result['url']
-            except:
+            except KeyError:
                 pass
             if 'title' in result and not isinstance(result['title'], str):
                 continue
