@@ -1,0 +1,18 @@
+version: '3.6'
+
+services:
+  spot:
+    entrypoint:
+      - coverage
+      - run
+      - --source=searx
+    command:
+      - searx/webapp.py
+    volumes:
+      - coverage:/coverage
+    environment:
+      COVERAGE_FILE: /coverage/func
+
+volumes:
+  coverage:
+    name: spot-coverage

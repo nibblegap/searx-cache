@@ -28,10 +28,10 @@ search_string = '?{query}&page={page}'
 supported_languages_url = base_url
 
 # regex
-regex_json = re.compile('initialData: {"Request":(.|\n)*},\s*environment')
-regex_json_remove_start = re.compile('^initialData:\s*')
-regex_json_remove_end = re.compile(',\s*environment$')
-regex_img_url_remove_start = re.compile('^https?://i\.swisscows\.ch/\?link=')
+regex_json = re.compile(r'initialData: {"Request":(.|\n)*},\s*environment')
+regex_json_remove_start = re.compile(r'^initialData:\s*')
+regex_json_remove_end = re.compile(r',\s*environment$')
+regex_img_url_remove_start = re.compile(r'^https?://i\.swisscows\.ch/\?link=')
 
 
 # do search-request

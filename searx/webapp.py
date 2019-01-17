@@ -40,8 +40,9 @@ logger = logger.getChild('webapp')
 try:
     from pygments import highlight
     from pygments.lexers import get_lexer_by_name
+    from pygments.util import ClassNotFound
     from pygments.formatters import HtmlFormatter
-except:
+except ImportError:
     logger.critical("cannot import dependency: pygments")
     from sys import exit
 
@@ -178,7 +179,7 @@ def code_highlighter(codelines, language=None):
     try:
         # find lexer by programing language
         lexer = get_lexer_by_name(language, stripall=True)
-    except:
+    except ClassNotFound:
         # if lexer is not found, using default one
         logger.debug('highlighter cannot find lexer for {0}'.format(language))
         lexer = get_lexer_by_name('text', stripall=True)
@@ -452,21 +453,26 @@ def config_results(results, query):
                 result['publishedDate'] = format_date(publishedDate)
 
 
-def index_error():
-    request.errors.append(gettext('search error'))
-    return render(
-        'index.html',
-    )
+def index_error(exn, output):
+    user_error = gettext("search error")
+    if output == "json":
+        return jsonify({"error": f"{user_error}: {exn}"})
+
+    request.errors.append(user_error)
+    return render('index.html')
 
 
 @app.route('/search', methods=['GET', 'POST'])
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # check the response format
+    output = request.form.get("output", "html")
+
     # check if there is query
     if request.form.get('q') is None:
-        return render(
-            'index.html',
-        )
+        if output == 'json':
+            return jsonify({}), 204
+        return render('index.html')
 
     selected_category = request.form.get('category') or 'general'
     first_page = request.form.get('pageno')
@@ -489,9 +495,9 @@ def index():
 
         # is it an invalid input parameter or something else ?
         if issubclass(e.__class__, SearxParameterException):
-            return index_error(), 400
+            return index_error(e, output), 400
         else:
-            return index_error(), 500
+            return index_error(e, output), 500
 
     if is_general_first_page:
         result_copy = copy.copy(search_data.results)
@@ -512,8 +518,7 @@ def index():
     config_results(images, search_data.query)
     config_results(videos, search_data.query)
 
-    return render(
-        'results.html',
+    response = dict(
         results=search_data.results,
         q=search_data.query,
         selected_category=selected_category,
@@ -521,12 +526,12 @@ def index():
         time_range=search_data.time_range,
         number_of_results=format_decimal(search_data.results_number),
         advanced_search=request.form.get('advanced_search', None),
-        suggestions=search_data.suggestions,
-        answers=search_data.answers,
-        corrections=search_data.corrections,
+        suggestions=list(search_data.suggestions),
+        answers=list(search_data.answers),
+        corrections=list(search_data.corrections),
         infoboxes=search_data.infoboxes,
         paging=search_data.paging,
-        unresponsive_engines=search_data.unresponsive_engines,
+        unresponsive_engines=list(search_data.unresponsive_engines),
         current_language=match_language(search_data.language,
                                         LANGUAGE_CODES,
                                         fallback=settings['search']['language']),
@@ -536,6 +541,9 @@ def index():
         theme=get_current_theme_name(),
         favicons=global_favicons[themes.index(get_current_theme_name())]
     )
+    if output == 'json':
+        return jsonify(response)
+    return render('results.html', **response)
 
 
 @app.route('/about', methods=['GET'])

@@ -48,8 +48,11 @@ class TestCurrencyConvertEngine(TestCase):
         results = currency_convert.response(response)
         self.assertEqual(type(results), list)
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['answer'], '10.0 GBP = 5.0 USD, 1 GBP (pound sterling)' +
-                         ' = 0.5 USD (United States dollar)')
+        self.assertEqual(
+            results[0]['answer'],
+            ('10.0 GBP = 5.0 USD, 1 GBP (pound sterling)'
+             ' = 0.5 USD (United States dollar)')
+        )
 
         target_url = 'https://duckduckgo.com/js/spice/currency/1/{}/{}'.format(
             dicto['from'], dicto['to'])

@@ -8,6 +8,7 @@ set -e
 # subshell
 PYTHONPATH="$BASE_DIR"
 SEARX_DIR="$BASE_DIR/searx"
+COV_DIR="$BASE_DIR/coverage"
 ACTION="$1"
 
 
@@ -35,25 +36,39 @@ pep8_check() {
     # ignored rules:
     #  E402 module level import not at top of file
     #  W503 line break before binary operator
-    pep8 --exclude=searx/static --max-line-length=120 --ignore "E402,W503" "$SEARX_DIR" "$BASE_DIR/tests"
+    #  E722 do not use bare 'except'
+    pycodestyle --exclude=searx/static --max-line-length=120 --ignore "E402,W503,E722" "$SEARX_DIR" "$BASE_DIR/tests"
 }
 
 unit_tests() {
     echo '[!] Running unit tests'
-    PYTHONPATH="$BASE_DIR" pytest --cov=searx --disable-pytest-warnings "$BASE_DIR/tests/unit"
+    mkdir -p "$COV_DIR"
+    chmod a+w "$COV_DIR"
+    PYTHONPATH="$BASE_DIR" COVERAGE_FILE="$COV_DIR"/unit pytest --cov=searx "$BASE_DIR/tests/unit"
 }
 
-py_test_coverage() {
-    echo '[!] Running python test coverage'
-    PYTHONPATH="`pwd`" python3 -m nose2 -C --log-capture --with-coverage --coverage "$SEARX_DIR" -s "$BASE_DIR/tests/unit" \
-    && coverage report \
-    && coverage html
+functional_tests() {
+    echo '[!] Running unit tests'
+    mkdir -p "$COV_DIR"
+    chmod a+w "$COV_DIR"
+    PYTHONPATH="$BASE_DIR" COMPOSE_FILE=docker-compose.yml:docker-compose-coverage.yml \
+        pytest "$BASE_DIR/tests/functional"
+    docker run -itd --rm --name tmp-vol -v spot-coverage:/coverage alpine
+    docker cp tmp-vol:/coverage/func $COV_DIR
+    docker stop tmp-vol
+}
+
+coverage() {
+    sed -i 's!/usr/local/searx!'$BASE_DIR'!g' "$COV_DIR"/func
+    coverage3 combine coverage/func coverage/unit
+    coverage3 report
 }
 
 tests() {
     set -e
     pep8_check
     unit_tests
+    functional_tests
     set +e
 }
 
@@ -128,7 +143,6 @@ Commands
     ------------------
     update_packages      - Check & update production dependency changes
     update_dev_packages  - Check & update development and production dependency changes
-    install_geckodriver  - Download & install geckodriver if not already installed (required for robot_tests)
     npm_packages         - Download & install npm dependencies (source manage.sh to update the PATH)
 
     Build
@@ -140,10 +154,9 @@ Commands
     Tests
     -----
     unit_tests           - Run unit tests
+    functional_tests     - Run functional tests
     pep8_check           - Pep8 validation
-    robot_tests          - Run selenium tests
-    tests                - Run all python tests (pep8, unit, robot_tests)
-    py_test_coverage     - Unit test coverage
+    tests                - Run all python tests (pep8, unit, functional)
 "
 }
 

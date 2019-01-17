@@ -116,7 +116,7 @@ def _fetch_supported_languages(resp):
 
     regions = dom.xpath(regions_xpath)
     for region in regions:
-        code = re.search('setmkt=[^\&]+', region).group()[7:]
+        code = re.search('setmkt=[^&]+', region).group()[7:]
         if code == 'nb-NO':
             code = 'no-NO'
 
