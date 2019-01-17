@@ -35,8 +35,11 @@
 {%- endmacro -%}
 
 <!-- Draw result header -->
-{% macro result_header(result, favicons) -%}
-<h4 class="result_header">{% if result.engine~".png" in favicons %}{{ draw_favicon(result.engine) }} {% endif %}{{ result_link(result.url, result.title|safe) }}</h4>
+{% macro result_header(result, favicons, put_icon=True) -%}
+<h4 class="result_header">{% if result.engine~".png" in favicons and put_icon %}{{ draw_favicon(result.engine) }} {% endif %}{{ result_link(result.url, result.title|safe) }}</h4>
+{%- endmacro %}
+{% macro result_engine(result, favicons) -%}
+<span class="result_engine">{{ result.engine }}{% if result.engine~".png" in favicons %}{{ draw_favicon(result.engine)}}{% endif %}</span>
 {%- endmacro %}
 
 <!-- Draw result sub header -->
@@ -102,7 +105,7 @@
     <input type="hidden" name="language" value="{{ lang }}" />
     {% endif %}
     {% if category %}
-    <input type="hidden" name="category" value="images" />
+    <input type="hidden" name="category" value="{{ category }}" />
     {% endif %}
     <button type="submit" class="btn btn-flat" >{{ text }}</button>
 </form>
@@ -117,4 +120,13 @@
         {{ caller() }}
     </div>
 </div>
+{%- endmacro %}
+
+
+{% macro format_filesize(filesize) -%}
+{% if filesize < 1024 %}{{ filesize }} {{ _('Bytes') }}
+{% elif filesize < 1024*1024 %}{{ '{0:0.2f}'.format(filesize/1024) }} {{ _('kiB') }}
+{% elif filesize < 1024*1024*1024 %}{{ '{0:0.2f}'.format(filesize/1024/1024) }} {{ _('MiB') }}
+{% elif filesize < 1024*1024*1024*1024 %}{{ '{0:0.2f}'.format(filesize/1024/1024/1024) }} {{ _('GiB') }}
+{% else %}{{ '{0:0.2f}'.format(filesize/1024/1024/1024/1024) }} {{ _('TiB') }}{% endif %}
 {%- endmacro %}

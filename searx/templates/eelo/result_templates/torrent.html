@@ -1,4 +1,4 @@
-{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, result_link, icon %}
+{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, result_link, icon, format_filesize %}
 
 {{ result_header(result, favicons) }}
 {% call result_sub_header(result) %}
@@ -20,11 +20,7 @@
     
         {% if result.filesize %}
         <span class="badge"> {{ _('Filesize') }}:
-            {% if result.filesize < 1024 %}{{ result.filesize }} {{ _('Bytes') }}
-            {% elif result.filesize < 1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024) }} {{ _('kiB') }}
-            {% elif result.filesize < 1024*1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024/1024) }} {{ _('MiB') }}
-            {% elif result.filesize < 1024*1024*1024*1024 %}{{ '{0:0.2f}'.format(result.filesize/1024/1024/1024) }} {{ _('GiB') }}
-            {% else %}{{ '{0:0.2f}'.format(result.filesize/1024/1024/1024/1024) }} {{ _('TiB') }}{% endif %}
+            {{ format_filesize(result.filesize) }}
         </span>
         {% endif %}
     

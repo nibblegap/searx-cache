@@ -507,7 +507,7 @@ def index():
                     images.append(res)
                 search_data.results.remove(res)
             elif res.get('category') == 'videos':
-                if len(videos) < 5:
+                if len(videos) < 2:
                     videos.append(res)
                 search_data.results.remove(res)
             elif res.get('category') is None:

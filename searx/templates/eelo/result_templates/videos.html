@@ -1,13 +1,13 @@
-{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, icon %}
+{% from 'eelo/macros.html' import result_header, result_engine, result_sub_header%}
 
 <div class="result-content">
     <a class="thumbnail" href="{{ result.url }}" {% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %}>
         <img src="{{ image_proxify(result.thumbnail) }}" alt="{{ result.title|striptags }} {{ result.engine }}" />
     </a>
-    <span>
-        {{ result_header(result, favicons) }}
+    <div>
+        {{ result_header(result, favicons, False) }}
         {% call result_sub_header(result) -%}
-        {{result.engine}}
+        {{result_engine(result, favicons)}}
         {%- endcall %}
-    </span>
+    </div>
 </div>

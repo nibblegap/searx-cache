@@ -214,17 +214,19 @@
     #search_params, #categories { flex-wrap: nowrap; }
 
     #more_categories {
+      margin-left: @spacing_x-large;
+      padding: @spacing_medium @spacing_large;
+      border-radius: @spacing_large;
       position: relative;
       flex-direction: row;
       align-items: center;
       top: 0;
-      border: none;
-      border-radius: 0;
-      padding-bottom: 0;
-      background-color: transparent;
       margin-left: @spacing_large;
 
       > label { padding: 0; }
+      > label:not(:last-child) {
+        margin-right: @spacing_large;
+      }
     }
   }
   #search_form.inline-search > #search_input_container {

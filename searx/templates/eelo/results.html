@@ -11,8 +11,8 @@
         {% include 'eelo/search_full.html' %}
     </div>
 
-    {% set image_gallery = selected_category == 'images' %}
-    <div class="container contents {% if image_gallery %} full {% endif %}">
+    {% set use_gallery_layout = selected_category == 'images' or selected_category == 'videos'%}
+    <div class="container contents {% if use_gallery_layout %} full {% endif %}">
         <div>
             {% if corrections %}
             <div class="result" id="corrections">
@@ -43,16 +43,21 @@
                 {% macro put_results(results_slice, no_image=False) -%}
                 {%- for result in results_slice %}
                 {% set template = result.template|replace('.html', '') if result['template'] else None %}
-                {% if no_image and template == "images" and not image_gallery %}
+                {% if no_image and template == "images" and not use_gallery_layout %}
                 {% else %}
                 <div class="result {% if template %}result-{{ template }}{% else %} result-default {% endif %}">
-                    {% if template in ["torrent"] %}
+                    {% if template in ["torrent"] and not use_gallery_layout %}
                     <small class="result-template">{{template}}</small>
                     {% endif %}
                     
                     {% set index = loop.index %}
                     {% if result.template %}
+                        {# Torrents presented in a gallery like layout are different than the regular layout #}
+                        {% if template == "torrent" and selected_category == 'videos' %}
+                        {% include get_result_template('eelo', 'video_torrent.html') %}
+                        {% else %}
                         {% include get_result_template('eelo', result['template']) %}
+                        {% endif %}
                     {% else %}
                         {% include 'eelo/result_templates/default.html' %}
                     {% endif %}
@@ -62,16 +67,29 @@
                 {%- endmacro %}
 
 
-                <div id="results" {% if image_gallery %} class="image-gallery" {% endif %}>
+                <div id="results" {% if use_gallery_layout %} class="{{selected_category}}-gallery" {% endif %}>
                     {{ put_results(results[:3], True) }}
 
                     {% if image_results %}
-                    <div id="image_result_mini_gallery_header">
-                        <b class="title">{{_("Images")}}</b>
-                        {{ search_link(_("More"), q|e, method=method, time_range=time_range, lang=current_language, category="images") }}
+                    <div class="first-page-media-results">
+                        <div class="header">
+                            <b class="title">{{_("Images")}}</b>
+                            {{ search_link(_("More"), q|e, method=method, time_range=time_range, lang=current_language, category="images") }}
+                        </div>
+                        <div id="default_images_container">
+                            {{ put_results(image_results) }}
+                        </div>
                     </div>
-                    <div id="default_images_container">
-                        {{ put_results(image_results) }}
+                    {% endif %}
+                    {% if videos_results %}
+                    <div class="first-page-media-results">
+                        <div class="header">
+                            <b class="title">{{_("Videos")}}</b>
+                            {{ search_link(_("More"), q|e, method=method, time_range=time_range, lang=current_language, category="videos") }}
+                        </div>
+                        <div class="videos-gallery">
+                            {{ put_results(videos_results) }}
+                        </div>
                     </div>
                     {% endif %}
     
