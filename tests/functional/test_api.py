@@ -26,4 +26,4 @@ def test_index(ctx, redisdb):
     response = res.json()
     assert len(response["results"]) > 5
     assert len(response["image_results"]) == 5
-    assert len(response['videos_results']) == 5
+    assert len(response['videos_results']) == 2
