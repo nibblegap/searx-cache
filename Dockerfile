@@ -18,9 +18,8 @@ RUN apk -U add \
     openssl \
     openssl-dev \
     ca-certificates \
- && pip install --upgrade pip \
- && pip install --no-cache -r requirements.txt \
- && pip install --no-cache coverage \
+ && pip install -r requirements.txt \
+ && pip install coverage \
  && apk del \
     build-base \
     libffi-dev \
