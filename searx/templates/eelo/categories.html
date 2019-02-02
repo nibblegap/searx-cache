@@ -3,7 +3,7 @@
 <label for="checkbox_{{ category|replace(' ', '_') }}">{{ _(category) }}</label>
 {%- endmacro -%}
 
-{% set main_categories = ["general", "images", "news"] %}
+{% set main_categories = ["general", "images", "videos", "news"] %}
 
 <div id="categories" {% if rtl %} class="rtl" {% endif %}>
 {% for category in categories %}
