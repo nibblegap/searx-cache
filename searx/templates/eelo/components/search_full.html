@@ -2,11 +2,11 @@
 
 {% call search_bar(q, true, rtl) %}
   <div id="search_params">
-    {% include 'eelo/categories.html' %}
+    {% include 'eelo/components/categories.html' %}
     <span id="time_and_lang">
       {% set flat_lang_selector = True %}
-      {% include 'eelo/languages.html' %}
-      {% include 'eelo/time-range.html' %}
+      {% include 'eelo/components/languages.html' %}
+      {% include 'eelo/components/time-range.html' %}
     </span>
   </div>
 {% endcall %}

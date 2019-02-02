@@ -722,16 +722,6 @@ def image_proxy():
     return Response(img, mimetype=resp.headers['content-type'], headers=headers)
 
 
-@app.route('/stats', methods=['GET'])
-def stats():
-    """Render engine statistics page."""
-    stats = get_engines_stats()
-    return render(
-        'stats.html',
-        stats=stats,
-    )
-
-
 @app.route('/robots.txt', methods=['GET'])
 def robots():
     return Response("""User-agent: *

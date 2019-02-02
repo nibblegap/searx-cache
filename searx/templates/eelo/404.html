@@ -1,9 +1,15 @@
 {% extends "eelo/base.html" %}
 {% block content %}
-<div class="text-center">
-    <h1>{{ _('Page not found') }}</h1>
-    {% autoescape false %}
-    <p>{{ _('Go to %(search_page)s.', search_page=unicode('<a href="{}">{}</a>').format(url_for('index'), _('search page'))) }}</p>
-    {% endautoescape %}
+<div class="container contents full">
+    <div>
+        <div id="page_not_found_404" class="content-small-centered">
+            <img src="{{ url_for('static', filename='img/not_found.svg') }}" alt="">
+            <h2>{{_("Page not found")}}</h2>
+    
+            {% autoescape false %}
+            <p>{{ _('Go to %(search_page)s.', search_page=unicode('<a href="{}">{}</a>').format(url_for('index'), _('search page'))) }}</p>
+            {% endautoescape %}
+        </div>
+    </div>
 </div>
 {% endblock %}

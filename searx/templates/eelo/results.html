@@ -8,7 +8,7 @@
 {% block content %}
 
     <div id="search_bar_area">
-        {% include 'eelo/search_full.html' %}
+        {% include 'eelo/components/search_full.html' %}
     </div>
 
     {% set use_gallery_layout = selected_category == 'images' or selected_category == 'videos'%}
@@ -125,7 +125,7 @@
         <div>
             {% if infoboxes %}
                 {% for infobox in infoboxes %}
-                    {% include 'eelo/infobox.html' %}
+                    {% include 'eelo/components/infobox.html' %}
                 {% endfor %}
             {% endif %}
 

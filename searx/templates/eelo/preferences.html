@@ -29,7 +29,7 @@
                 {% set language_label = _('Search language') %}
                 {% set language_info = _('What language do you prefer for search?') %}
                 {% call preferences_item(language_info, language_label, rtl) %}
-                    {% include 'eelo/languages.html' %}
+                    {% include 'eelo/components/languages.html' %}
                 {% endcall %}
 
                 {% set locale_label = _('Interface language') %}

@@ -69,12 +69,14 @@ a {
   max-width: 600px;
   margin: auto;
 }
-#no_results_msg {
+#no_results_msg,
+#page_not_found_404 {
   text-align: center;
   margin-top: 64px;
   margin-bottom: 64px;
 }
-#no_results_msg img {
+#no_results_msg img,
+#page_not_found_404 img {
   max-width: 70%;
 }
 .inline {

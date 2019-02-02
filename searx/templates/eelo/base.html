@@ -12,9 +12,6 @@
     {% block meta %}{% endblock %}
     <title>{% block title %}{% endblock %}{{ instance_name }}</title>
 
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" type="text/css" /> -->
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/logicodev.min.css') }}" type="text/css" /> -->
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.min.css') }}" type="text/css" /> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/eelo.min.css') }}" type="text/css" />
 
     {% for css in styles %}
@@ -53,8 +50,8 @@
 
 
 <body>
-    {% include 'eelo/icons.html' %}
-    {% include 'eelo/navbar.html' %}
+    {% include 'eelo/components/icons.html' %}
+    {% include 'eelo/components/navbar.html' %}
 
     {% set inline_search_form = true %}
     <main>
@@ -108,7 +105,7 @@
         {% endblock %}
         <p class="text-muted">
             <small>
-                e Foundation 2018,
+                e Foundation 2019,
                 {{ _('Powered by') }} <a href="https://asciimoo.github.io/searx/">searx</a><br/>
                 <span class="links">
                     <a href="https://e.foundation">{{ _('About') }}</a>
