@@ -1,17 +1,28 @@
-{% from 'eelo/macros.html' import icon %}
-{% if unresponsive_engines %}
-<div class="alert alert-danger fade in" role="alert">
-    <p><strong class="lead">{{ icon('remove-sign') }} {{ _('Error!') }}</strong> {{ _('Engines cannot retrieve results.') }}</p>
-    <p>
-        {% for engine_name, error_type in unresponsive_engines %}
-        {{ engine_name }} ({{ error_type }}){% if not loop.last %}, {% endif %}
-        {% endfor %}
-    </p>
-    <p><small>{{ _('Please, try again later or find another searx instance.') }}</small></p>
+<div id="no_results_msg">
+  <img src="{{ url_for('static', filename='img/empty_space.svg') }}" alt="">
+  <h2>{{_("Sorry, no results found!")}}</h2>
 </div>
-{% else %}
-<div class="alert alert-info fade in" role="alert">
-    <strong class="lead">{{ icon('info-sign') }} {{ _('Sorry!') }}</strong>
-    {{ _('we didn\'t find any results. Please use another query or search in more categories.') }}
+
+
+
+{% if unresponsive_engines %}
+<div id="unresponsive_engines" class="content-small-centered">
+    <section>
+        <p>{{ _('Some engines are not working as expected!') }}</p>
+        <pre>
+{% for engine_name, error_type in unresponsive_engines %}
+- {{ engine_name }} ({{ error_type }}){% if not loop.last %}<br/>{% endif %}
+{% endfor %}
+        </pre>
+    </section>
+
+    <section>
+        <p>{{ _('Please, try the following.') }}</p>
+        <ul>
+            <li>{{_("Search again later")}}</li>
+            <li>{{_("Try another query")}}</li>
+            <li>{{_("Report this problem")}}</li>
+        </ul>
+    </section>
 </div>
 {% endif %}

@@ -12,7 +12,7 @@
     </div>
 
     {% set use_gallery_layout = selected_category == 'images' or selected_category == 'videos'%}
-    <div class="container contents {% if use_gallery_layout %} full {% endif %}">
+    <div class="container contents {% if use_gallery_layout or (not results and not answers) %} full {% endif %}">
         <div>
             {% if corrections %}
             <div class="result" id="corrections">

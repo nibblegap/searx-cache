@@ -63,9 +63,19 @@ a {
 #search_bar_area {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
-#search_bar_area #search_form {
+#search_bar_area #search_form,
+#no_results_msg,
+.content-small-centered {
   max-width: 600px;
   margin: auto;
+}
+#no_results_msg {
+  text-align: center;
+  margin-top: 64px;
+  margin-bottom: 64px;
+}
+#no_results_msg img {
+  max-width: 70%;
 }
 .inline {
   display: flex;
@@ -305,6 +315,13 @@ ul > li {
 fieldset {
   border: none;
   padding: 0px;
+}
+pre {
+  font-family: 'Courier New', Courier, monospace;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  white-space: pre-wrap;
 }
 footer {
   position: absolute;

@@ -554,6 +554,14 @@ def about():
     )
 
 
+@app.route('/privacy', methods=['GET'])
+def privacy():
+    """Render privacy page"""
+    return render(
+        'privacy.html',
+    )
+
+
 @app.route('/autocompleter', methods=['GET', 'POST'])
 def autocompleter():
     """Return autocompleter results"""

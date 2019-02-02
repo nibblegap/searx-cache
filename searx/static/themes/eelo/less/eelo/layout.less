@@ -43,10 +43,17 @@
 
 #search_bar_area {
   border-bottom: 1px solid rgba(0, 0, 0, .1);
-
-  #search_form {
-    max-width: @size-content;
-    margin: auto;
+}
+#search_bar_area #search_form, #no_results_msg, .content-small-centered {
+  max-width: @size-content;
+  margin: auto;
+}
+#no_results_msg {
+  text-align: center;
+  margin-top: @spacing_xx-huge;
+  margin-bottom: @spacing_xx-huge;
+  img {
+    max-width: 70%;
   }
 }
 
