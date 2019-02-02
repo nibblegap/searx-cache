@@ -55,24 +55,6 @@
 
     {% set inline_search_form = true %}
     <main>
-        
-    {# Ignore errors for now, they might not be very useful #}
-    {% if errors and False %}
-        <div class="error danger" role="alert">
-            <div class="header">
-                <strong class="lead">{{ _('Error!') }}</strong>
-
-                <button class="close" data-dismiss="alert" type="button">
-                    {{ icon("close") }}
-                </button>
-            </div>
-            <ul>
-                {% for message in errors %}
-                <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
 
     {% block site_alert_error %}
     {% endblock %}

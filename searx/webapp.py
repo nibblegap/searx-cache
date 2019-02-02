@@ -459,7 +459,7 @@ def index_error(exn, output):
         return jsonify({"error": f"{user_error}: {exn}"})
 
     request.errors.append(user_error)
-    return render('index.html')
+    return render('index.html', error_details=exn)
 
 
 @app.route('/search', methods=['GET', 'POST'])

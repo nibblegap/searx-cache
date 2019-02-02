@@ -123,6 +123,11 @@
         </div>
 
         <div>
+            {% if errors %}
+            {% from 'eelo/macros.html' import errors_panel %}
+            {{ errors_panel(errors) }}
+            {% endif %}
+            
             {% if infoboxes %}
                 {% for infobox in infoboxes %}
                     {% include 'eelo/components/infobox.html' %}

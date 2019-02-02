@@ -79,6 +79,18 @@ a {
 #page_not_found_404 img {
   max-width: 70%;
 }
+#errors {
+  border: 2px solid #e06572;
+  border-radius: 8px;
+  padding: 8px;
+}
+#errors .title {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+#errors pre {
+  background-color: rgba(224, 101, 114, 0.1);
+}
 .inline {
   display: flex;
   flex-direction: row;
@@ -323,7 +335,7 @@ pre {
   background: rgba(0, 0, 0, 0.1);
   padding: 8px 16px;
   border-radius: 8px;
-  white-space: pre-wrap;
+  white-space: pre-line;
 }
 footer {
   position: absolute;

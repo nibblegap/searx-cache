@@ -130,3 +130,20 @@
 {% elif filesize < 1024*1024*1024*1024 %}{{ '{0:0.2f}'.format(filesize/1024/1024/1024) }} {{ _('GiB') }}
 {% else %}{{ '{0:0.2f}'.format(filesize/1024/1024/1024/1024) }} {{ _('TiB') }}{% endif %}
 {%- endmacro %}
+
+
+{% macro errors_panel(errors, error_detail) -%}
+<section id="errors" class="danger">
+    <h4 class="title">{{_("Error")}}</h4>
+    <ul>
+        {% for message in errors %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% if error_detail %}
+    <pre>
+{{error_detail}}
+    </pre>
+    {% endif %}
+</section>
+{%- endmacro %}

@@ -191,6 +191,11 @@
 
 
     <div id="info">
+        {% if errors %}
+        {% from 'eelo/macros.html' import errors_panel %}
+        {{ errors_panel(errors) }}
+        {% endif %}
+
         <div id="notice">
             <p>{{ _('These settings are stored in your cookies, this allows us not to store this data about you.') }}
             <br/>

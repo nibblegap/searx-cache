@@ -56,6 +56,19 @@
     max-width: 70%;
   }
 }
+#errors {
+  .widget-border(@color_danger);
+  border-radius: @corner-radius;
+  padding: @spacing_medium;
+
+  .title {
+    margin-top: 0;
+    margin-bottom: @spacing_medium;
+  }
+  pre {
+    background-color: fade(@color_danger, 10%);
+  }
+}
 
 
 .inline {
