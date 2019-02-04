@@ -96,11 +96,6 @@ class ViewsTestCase(TestCase):
             result.data
         )
 
-    def test_stats(self):
-        result = self.app.get('/stats')
-        self.assertEqual(result.status_code, 200)
-        self.assertIn(b'<h2>Engine stats</h2>', result.data)
-
     def test_robots_txt(self):
         result = self.app.get('/robots.txt')
         self.assertEqual(result.status_code, 200)
