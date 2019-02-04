@@ -76,10 +76,6 @@ engines:
     categories : science
     timeout : 4.0
 
-  - name : asksteem
-    engine : asksteem
-    shortcut : as
-
   - name : base
     engine : base
     shortcut : bs
@@ -623,6 +619,11 @@ engines:
 #    title_xpath   : //*[@class="def-header"]
 #    content_xpath : //*[@class="meaning"]
 #    shortcut : ud
+
+  - name : unsplash
+    engine : unsplash
+    disabled: True
+    shortcut : us
 
   - name : yahoo
     engine : yahoo

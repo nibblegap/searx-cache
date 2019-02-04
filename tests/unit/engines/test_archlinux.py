@@ -4,7 +4,7 @@ from searx.engines import archlinux
 from unittest import TestCase
 
 domains = {
-    'en': 'https://wiki.archlinux.org',
+    'all': 'https://wiki.archlinux.org',
     'de': 'https://wiki.archlinux.de',
     'fr': 'https://wiki.archlinux.fr',
     'ja': 'https://wiki.archlinuxjp.org',

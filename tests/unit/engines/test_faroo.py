@@ -20,6 +20,10 @@ class TestFarooEngine(TestCase):
         self.assertIn('en', params['url'])
         self.assertIn('web', params['url'])
 
+        dicto['language'] = 'all'
+        params = faroo.request(query, dicto)
+        self.assertIn('en', params['url'])
+
         dicto['language'] = 'de-DE'
         params = faroo.request(query, dicto)
         self.assertIn('de', params['url'])
