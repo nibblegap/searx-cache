@@ -7,7 +7,7 @@ services:
       - run
       - --source=searx
     command:
-      - searx/webapp.py
+      - /usr/local/bin/searx-run
     volumes:
       - coverage:/coverage
     environment:

@@ -16,11 +16,9 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 (C) 2013- by Adam Tauber, <asciimoo@gmail.com>
 '''
 
-# version of searx
-VERSION_MAJOR = 0
-VERSION_MINOR = 15
-VERSION_BUILD = 0
+from pkg_resources import get_distribution, DistributionNotFound
 
-VERSION_STRING = "{0}.{1}.{2}".format(VERSION_MAJOR,
-                                      VERSION_MINOR,
-                                      VERSION_BUILD)
+try:
+    VERSION_STRING = get_distribution("searx").version
+except DistributionNotFound:
+    VERSION_STRING = "0.0.0"

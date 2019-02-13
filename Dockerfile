@@ -1,37 +1,34 @@
+FROM python:3.7-alpine as builder
+
+RUN apk add \
+ git \
+ build-base \
+ libxml2-dev \
+ libxslt-dev \
+ libffi-dev \
+ openssl-dev
+
+# Only to use the docker cache and optimize the build time
+WORKDIR /src
+COPY requirements.txt /src/requirements.txt
+RUN pip3 install --prefix /install -r requirements.txt
+
+COPY . /src/
+RUN PYTHONPATH=/install/lib/python3.7/site-packages/ python3 setup.py install --prefix /install
+
+
 FROM python:3.7-alpine
 LABEL maintainer="searx <https://github.com/asciimoo/searx>"
 LABEL description="A privacy-respecting, hackable metasearch engine."
 
+RUN apk add \
+ ca-certificates \
+ libxslt \
+ openssl \
+&& pip install coverage
+
+COPY --from=builder /install/ /usr/local/
+
 EXPOSE 8888
-WORKDIR /usr/local/searx
-CMD ["python", "searx/webapp.py"]
-
-COPY requirements.txt ./requirements.txt
-
-RUN apk -U add \
-    build-base \
-    libxml2 \
-    libxml2-dev \
-    libxslt \
-    libxslt-dev \
-    libffi-dev \
-    openssl \
-    openssl-dev \
-    ca-certificates \
- && pip install -r requirements.txt \
- && pip install coverage \
- && apk del \
-    build-base \
-    libffi-dev \
-    openssl-dev \
-    libxslt-dev \
-    libxml2-dev \
-    openssl-dev \
-    ca-certificates \
- && rm -f /var/cache/apk/*
-
-COPY searx /usr/local/searx/searx
-
-RUN sed -i "s/127.0.0.1/0.0.0.0/g" searx/settings.yml
-
 STOPSIGNAL SIGINT
+CMD ["searx-run"]
