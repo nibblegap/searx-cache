@@ -130,9 +130,10 @@ def duckduckgo(query, lang):
     # duckduckgo autocompleter
     url = 'https://ac.duckduckgo.com/ac/?{0}&type=list'
 
-    resp = loads(get(url.format(urlencode(dict(q=query)))).text)
-    if len(resp) > 1:
-        return resp[1]
+    resp = get(url.format(urlencode(dict(q=query))))
+    if resp.status_code == 200 and resp.text:
+        res = loads(resp.text)
+        return res[1] if len(res) == 2 else []
     return []
 
 
