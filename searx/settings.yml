@@ -283,10 +283,12 @@ engines:
   - name : google
     engine : google
     shortcut : go
+    weight : 5
 
   - name : google images
     engine : google_images
     shortcut : goi
+    disabled: True
 
   - name : google news
     engine : google_news
