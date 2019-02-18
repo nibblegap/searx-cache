@@ -4,27 +4,15 @@
 from setuptools import setup
 from setuptools import find_packages
 
-import os
-import sys
 
-# required to load VERSION_STRING constant
-sys.path.insert(0, './searx')
-from version import VERSION_STRING
-
-
-def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
-
-
-long_description = read('README.rst')
-requirements = map(str.strip, open('requirements.txt').readlines())
-dev_requirements = map(str.strip, open('requirements-dev.txt').readlines())
+requirements = open('requirements.txt').read().splitlines()
+dev_requirements = open('requirements-dev.txt').read().splitlines()
 
 setup(
     name='searx',
-    version=VERSION_STRING,
+    use_scm_version=True,
     description="A privacy-respecting, hackable metasearch engine",
-    long_description=long_description,
+    long_description=open('README.rst').read(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
@@ -41,6 +29,7 @@ setup(
     packages=find_packages(exclude=["tests*"]),
     zip_safe=False,
     install_requires=requirements,
+    setup_requires=["setuptools_scm"],
     extras_require={
         'test': dev_requirements
     },
@@ -52,9 +41,6 @@ setup(
     package_data={
         'searx': [
             'settings.yml',
-            '../README.rst',
-            '../requirements.txt',
-            '../requirements-dev.txt',
             'data/*',
             'plugins/*/*',
             'static/*.*',
@@ -64,11 +50,7 @@ setup(
             'static/*/*/*/*/*.*',
             'templates/*/*.*',
             'templates/*/*/*.*',
-            'tests/*',
-            'tests/*/*',
-            'tests/*/*/*',
             'translations/*/*/*'
         ],
     },
-
 )

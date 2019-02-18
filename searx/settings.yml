@@ -11,7 +11,7 @@ search:
 
 server:
     port : 8888
-    bind_address : "127.0.0.1" # address to listen on
+    bind_address : "0.0.0.0" # address to listen on
     secret_key : "ultrasecretkey" # change this!
     base_url : False # Set custom base_url. Possible values: False or "https://your.custom.host/location/"
     image_proxy : False # Proxying image results through searx

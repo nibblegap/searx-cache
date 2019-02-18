@@ -13,7 +13,9 @@ class SpotContext(Context):
         return f"http://{addr}:{port}"
 
     def wait_for_running_state(self):
-        Wait(ignored_exns=(requests.ConnectionError,))(lambda: requests.get(self.url))
+        Wait(ignored_exns=(requests.ConnectionError,), timeout=60)(
+            lambda: requests.get(self.url)
+        )
 
 
 @pytest.fixture(scope="session")

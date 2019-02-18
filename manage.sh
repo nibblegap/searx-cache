@@ -59,7 +59,7 @@ functional_tests() {
 }
 
 coverage() {
-    sed -i 's!/usr/local/searx!'$BASE_DIR'!g' "$COV_DIR"/func
+    sed -i 's!/usr/local/lib/python3.7/site-packages/searx[^/]*/searx!'$SEARX_DIR'!g' "$COV_DIR"/func
     coverage3 combine coverage/func coverage/unit
     coverage3 report
 }
