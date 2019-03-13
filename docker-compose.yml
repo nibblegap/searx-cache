@@ -8,3 +8,4 @@ services:
     build: .
     environment:
       SEARX_REDIS_HOST: redis
+      VIRTUAL_HOST: ${SPOT_HOSTNAME}

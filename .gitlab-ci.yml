@@ -4,6 +4,7 @@ stages:
  - build
  - test
  - report
+ - deploy
 
 front-end:
   stage: build
@@ -59,3 +60,28 @@ coverage:
     - unit-test
     - functional-test
   coverage: '/TOTAL.*\s+(\d+%)$/'
+
+deploy-test:
+  image: docker:stable
+  stage: deploy
+  only:
+    - branches
+  when: manual
+  variables:
+    PUBLISH_USER: root
+    PUBLISH_URL: spot.test.ecloud.global
+    GIT_STRATEGY: none
+    SPOT_HOSTNAME: spot.test.ecloud.global
+  dependencies: []
+  before_script:
+    - 'which ssh-agent || ( apk --update add openssh-client )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_TEST" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL 'if [ ! "$(docker ps -q -f name=proxy)" ] ; then docker run -d -p 80:80 --net my-network my-spot_default -v /var/run/docker.sock:/tmp/docker.sock:ro --restart unless-stopped --name proxy jwilder/nginx-proxy ; elif [ ! "$(docker ps -q -f name=proxy -f status=exited)" ] ; then docker start proxy ; fi'
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "cd /root/my-spot/ && git fetch && git checkout $CI_COMMIT_SHA"
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "SPOT_HOSTNAME=$SPOT_HOSTNAME && export SPOT_HOSTNAME && cd /root/my-spot/ && docker-compose pull && docker-compose up -d --build --force-recreate"
