@@ -66,18 +66,10 @@ the environnement variable SEARX_DEBUG is 0 or false
 (whatever the value in settings.yml)
 or general.debug=False in settings.yml
 '''
-searx_debug_env = environ.get('SEARX_DEBUG', '').lower()
-if searx_debug_env == 'true' or searx_debug_env == '1':
-    searx_debug = True
-elif searx_debug_env == 'false' or searx_debug_env == '0':
-    searx_debug = False
-else:
-    searx_debug = settings.get('general', {}).get('debug')
-
-if searx_debug:
-    logging.basicConfig(level=logging.DEBUG)
-else:
-    logging.basicConfig(level=logging.WARNING)
+searx_debug = True if settings.get('general', {}).get('debug') else False
+searx_loglevel = 'DEBUG' if searx_debug else 'WARNING'
+searx_loglevel = environ.get('SEARX_LOGGER', searx_loglevel).upper()
+logging.basicConfig(level=getattr(logging, searx_loglevel))
 
 logger = logging.getLogger('searx')
 logger.debug('read configuration from %s', settings_path)

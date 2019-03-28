@@ -9,3 +9,4 @@ services:
     environment:
       SEARX_REDIS_HOST: redis
       VIRTUAL_HOST: ${SPOT_HOSTNAME}
+      SEARX_LOGGER: INFO
