@@ -156,12 +156,7 @@ def get_locale():
     if request.preferences.get_value('locale') != '':
         locale = request.preferences.get_value('locale')
 
-    if 'locale' in request.args \
-            and request.args['locale'] in settings['locales']:
-        locale = request.args['locale']
-
-    if 'locale' in request.form \
-            and request.form['locale'] in settings['locales']:
+    if 'locale' in request.form and request.form['locale'] in settings['locales']:
         locale = request.form['locale']
 
     if locale == 'zh_TW':
