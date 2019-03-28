@@ -1,4 +1,4 @@
-{% from 'eelo/macros.html' import result_header, result_engine, result_sub_header%}
+{% from 'eelo/macros.html' import result_header, result_engine, result_sub_header, format_filesize%}
 
 <div class="result-content">
     <a class="thumbnail" href="{{ result.url }}" {% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %}>
