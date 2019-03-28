@@ -485,7 +485,7 @@ def index():
     output = request.form.get("output", "html")
 
     # check if there is query
-    if request.form.get('q') is None:
+    if not request.form.get('q'):
         if output == 'json':
             return jsonify({}), 204
         return render('index.html')
