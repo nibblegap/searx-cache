@@ -1,12 +1,20 @@
 image: $CI_REGISTRY_IMAGE/env:latest
 
 stages:
+ - check
  - build
  - test
  - report
  - deploy
 
-front-end:
+python:
+  stage: check
+  before_script:
+    - ./manage.sh update_dev_packages
+  script:
+    - ./manage.sh pep8_check
+
+build:web:
   stage: build
   before_script:
     - ./manage.sh npm_packages
@@ -16,14 +24,18 @@ front-end:
     - ./manage.sh styles
     - ./manage.sh grunt_build
 
-coding-rules:
+build:docker:
   stage: build
   before_script:
-    - ./manage.sh update_dev_packages
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - ./manage.sh pep8_check
+    - docker build -t $CI_REGISTRY_IMAGE:${CI_COMMIT_TAG:-latest} .
+    - docker push $CI_REGISTRY_IMAGE:${CI_COMMIT_TAG:-latest}
+  only:
+    - master
+    - tags
 
-unit-test:
+test:unit:
   stage: test
   before_script:
     - ./manage.sh update_dev_packages
@@ -34,7 +46,7 @@ unit-test:
       - coverage
     expire_in: 1 hour
 
-functional-test:
+test:functional:
   stage: test
   image: docker:stable
   services:
@@ -57,11 +69,11 @@ coverage:
   script:
     - ./manage.sh coverage
   dependencies:
-    - unit-test
-    - functional-test
+    - test:unit
+    - test:functional
   coverage: '/TOTAL.*\s+(\d+%)$/'
 
-deploy-test:
+deploy:test:
   image: docker:stable
   stage: deploy
   only:
