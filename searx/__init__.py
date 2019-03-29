@@ -15,18 +15,11 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 (C) 2013- by Adam Tauber, <asciimoo@gmail.com>
 '''
 
-import certifi
 import logging
 from os import environ
 from os.path import realpath, dirname, join, abspath, isfile
 from io import open
-from ssl import OPENSSL_VERSION_INFO, OPENSSL_VERSION
-try:
-    from yaml import load
-except ImportError:
-    from sys import exit, stderr
-    stderr.write('[E] install pyyaml\n')
-    exit(2)
+from yaml import load
 
 searx_dir = abspath(dirname(__file__))
 engine_dir = dirname(realpath(__file__))
@@ -73,12 +66,6 @@ logging.basicConfig(level=getattr(logging, searx_loglevel))
 
 logger = logging.getLogger('searx')
 logger.debug('read configuration from %s', settings_path)
-# Workaround for openssl versions <1.0.2
-# https://github.com/certifi/python-certifi/issues/26
-if OPENSSL_VERSION_INFO[0:3] < (1, 0, 2):
-    if hasattr(certifi, 'old_where'):
-        environ['REQUESTS_CA_BUNDLE'] = certifi.old_where()
-    logger.warning('You are using an old openssl version({0}), please upgrade above 1.0.2!'.format(OPENSSL_VERSION))
 
 logger.info('Initialisation done')
 

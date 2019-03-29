@@ -37,16 +37,11 @@ from searx import logger
 
 logger = logger.getChild('webapp')
 
-try:
-    from pygments import highlight
-    from pygments.lexers import get_lexer_by_name
-    from pygments.util import ClassNotFound
-    from pygments.formatters import HtmlFormatter
-except ImportError:
-    logger.critical("cannot import dependency: pygments")
-    from sys import exit
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.util import ClassNotFound
+from pygments.formatters import HtmlFormatter
 
-    exit(1)
 from html import escape
 from datetime import datetime, timedelta
 from werkzeug.contrib.fixers import ProxyFix
@@ -79,14 +74,6 @@ from searx.answerers import answerers
 from searx.url_utils import urlencode, urlparse, urljoin
 from searx.utils import new_hmac
 import threading
-
-# check if the pyopenssl package is installed.
-# It is needed for SSL connection without trouble, see #298
-try:
-    import OpenSSL.SSL  # NOQA
-except ImportError:
-    logger.critical("The pyopenssl package has to be installed.\n"
-                    "Some HTTPS connections will fail")
 
 from io import StringIO
 

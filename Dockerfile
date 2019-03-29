@@ -4,9 +4,7 @@ RUN apk add \
  git \
  build-base \
  libxml2-dev \
- libxslt-dev \
- libffi-dev \
- openssl-dev
+ libxslt-dev
 
 # Only to use the docker cache and optimize the build time
 WORKDIR /src
@@ -24,7 +22,6 @@ LABEL description="A privacy-respecting, hackable metasearch engine."
 RUN apk add \
  ca-certificates \
  libxslt \
- openssl \
 && pip install coverage
 
 COPY --from=builder /install/ /usr/local/
