@@ -36,7 +36,7 @@ from pygments.formatters import HtmlFormatter
 
 from html import escape
 from datetime import datetime, timedelta
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import (
     Flask, request, render_template, url_for, Response, make_response,
     redirect, send_from_directory

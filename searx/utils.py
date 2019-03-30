@@ -3,12 +3,12 @@ import hashlib
 import hmac
 import os
 import re
+from importlib.machinery import SourceFileLoader
 
 from babel.core import get_global
 from babel.dates import format_date
 from babel import UnknownLocaleError
 from codecs import getincrementalencoder
-from imp import load_source
 from numbers import Number
 from os.path import splitext, join
 from pathlib import Path
@@ -30,10 +30,8 @@ logger = logger.getChild('utils')
 blocked_tags = ('script',
                 'style')
 
-useragents = json.load(open(
-    Path(__file__).parent / "data" / "useragents.json",
-    encoding='utf-8')
-)
+with open(Path(__file__).parent / "data" / "useragents.json", encoding='utf-8') as fd:
+    useragents = json.load(fd)
 
 
 def searx_useragent():
@@ -357,7 +355,7 @@ def load_module(filename, module_dir):
     if modname in sys.modules:
         del sys.modules[modname]
     filepath = join(module_dir, filename)
-    module = load_source(modname, filepath)
+    module = SourceFileLoader(modname, filepath).load_module()
     module.name = modname
     return module
 

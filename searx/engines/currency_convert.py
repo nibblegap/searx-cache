@@ -1,10 +1,9 @@
 import json
 import re
-import os
 import sys
 import unicodedata
 
-from io import open
+from pathlib import Path
 from datetime import datetime
 
 
@@ -88,10 +87,10 @@ def response(resp):
 def load():
     global db
 
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    json_data = open(current_dir + "/../data/currencies.json", 'r', encoding='utf-8').read()
-
-    db = json.loads(json_data)
+    with open(
+        Path(__file__).parent.parent / "data" / "currencies.json", encoding='utf-8'
+    ) as fd:
+        db = json.load(fd)
 
 
 load()

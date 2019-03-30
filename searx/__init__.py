@@ -18,8 +18,8 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 import logging
 from os import environ
 from os.path import realpath, dirname, join, abspath, isfile
-from io import open
-from yaml import load
+
+import yaml
 
 searx_dir = abspath(dirname(__file__))
 engine_dir = dirname(realpath(__file__))
@@ -46,7 +46,11 @@ if not settings_path:
 
 # load settings
 with open(settings_path, 'r', encoding='utf-8') as settings_yaml:
-    settings = load(settings_yaml)
+    # XXX: docker-compose does not support yet yaml >= 5
+    if int(yaml.__version__.split('.')[0]) >= 5:
+        settings = yaml.load(settings_yaml, Loader=yaml.FullLoader)
+    else:
+        settings = yaml.load(settings_yaml)
 
 '''
 enable debug if

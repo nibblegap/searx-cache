@@ -18,12 +18,11 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 
 import sys
 import threading
-from os.path import realpath, dirname
-from io import open
+import json
+from pathlib import Path
 from babel.localedata import locale_identifiers
 from flask_babel import gettext
 from operator import itemgetter
-from json import loads
 from requests import get
 from searx import settings
 from searx import logger
@@ -32,13 +31,14 @@ from searx.utils import load_module, match_language
 
 logger = logger.getChild('engines')
 
-engine_dir = dirname(realpath(__file__))
+engine_dir = Path(__file__).parent
 
 engines = {}
 
 categories = {'general': []}
 
-languages = loads(open(engine_dir + '/../data/engines_languages.json', 'r', encoding='utf-8').read())
+with open(engine_dir.parent / "data" / "engines_languages.json", encoding='utf-8') as fd:
+    languages = json.load(fd)
 babel_langs = [lang_parts[0] + '-' + lang_parts[-1] if len(lang_parts) > 1 else lang_parts[0]
                for lang_parts in (lang_code.split('_') for lang_code in locale_identifiers())]
 
