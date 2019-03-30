@@ -22,7 +22,6 @@ from searx.engines import (
     categories, engines, engine_shortcuts
 )
 import re
-import sys
 
 
 VALID_LANGUAGE_CODE = re.compile(r'^[a-z]{2,3}(-[a-zA-Z]{2})?$')
@@ -78,20 +77,21 @@ class RawTextQuery(object):
 
                     # if correct language-code is found
                     # set it as new search-language
-                    if (lang == lang_id
-                        or lang == lang_name
-                        or lang == english_name
-                        or lang.replace('-', ' ') == country)\
-                       and lang not in self.languages:
-                            parse_next = True
-                            lang_parts = lang_id.split('-')
-                            if len(lang_parts) == 2:
-                                self.languages.append(lang_parts[0] + '-' + lang_parts[1].upper())
-                            else:
-                                self.languages.append(lang_id)
-                            # to ensure best match (first match is not necessarily the best one)
-                            if lang == lang_id:
-                                break
+                    if (
+                        lang in [lang_id, lang_name, english_name]
+                        or lang.replace("-", " ") == country  # noqa
+                    ) and lang not in self.languages:
+                        parse_next = True
+                        lang_parts = lang_id.split("-")
+                        if len(lang_parts) == 2:
+                            self.languages.append(
+                                lang_parts[0] + "-" + lang_parts[1].upper()
+                            )
+                        else:
+                            self.languages.append(lang_id)
+                        # to ensure best match (first match is not necessarily the best one)
+                        if lang == lang_id:
+                            break
 
                 # user may set a valid, yet not selectable language
                 if VALID_LANGUAGE_CODE.match(lang):

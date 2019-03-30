@@ -17,17 +17,10 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 (C) 2013- by Adam Tauber, <asciimoo@gmail.com>
 '''
 
-if __name__ == '__main__':
-    from sys import path
-    from os.path import realpath, dirname
-
-    path.append(realpath(dirname(realpath(__file__)) + '/../'))
-
 import hashlib
 import hmac
 import json
 import os
-import sys
 import time
 import copy
 
@@ -35,7 +28,6 @@ import requests
 
 from searx import logger
 
-logger = logger.getChild('webapp')
 
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
@@ -75,10 +67,10 @@ from searx.url_utils import urlencode, urlparse, urljoin
 from searx.utils import new_hmac
 import threading
 
-from io import StringIO
-
 # serve pages with HTTP/1.1
 from werkzeug.serving import WSGIRequestHandler
+
+logger = logger.getChild('webapp')
 
 WSGIRequestHandler.protocol_version = "HTTP/{}".format(settings['server'].get('http_protocol_version', '1.0'))
 
@@ -306,10 +298,11 @@ def render(template_name, override_theme=None, **kwargs):
 
     if 'categories' not in kwargs:
         kwargs['categories'] = ['general']
-        kwargs['categories'].extend(x for x in
-                                    sorted(categories.keys())
-                                    if x != 'general'
-                                    and x in enabled_categories)
+        kwargs["categories"].extend(
+            x
+            for x in sorted(categories.keys())
+            if x != "general" and x in enabled_categories
+        )
 
     if 'all_categories' not in kwargs:
         kwargs['all_categories'] = ['general']
@@ -415,7 +408,7 @@ def pre_request():
     else:
         try:
             preferences.parse_dict(request.form)
-        except Exception as e:
+        except Exception:
             logger.exception('invalid settings')
             request.errors.append(gettext('Invalid settings'))
 
@@ -431,8 +424,9 @@ def pre_request():
     allowed_plugins = preferences.plugins.get_enabled()
     disabled_plugins = preferences.plugins.get_disabled()
     for plugin in plugins:
-        if ((plugin.default_on and plugin.id not in disabled_plugins)
-                or plugin.id in allowed_plugins):
+        if (
+            plugin.default_on and plugin.id not in disabled_plugins
+        ) or plugin.id in allowed_plugins:
             request.user_plugins.append(plugin)
 
 
@@ -631,7 +625,6 @@ def preferences():
 
     # render preferences
     image_proxy = request.preferences.get_value('image_proxy')
-    lang = request.preferences.get_value('language')
     disabled_engines = request.preferences.engines.get_disabled()
     allowed_plugins = request.preferences.plugins.get_enabled()
 
@@ -677,11 +670,13 @@ def preferences():
 
 
 def _is_selected_language_supported(engine, preferences):
-    language = preferences.get_value('language')
-    return (language == 'all'
-            or match_language(language,
-                              getattr(engine, 'supported_languages', []),
-                              getattr(engine, 'language_aliases', {}), None))
+    language = preferences.get_value("language")
+    return language == "all" or match_language(
+        language,
+        getattr(engine, "supported_languages", []),
+        getattr(engine, "language_aliases", {}),
+        None,
+    )
 
 
 @app.route('/image_proxy', methods=['GET'])

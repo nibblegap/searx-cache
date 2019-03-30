@@ -374,7 +374,7 @@ def add_url(urls, result, property_id=None, default_label=None, url_prefix=None,
 
     # wiki links don't have property in wikidata page
     if link_type and 'wiki' in link_type:
-            links.append(get_wikilink(result, link_type))
+        links.append(get_wikilink(result, link_type))
     else:
         dom_element = result.xpath(property_xpath.replace('{propertyid}', property_id))
         if dom_element:

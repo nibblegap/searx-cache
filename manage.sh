@@ -38,6 +38,7 @@ pep8_check() {
     #  W503 line break before binary operator
     #  E722 do not use bare 'except'
     pycodestyle --exclude=searx/static --max-line-length=120 --ignore "E402,W503,E722" "$SEARX_DIR" "$BASE_DIR/tests"
+    flake8 --ignore=E722 $SEARX_DIR/*.py
 }
 
 unit_tests() {

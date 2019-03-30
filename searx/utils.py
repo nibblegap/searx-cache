@@ -11,7 +11,7 @@ from codecs import getincrementalencoder
 from imp import load_source
 from numbers import Number
 from os.path import splitext, join
-from io import open
+from pathlib import Path
 from random import choice
 import sys
 import json
@@ -19,7 +19,6 @@ import json
 from searx import settings
 from searx.version import VERSION_STRING
 from searx.languages import language_codes
-from searx import settings
 from searx import logger
 
 from io import StringIO
@@ -31,8 +30,10 @@ logger = logger.getChild('utils')
 blocked_tags = ('script',
                 'style')
 
-useragents = json.loads(open(os.path.dirname(os.path.realpath(__file__))
-                             + "/data/useragents.json", 'r', encoding='utf-8').read())
+useragents = json.load(open(
+    Path(__file__).parent / "data" / "useragents.json",
+    encoding='utf-8')
+)
 
 
 def searx_useragent():
@@ -161,7 +162,7 @@ def get_resources_directory(searx_directory, subdirectory, resources_directory):
     if not resources_directory:
         resources_directory = os.path.join(searx_directory, subdirectory)
     if not os.path.isdir(resources_directory):
-        raise Exception(directory + " is not a directory")
+        raise Exception(resources_directory + " is not a directory")
     return resources_directory
 
 
