@@ -850,7 +850,7 @@ def update_results():
         queries = get_twenty_queries(x, host)
         for query in queries:
             result_container = search.search(query)
-            searchData = search_database.get_search_data(query, result_container)
+            searchData = search.create_search_data(query, result_container)
             search_database.update(searchData, host)
             if running.is_set():
                 return

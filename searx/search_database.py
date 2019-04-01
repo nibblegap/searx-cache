@@ -93,24 +93,6 @@ def jds(coded):
     return jd(coded)
 
 
-def get_search_data(q, r):
-    results_number = r.results_number()
-    if results_number < r.results_length():
-        results_number = 0
-    results = r.get_ordered_results()
-    for result in results:
-        if 'publishedDate' in result:
-            try:
-                result['pubdate'] = result['publishedDate'].strftime('%Y-%m-%d %H:%M:%S')
-            finally:
-                result['publishedDate'] = None
-    if q.time_range is None:
-        q.time_range = ""
-
-    return SearchData(q, results, r.paging, results_number, r.answers, r.corrections,
-                      r.infoboxes, r.suggestions, r.unresponsive_engines)
-
-
 def update(d, host):
     conn = redis.StrictRedis(host)
     key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(

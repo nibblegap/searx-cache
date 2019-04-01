@@ -32,7 +32,7 @@ from searx.engines import (
 )
 from searx.exceptions import SearxParameterException
 from searx.query import RawTextQuery, SearchQuery, VALID_LANGUAGE_CODE
-from searx.results import ResultContainer
+from searx.results import ResultContainer, SearchData
 from searx.utils import gen_useragent
 from searx.plugins import plugins
 
@@ -193,7 +193,7 @@ def search(request, host):
     searchData = search_database.read(search_query, host)
     if searchData is None:
         result_container = search.search(search_query)
-        searchData = search_database.get_search_data(search_query, result_container)
+        searchData = search.create_search_data(search_query, result_container)
         threading.Thread(
             target=search_database.save,
             args=(searchData, host),
@@ -202,6 +202,7 @@ def search(request, host):
 
     search.search_with_plugins(request, searchData)
     return searchData
+
 
 class Search(object):
     """Search information container"""
@@ -374,3 +375,20 @@ class Search(object):
 
         return SearchQuery(query, query_engines, query_categories, query_lang, query_safesearch, query_pageno,
                            query_time_range)
+
+    def create_search_data(self, q, r):
+        results_number = r.results_number()
+        if results_number < r.results_length():
+            results_number = 0
+        results = r.get_ordered_results()
+        for result in results:
+            if 'publishedDate' in result:
+                try:
+                    result['pubdate'] = result['publishedDate'].strftime('%Y-%m-%d %H:%M:%S')
+                finally:
+                    result['publishedDate'] = None
+        if q.time_range is None:
+            q.time_range = ""
+
+        return SearchData(q, results, r.paging, results_number, r.answers, r.corrections,
+                          r.infoboxes, r.suggestions, r.unresponsive_engines)
