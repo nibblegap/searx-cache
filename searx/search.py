@@ -185,95 +185,14 @@ def default_request_params():
     }
 
 
-def get_search_query_from_webapp(preferences, form):
-    # no text for the query ?
-    if not form.get('q'):
-        raise SearxParameterException('q', '')
-
-    # set blocked engines
-    disabled_engines = preferences.engines.get_disabled()
-
-    # parse query, if tags are set, which change
-    # the serch engine or search-language
-    raw_text_query = RawTextQuery(form['q'], disabled_engines)
-    raw_text_query.parse_query()
-
-    # set query
-    query = raw_text_query.getSearchQuery()
-
-    # get and check page number
-    pageno_param = form.get('pageno', '1')
-    if not pageno_param.isdigit() or int(pageno_param) < 1:
-        raise SearxParameterException('pageno', pageno_param)
-    query_pageno = int(pageno_param)
-
-    # get language
-    # set specific language if set on request, query or preferences
-    # TODO support search with multible languages
-    if len(raw_text_query.languages):
-        query_lang = raw_text_query.languages[-1]
-    elif 'language' in form:
-        query_lang = form.get('language')
-    else:
-        query_lang = preferences.get_value('language')
-
-    # check language
-    if not VALID_LANGUAGE_CODE.match(query_lang):
-        raise SearxParameterException('language', query_lang)
-
-    # get safesearch
-    if 'safesearch' in form:
-        query_safesearch = form.get('safesearch')
-        # first check safesearch
-        if not query_safesearch.isdigit():
-            raise SearxParameterException('safesearch', query_safesearch)
-        query_safesearch = int(query_safesearch)
-    else:
-        query_safesearch = preferences.get_value('safesearch')
-
-    # safesearch : second check
-    if query_safesearch < 0 or query_safesearch > 2:
-        raise SearxParameterException('safesearch', query_safesearch)
-
-    # get time_range
-    query_time_range = form.get('time_range')
-
-    # check time_range
-    if query_time_range not in ('None', None, '', 'day', 'week', 'month', 'year'):
-        raise SearxParameterException('time_range', query_time_range)
-
-    # query_engines
-    query_engines = raw_text_query.engines
-
-    # we only need to check the categories parameter set by the caller (not by the user)
-    # so we can assume it contains a list of categories
-    query_categories = form.get('categories')
-
-    def append_to_engines(cat):
-        # protect agains custom category provided by the user
-        engines = categories.get(cat)
-        if engines is None:
-            return
-        for engine in engines:
-            if (engine.name, cat) not in disabled_engines:
-                query_engines.append({'category': cat, 'name': engine.name})
-
-    # on top of the category field we have query_categories, which will be the engines to
-    # use to perform the search.
-    for category in query_categories:
-        append_to_engines(category)
-
-    return SearchQuery(query, query_engines, query_categories, query_lang, query_safesearch, query_pageno,
-                       query_time_range)
-
-
 def search(request, host):
     """ Entry point to perform search request on engines
     """
-    search_query = get_search_query_from_webapp(request.preferences, request.form)
+    search = Search()
+    search_query = search.get_search_query_from_webapp(request.preferences, request.form)
     searchData = search_database.read(search_query, host)
     if searchData is None:
-        result_container = Search(search_query).search()
+        result_container = search.search(search_query)
         searchData = search_database.get_search_data(search_query, result_container)
         threading.Thread(
             target=search_database.save,
@@ -292,26 +211,24 @@ def search(request, host):
 class Search(object):
     """Search information container"""
 
-    def __init__(self, search_query):
-        # init vars
-        super(Search, self).__init__()
-        self.search_query = search_query
-        self.result_container = ResultContainer()
+    def search(self, search_query):
+        """ do search-request
 
-    # do search-request
-    def search(self):
+        Return a ResultContainer object
+        """
         global number_of_searches
+        result_container = ResultContainer()
 
         # start time
         start_time = time()
 
         # answeres ?
-        answerers_results = ask(self.search_query)
+        answerers_results = ask(search_query)
 
         if answerers_results:
             for results in answerers_results:
-                self.result_container.extend('answer', results)
-            return self.result_container
+                result_container.extend('answer', results)
+            return result_container
 
         # init vars
         requests = []
@@ -322,8 +239,6 @@ class Search(object):
         # set default useragent
         # user_agent = request.headers.get('User-Agent', '')
         user_agent = gen_useragent()
-
-        search_query = self.search_query
 
         # max of all selected engine timeout
         timeout_limit = 0
@@ -371,8 +286,89 @@ class Search(object):
 
         if requests:
             # send all search-request
-            search_multiple_requests(requests, self.result_container, start_time, timeout_limit)
+            search_multiple_requests(requests, result_container, start_time, timeout_limit)
             start_new_thread(gc.collect, tuple())
 
         # return results, suggestions, answers and infoboxes
-        return self.result_container
+        return result_container
+
+    def get_search_query_from_webapp(self, preferences, form):
+        # no text for the query ?
+        if not form.get('q'):
+            raise SearxParameterException('q', '')
+
+        # set blocked engines
+        disabled_engines = preferences.engines.get_disabled()
+
+        # parse query, if tags are set, which change
+        # the serch engine or search-language
+        raw_text_query = RawTextQuery(form['q'], disabled_engines)
+        raw_text_query.parse_query()
+
+        # set query
+        query = raw_text_query.getSearchQuery()
+
+        # get and check page number
+        pageno_param = form.get('pageno', '1')
+        if not pageno_param.isdigit() or int(pageno_param) < 1:
+            raise SearxParameterException('pageno', pageno_param)
+        query_pageno = int(pageno_param)
+
+        # get language
+        # set specific language if set on request, query or preferences
+        # TODO support search with multible languages
+        if len(raw_text_query.languages):
+            query_lang = raw_text_query.languages[-1]
+        elif 'language' in form:
+            query_lang = form.get('language')
+        else:
+            query_lang = preferences.get_value('language')
+
+        # check language
+        if not VALID_LANGUAGE_CODE.match(query_lang):
+            raise SearxParameterException('language', query_lang)
+
+        # get safesearch
+        if 'safesearch' in form:
+            query_safesearch = form.get('safesearch')
+            # first check safesearch
+            if not query_safesearch.isdigit():
+                raise SearxParameterException('safesearch', query_safesearch)
+            query_safesearch = int(query_safesearch)
+        else:
+            query_safesearch = preferences.get_value('safesearch')
+
+        # safesearch : second check
+        if query_safesearch < 0 or query_safesearch > 2:
+            raise SearxParameterException('safesearch', query_safesearch)
+
+        # get time_range
+        query_time_range = form.get('time_range')
+
+        # check time_range
+        if query_time_range not in ('None', None, '', 'day', 'week', 'month', 'year'):
+            raise SearxParameterException('time_range', query_time_range)
+
+        # query_engines
+        query_engines = raw_text_query.engines
+
+        # we only need to check the categories parameter set by the caller (not by the user)
+        # so we can assume it contains a list of categories
+        query_categories = form.get('categories')
+
+        def append_to_engines(cat):
+            # protect agains custom category provided by the user
+            engines = categories.get(cat)
+            if engines is None:
+                return
+            for engine in engines:
+                if (engine.name, cat) not in disabled_engines:
+                    query_engines.append({'category': cat, 'name': engine.name})
+
+        # on top of the category field we have query_categories, which will be the engines to
+        # use to perform the search.
+        for category in query_categories:
+            append_to_engines(category)
+
+        return SearchQuery(query, query_engines, query_categories, query_lang, query_safesearch, query_pageno,
+                           query_time_range)

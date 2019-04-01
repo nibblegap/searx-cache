@@ -842,13 +842,14 @@ def wait_updating(start_time):
 
 
 def update_results():
+    search = Search()
     start_time = time.time()
     x = 0
     while not running.is_set():
         host = settings['redis']['host']
         queries = get_twenty_queries(x, host)
         for query in queries:
-            result_container = Search(query).search()
+            result_container = search.search(query)
             searchData = search_database.get_search_data(query, result_container)
             search_database.update(searchData, host)
             if running.is_set():
