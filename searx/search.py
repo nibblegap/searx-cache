@@ -268,7 +268,7 @@ class Search(object):
             if hasattr(engine, 'language') and engine.language:
                 request_params['language'] = engine.language
             else:
-                request_params['language'] = search_query.lang
+                request_params['language'] = search_query.language
 
             # 0 = None, 1 = Moderate, 2 = Strict
             request_params['safesearch'] = search_query.safesearch

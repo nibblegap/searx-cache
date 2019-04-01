@@ -4,6 +4,7 @@ from operator import itemgetter
 from threading import RLock
 from searx.engines import engines
 from searx.url_utils import urlparse, unquote
+from searx.query import SearchQuery
 
 
 CONTENT_LEN_IGNORED_CHARS_REGEX = re.compile(r'[,;:!?\./\\\\ ()-_]', re.M | re.U)
@@ -319,16 +320,11 @@ class ResultContainer(object):
         self.unresponsive_engines.add(engine_error)
 
 
-class SearchData(object):
+class SearchData(SearchQuery):
     def __init__(self, search_query, results, paging,
                  results_number, answers, corrections, infoboxes, suggestions, unresponsive_engines):
-        self.categories = search_query.categories
-        self.query = search_query.query
-        self.pageno = search_query.pageno
-        self.safe_search = search_query.safesearch
-        self.language = search_query.lang
-        self.time_range = search_query.time_range
-        self.engines = search_query.engines
+        super().__init__(**search_query.__dict__)
+
         self.results = results
         self.paging = paging
         self.results_number = results_number

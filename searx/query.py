@@ -158,14 +158,14 @@ class RawTextQuery(object):
         return ''.join(self.query_parts)
 
 
-class SearchQuery(object):
+class SearchQuery:
     """container for all the search parameters (query, language, etc...)"""
 
-    def __init__(self, query, engines, categories, lang, safesearch, pageno, time_range):
+    def __init__(self, query, engines, categories, language, safesearch, pageno, time_range):
         self.query = query
         self.engines = engines
         self.categories = categories
-        self.lang = lang
+        self.language = language
         self.safesearch = safesearch
         self.pageno = pageno
         self.time_range = time_range

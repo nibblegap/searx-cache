@@ -12,18 +12,28 @@ from searx.results import SearchData
 from searx import settings
 
 
+def make_key(q):
+    if q.time_range is None:
+        q.time_range = ""
+
+    return "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
+        e(q.query),
+        je(q.engines),
+        q.categories[0],
+        q.language,
+        q.safesearch,
+        q.pageno,
+        q.time_range,
+    )
+
+
 def _get_connection(decode_responses=True):
     return redis.StrictRedis(host=settings['redis']['host'], decode_responses=decode_responses)
 
 
 def read(q):
-    time_range = q.time_range
-    if q.time_range is None:
-        q.time_range = ""
-
     conn = _get_connection()
-    key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
-        e(q.query), je(q.engines), q.categories[0], q.lang, q.safesearch, q.pageno, time_range)
+    key = make_key(q)
     response = conn.hgetall(key)
     if not response:
         return None
@@ -37,10 +47,9 @@ def read(q):
 
 def save(d):
     conn = _get_connection()
-    key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
-        e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
+    key = make_key(d)
     mapping = {
-        'query': e(d.query), 'category': d.categories[0], 'pageno': d.pageno, 'safe_search': d.safe_search,
+        'query': e(d.query), 'category': d.categories[0], 'pageno': d.pageno, 'safesearch': d.safesearch,
         'language': d.language, 'time_range': d.time_range, 'engines': je(d.engines), 'results': je(d.results),
         'paging': d.paging, 'results_number': d.results_number, 'answers': jes(d.answers),
         'corrections': jes(d.corrections), 'infoboxes': je(d.infoboxes), 'suggestions': jes(d.suggestions),
@@ -64,7 +73,7 @@ def get_twenty_queries(x):
     output = pipe.execute()
     for row in output:
         result.append(SearchQuery(d(row['query']), jd(row['engines']), [row['category']], row['language'],
-                                  int(row['safe_search']), int(row['pageno']), row['time_range']))
+                                  int(row['safesearch']), int(row['pageno']), row['time_range']))
 
     return result
 
@@ -95,8 +104,7 @@ def jds(coded):
 
 def update(d):
     conn = _get_connection(decode_responses=False)
-    key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
-        e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
+    key = make_key(d)
     current = conn.hgetall(key)
     current.update({
         'results': je(d.results), 'paging': d.paging, 'results_number': d.results_number,
