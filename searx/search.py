@@ -185,18 +185,18 @@ def default_request_params():
     }
 
 
-def search(request, host):
+def search(request):
     """ Entry point to perform search request on engines
     """
     search = Search()
     search_query = search.get_search_query_from_webapp(request.preferences, request.form)
-    searchData = search_database.read(search_query, host)
+    searchData = search_database.read(search_query)
     if searchData is None:
         result_container = search.search(search_query)
         searchData = search.create_search_data(search_query, result_container)
         threading.Thread(
             target=search_database.save,
-            args=(searchData, host),
+            args=(searchData,),
             name='save_search_' + str(searchData)
         ).start()
 

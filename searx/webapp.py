@@ -503,7 +503,7 @@ def index():
             request.form['categories'] = ['general', 'videos', 'images']
         else:
             request.form['categories'] = [selected_category]
-        search_data = search(request, settings['redis']['host'])
+        search_data = search(request)
 
     except Exception as e:
         # log exception
@@ -846,12 +846,11 @@ def update_results():
     start_time = time.time()
     x = 0
     while not running.is_set():
-        host = settings['redis']['host']
-        queries = get_twenty_queries(x, host)
+        queries = get_twenty_queries(x)
         for query in queries:
             result_container = search.search(query)
             searchData = search.create_search_data(query, result_container)
-            search_database.update(searchData, host)
+            search_database.update(searchData)
             if running.is_set():
                 return
         x += 20

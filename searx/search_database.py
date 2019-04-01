@@ -9,19 +9,19 @@ from searx.plugins import plugins
 from searx.query import SearchQuery
 from searx.url_utils import urlparse
 from searx.results import SearchData
+from searx import settings
 
 
-def _get_connection(host):
-    host = host if host else settings['redis']['host']
-    return redis.StrictRedis(host=host, decode_responses=True)
+def _get_connection(decode_responses=True):
+    return redis.StrictRedis(host=settings['redis']['host'], decode_responses=decode_responses)
 
 
-def read(q, host):
+def read(q):
     time_range = q.time_range
     if q.time_range is None:
         q.time_range = ""
 
-    conn = _get_connection(host)
+    conn = _get_connection()
     key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
         e(q.query), je(q.engines), q.categories[0], q.lang, q.safesearch, q.pageno, time_range)
     response = conn.hgetall(key)
@@ -35,8 +35,8 @@ def read(q, host):
                       jds(response['suggestions']), jds(response['unresponsive_engines']))
 
 
-def save(d, host):
-    conn = _get_connection(host)
+def save(d):
+    conn = _get_connection()
     key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
         e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
     mapping = {
@@ -50,10 +50,10 @@ def save(d, host):
     conn.hmset(key, mapping)
 
 
-def get_twenty_queries(x, host):
+def get_twenty_queries(x):
     result = []
 
-    conn = _get_connection(host)
+    conn = _get_connection()
     keys = conn.zrange('SEARCH_HISTORY_KEYS', int(x), int(x) + 20)
     if not keys:
         return result
@@ -93,8 +93,8 @@ def jds(coded):
     return jd(coded)
 
 
-def update(d, host):
-    conn = redis.StrictRedis(host)
+def update(d):
+    conn = _get_connection(decode_responses=False)
     key = "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
         e(d.query), je(d.engines), d.categories[0], d.language, d.safe_search, d.pageno, d.time_range)
     current = conn.hgetall(key)
