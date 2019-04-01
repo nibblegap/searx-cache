@@ -317,3 +317,23 @@ class ResultContainer(object):
 
     def add_unresponsive_engine(self, engine_error):
         self.unresponsive_engines.add(engine_error)
+
+
+class SearchData(object):
+    def __init__(self, search_query, results, paging,
+                 results_number, answers, corrections, infoboxes, suggestions, unresponsive_engines):
+        self.categories = search_query.categories
+        self.query = search_query.query
+        self.pageno = search_query.pageno
+        self.safe_search = search_query.safesearch
+        self.language = search_query.lang
+        self.time_range = search_query.time_range
+        self.engines = search_query.engines
+        self.results = results
+        self.paging = paging
+        self.results_number = results_number
+        self.answers = answers
+        self.corrections = corrections
+        self.infoboxes = infoboxes
+        self.suggestions = suggestions
+        self.unresponsive_engines = unresponsive_engines
