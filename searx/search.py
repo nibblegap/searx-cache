@@ -31,7 +31,6 @@ from searx.engines import (
     categories, engines, settings
 )
 from searx.exceptions import SearxParameterException
-from searx.plugins import plugins
 from searx.query import RawTextQuery, SearchQuery, VALID_LANGUAGE_CODE
 from searx.results import ResultContainer
 from searx.utils import gen_useragent
@@ -376,26 +375,4 @@ class Search(object):
             start_new_thread(gc.collect, tuple())
 
         # return results, suggestions, answers and infoboxes
-        return self.result_container
-
-
-class SearchWithPlugins(Search):
-    """Similar to the Search class but call the plugins."""
-
-    def __init__(self, search_query, ordered_plugin_list, request):
-        super(SearchWithPlugins, self).__init__(search_query)
-        self.ordered_plugin_list = ordered_plugin_list
-        self.request = request
-
-    def search(self):
-        if plugins.call(self.ordered_plugin_list, 'pre_search', self.request, self):
-            super(SearchWithPlugins, self).search()
-
-        plugins.call(self.ordered_plugin_list, 'post_search', self.request, self)
-
-        results = self.result_container.get_ordered_results()
-
-        for result in results:
-            plugins.call(self.ordered_plugin_list, 'on_result', self.request, self, result)
-
         return self.result_container
