@@ -24,6 +24,7 @@ import requests.exceptions
 from flask_babel import gettext
 
 import searx.poolrequests as requests_lib
+from searx import search_database
 from searx import logger
 from searx.answerers import ask
 from searx.engines import (
@@ -34,6 +35,7 @@ from searx.plugins import plugins
 from searx.query import RawTextQuery, SearchQuery, VALID_LANGUAGE_CODE
 from searx.results import ResultContainer
 from searx.utils import gen_useragent
+from searx.plugins import plugins
 
 from _thread import start_new_thread
 
@@ -264,6 +266,28 @@ def get_search_query_from_webapp(preferences, form):
 
     return SearchQuery(query, query_engines, query_categories, query_lang, query_safesearch, query_pageno,
                        query_time_range)
+
+
+def search(request, host):
+    """ Entry point to perform search request on engines
+    """
+    search_query = get_search_query_from_webapp(request.preferences, request.form)
+    searchData = search_database.read(search_query, host)
+    if searchData is None:
+        result_container = Search(search_query).search()
+        searchData = search_database.get_search_data(search_query, result_container)
+        threading.Thread(
+            target=search_database.save,
+            args=(searchData, host),
+            name='save_search_' + str(searchData)
+        ).start()
+
+    ordered_plugin = request.user_plugins
+    plugins.call(ordered_plugin, 'post_search', request, searchData)
+
+    for result in searchData.results:
+        plugins.call(ordered_plugin, 'on_result', request, searchData, result)
+    return searchData
 
 
 class Search(object):

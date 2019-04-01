@@ -68,7 +68,7 @@ from searx.utils import (
 )
 from searx.version import VERSION_STRING
 from searx.languages import language_codes as languages
-from searx.search import Search
+from searx.search import Search, search
 from searx.query import RawTextQuery
 from searx.autocomplete import searx_bang, backends as autocomplete_backends
 from searx.plugins import plugins
@@ -77,7 +77,7 @@ from searx.preferences import Preferences, ValidationException, LANGUAGE_CODES
 from searx.answerers import answerers
 from searx.url_utils import urlencode, urlparse, urljoin
 from searx.utils import new_hmac
-from searx.search_database import get_twenty_queries, search
+from searx.search_database import get_twenty_queries
 import threading
 
 # check if the pyopenssl package is installed.

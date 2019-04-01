@@ -7,7 +7,6 @@ import redis
 from searx import settings
 from searx.plugins import plugins
 from searx.query import SearchQuery
-from searx.search import Search, get_search_query_from_webapp
 from searx.url_utils import urlparse
 
 
@@ -129,22 +128,6 @@ def get_search_data(q, r):
 
     return SearchData(q, results, r.paging, results_number, r.answers, r.corrections,
                       r.infoboxes, r.suggestions, r.unresponsive_engines)
-
-
-def search(request, host):
-    search_query = get_search_query_from_webapp(request.preferences, request.form)
-    searchData = read(search_query, host)
-    if searchData is None:
-        result_container = Search(search_query).search()
-        searchData = get_search_data(search_query, result_container)
-        threading.Thread(target=save, args=(searchData, host), name='save_search_' + str(searchData)).start()
-
-    ordered_plugin = request.user_plugins
-    plugins.call(ordered_plugin, 'post_search', request, searchData)
-
-    for result in searchData.results:
-        plugins.call(ordered_plugin, 'on_result', request, searchData, result)
-    return searchData
 
 
 def update(d, host):
