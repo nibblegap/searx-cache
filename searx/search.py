@@ -200,13 +200,8 @@ def search(request, host):
             name='save_search_' + str(searchData)
         ).start()
 
-    ordered_plugin = request.user_plugins
-    plugins.call(ordered_plugin, 'post_search', request, searchData)
-
-    for result in searchData.results:
-        plugins.call(ordered_plugin, 'on_result', request, searchData, result)
+    search.search_with_plugins(request, searchData)
     return searchData
-
 
 class Search(object):
     """Search information container"""
@@ -291,6 +286,13 @@ class Search(object):
 
         # return results, suggestions, answers and infoboxes
         return result_container
+
+    def search_with_plugins(self, request, searchData):
+        ordered_plugin = request.user_plugins
+        plugins.call(ordered_plugin, 'post_search', request, searchData)
+
+        for result in searchData.results:
+            plugins.call(ordered_plugin, 'on_result', request, searchData, result)
 
     def get_search_query_from_webapp(self, preferences, form):
         # no text for the query ?
