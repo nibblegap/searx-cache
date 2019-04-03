@@ -515,27 +515,27 @@ def index():
         else:
             return index_error(e, output), 500
 
+    results_copy = copy.deepcopy(search_data.results)
     if is_general_first_page:
-        result_copy = copy.copy(search_data.results)
-        for res in result_copy:
+        for res in results_copy:
             if res.get('category') == 'images':
                 if len(images) < 5:
                     images.append(res)
-                search_data.results.remove(res)
+                results_copy.remove(res)
             elif res.get('category') == 'videos':
                 if len(videos) < 2:
                     videos.append(res)
-                search_data.results.remove(res)
+                results_copy.remove(res)
             elif res.get('category') is None:
-                search_data.results.remove(res)
+                results_copy.remove(res)
 
     # output
-    config_results(search_data.results, search_data.query)
+    config_results(results_copy, search_data.query)
     config_results(images, search_data.query)
     config_results(videos, search_data.query)
 
     response = dict(
-        results=search_data.results,
+        results=results_copy,
         q=search_data.query,
         selected_category=selected_category,
         pageno=search_data.pageno,

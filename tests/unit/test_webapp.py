@@ -63,7 +63,7 @@ class ViewsTestCase(TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'<div class="title"><h1>searx</h1></div>', result.data)
 
-    @patch('redis.StrictRedis', mock_strict_redis_client)
+    @patch('redis.Redis', mock_strict_redis_client)
     def test_index_html(self):
         result = self.app.post('/', data={'q': 'test'})
         self.assertIn(

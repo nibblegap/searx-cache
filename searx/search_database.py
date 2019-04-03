@@ -1,15 +1,8 @@
-import json
-import threading
-import urllib.parse
-
 import redis
+import pickle
 
 from searx import settings
-from searx.plugins import plugins
 from searx.query import SearchQuery
-from searx.url_utils import urlparse
-from searx.results import SearchData
-from searx import settings
 
 
 def make_key(q):
@@ -17,8 +10,8 @@ def make_key(q):
         q.time_range = ""
 
     return "SEARCH_HISTORY:{}:{}:{}:{}:{}:{}:{}".format(
-        e(q.query),
-        je(q.engines),
+        q.query,
+        q.engines,
         q.categories[0],
         q.language,
         q.safesearch,
@@ -27,36 +20,25 @@ def make_key(q):
     )
 
 
-def _get_connection(decode_responses=True):
-    return redis.StrictRedis(host=settings['redis']['host'], decode_responses=decode_responses)
+def _get_connection():
+    return redis.Redis(host=settings['redis']['host'])
 
 
 def read(q):
     conn = _get_connection()
     key = make_key(q)
-    response = conn.hgetall(key)
+    response = conn.get(key)
     if not response:
         return None
-    results = jd(response['results'])
-    for result in results:
-        result['parsed_url'] = urlparse(result['url'])
-    return SearchData(q, results, response['paging'], int(response['results_number']),
-                      jds(response['answers']), jds(response['corrections']), jd(response['infoboxes']),
-                      jds(response['suggestions']), jds(response['unresponsive_engines']))
+    return pickle.loads(response)
 
 
 def save(d):
     conn = _get_connection()
     key = make_key(d)
-    mapping = {
-        'query': e(d.query), 'category': d.categories[0], 'pageno': d.pageno, 'safesearch': d.safesearch,
-        'language': d.language, 'time_range': d.time_range, 'engines': je(d.engines), 'results': je(d.results),
-        'paging': d.paging, 'results_number': d.results_number, 'answers': jes(d.answers),
-        'corrections': jes(d.corrections), 'infoboxes': je(d.infoboxes), 'suggestions': jes(d.suggestions),
-        'unresponsive_engines': jes(d.unresponsive_engines)
-    }
-    conn.zadd('SEARCH_HISTORY_KEYS', conn.incr('SEARCH_HISTORY_INDEX'), key)
-    conn.hmset(key, mapping)
+    history = conn.incr("SEARCH_HISTORY_INDEX")
+    conn.zadd("SEARCH_HISTORY_KEYS", {key: history})
+    conn.set(key, pickle.dumps(d, protocol=4))
 
 
 def get_twenty_queries(x):
@@ -69,46 +51,35 @@ def get_twenty_queries(x):
 
     pipe = conn.pipeline()
     for key in keys:
-        pipe.hgetall(key)
+        pipe.get(key)
     output = pipe.execute()
     for row in output:
-        result.append(SearchQuery(d(row['query']), jd(row['engines']), [row['category']], row['language'],
-                                  int(row['safesearch']), int(row['pageno']), row['time_range']))
+        row = pickle.loads(row)
+        result.append(
+            SearchQuery(
+                row.query,
+                row.engines,
+                row.categories,
+                row.language,
+                row.safesearch,
+                row.pageno,
+                row.time_range,
+            )
+        )
 
     return result
 
 
-def e(obj):
-    return urllib.parse.quote_plus(obj)
-
-
-def d(coded):
-    return urllib.parse.unquote_plus(coded)
-
-
-def je(obj):
-    return e(json.dumps(obj))
-
-
-def jd(coded):
-    return json.loads(d(coded))
-
-
-def jes(set):
-    return je(list(set))
-
-
-def jds(coded):
-    return jd(coded)
-
-
 def update(d):
-    conn = _get_connection(decode_responses=False)
+    conn = _get_connection()
     key = make_key(d)
-    current = conn.hgetall(key)
-    current.update({
-        'results': je(d.results), 'paging': d.paging, 'results_number': d.results_number,
-        'answers': jes(d.answers), 'corrections': jes(d.corrections), 'infoboxes': je(d.infoboxes),
-        'suggestions': jes(d.suggestions), 'unresponsive_engines': jes(d.unresponsive_engines)
-    })
-    conn.hmset(key, current)
+    current = read(d)
+    current.results = d.results
+    current.paging = d.paging
+    current.results_number = d.results_number
+    current.answers = d.answers
+    current.corrections = d.corrections
+    current.infoboxes = d.infoboxes
+    current.suggestions = d.suggestions
+    current.unresponsive_engines = d.unresponsive_engines
+    conn.set(key, pickle.dumps(current, protocol=4))
