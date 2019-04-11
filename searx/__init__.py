@@ -89,6 +89,7 @@ if 'BASE_URL' in environ:
 if 'IMAGE_PROXY' in environ:
     settings['server']['image_proxy'] = environ['IMAGE_PROXY']
 if 'SEARX_REDIS_HOST' in environ:
+    settings['redis']['enable'] = True
     settings['redis']['host'] = environ['SEARX_REDIS_HOST']
 if 'HTTP_PROXY_URL' in environ:
     settings['proxies']['http'] = environ['HTTP_PROXY_URL']

@@ -185,27 +185,25 @@ def default_request_params():
     }
 
 
-def search(request):
-    """ Entry point to perform search request on engines
-    """
-    search = Search()
-    search_query = search.get_search_query_from_webapp(request.preferences, request.form)
-    searchData = search_database.read(search_query)
-    if searchData is None:
-        result_container = search.search(search_query)
-        searchData = search.create_search_data(search_query, result_container)
-        threading.Thread(
-            target=search_database.save,
-            args=(searchData,),
-            name='save_search_' + str(searchData)
-        ).start()
+class Search:
+    """Search information manager"""
 
-    search.search_with_plugins(request, searchData)
-    return searchData
+    def __init__(self, cachecls=search_database.CacheInterface):
+        self.cache = cachecls()
 
+    def __call__(self, request):
+        """ Entry point to perform search request on engines
+        """
+        search_query = self.get_search_query_from_webapp(request.preferences, request.form)
+        searchData = self.cache.read(search_query)
 
-class Search(object):
-    """Search information container"""
+        if searchData is None:
+            result_container = self.search(search_query)
+            searchData = self.create_search_data(search_query, result_container)
+            self.cache.save(searchData)
+
+        self.search_with_plugins(request, searchData)
+        return searchData
 
     def search(self, search_query):
         """ do search-request

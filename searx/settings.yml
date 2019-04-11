@@ -17,6 +17,7 @@ server:
     http_protocol_version : "1.0"  # 1.0 and 1.1 are supported
 
 redis:
+    enable: False
     host : "127.0.0.1"
     user : "searx"
     password : "password" # change this!

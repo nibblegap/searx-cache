@@ -33,7 +33,7 @@ import copy
 
 import requests
 
-from searx import logger, search_database
+from searx import logger
 
 logger = logger.getChild('webapp')
 
@@ -68,7 +68,8 @@ from searx.utils import (
 )
 from searx.version import VERSION_STRING
 from searx.languages import language_codes as languages
-from searx.search import Search, search
+from searx.search import Search
+from searx.search_database import RedisCache
 from searx.query import RawTextQuery
 from searx.autocomplete import searx_bang, backends as autocomplete_backends
 from searx.plugins import plugins
@@ -77,7 +78,6 @@ from searx.preferences import Preferences, ValidationException, LANGUAGE_CODES
 from searx.answerers import answerers
 from searx.url_utils import urlencode, urlparse, urljoin
 from searx.utils import new_hmac
-from searx.search_database import get_twenty_queries
 import threading
 
 # check if the pyopenssl package is installed.
@@ -130,6 +130,8 @@ if not searx_debug \
     initialize_engines(settings['engines'])
 
 babel = Babel(app)
+
+search = Search(RedisCache) if settings["redis"]["enable"] else Search()
 
 rtl_locales = ['ar', 'arc', 'bcc', 'bqi', 'ckb', 'dv', 'fa', 'glk', 'he',
                'ku', 'mzn', 'pnb', 'ps', 'sd', 'ug', 'ur', 'yi']
@@ -842,18 +844,17 @@ def wait_updating(start_time):
 
 
 def update_results():
-    search = Search()
     start_time = time.time()
     x = 0
     while not running.is_set():
-        queries = get_twenty_queries(x)
+        queries = search.cache.get_twenty_queries(x)
         for query in queries:
             result_container = search.search(query)
             searchData = search.create_search_data(query, result_container)
-            search_database.update(searchData)
+            search.cache.update(searchData)
             if running.is_set():
                 return
-        x += 20
+        x += len(queries)
         if len(queries) < 20:
             x = 0
             wait_updating(start_time)
