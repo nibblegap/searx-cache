@@ -312,7 +312,7 @@ def render(template_name, override_theme=None, **kwargs):
 
     if 'selected_categories' not in kwargs:
         kwargs['selected_categories'] = []
-        for arg in request.args:
+        for arg in request.form:
             if arg.startswith('category_'):
                 c = arg.split('_', 1)[1]
                 if c in categories:
@@ -473,6 +473,16 @@ def index():
             return jsonify({}), 204
         return render('index.html')
 
+    if request.form.get('category') is None:
+        category = None
+        for name, value in request.form.items():
+            if name.startswith('category_'):
+                category = name[9:]
+                if category in categories and value == "on":
+                    break
+        if category is not None:
+            request.form["category"] = category
+
     selected_category = request.form.get('category') or 'general'
     first_page = request.form.get('pageno')
     is_general_first_page = selected_category == 'general' and (first_page is None or first_page == u'1')
@@ -521,6 +531,7 @@ def index():
         results=results_copy,
         q=search_data.query,
         selected_category=selected_category,
+        selected_categories=[selected_category],
         pageno=search_data.pageno,
         time_range=search_data.time_range,
         number_of_results=format_decimal(search_data.results_number),
