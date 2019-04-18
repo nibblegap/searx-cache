@@ -72,6 +72,24 @@
                     </select>
                 {% endcall %}
 
+                {% set theme_label = _('Themes') %}
+                {% set theme_info = _('Change searx layout') %}
+                {% call preferences_item(theme_info, theme_label, rtl) %}
+                    <select class="form-control custom-select" name="theme">
+                        {% for name in themes %}
+                        <option value="{{ name }}" {% if name == theme %}selected="selected"{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                {% endcall %}
+
+                {% call preferences_item(_('Choose style for this theme'), _('Style'), rtl) %}
+                    <select class="form-control custom-select" name='oscar-style'>
+                        <option value="logicodev" >Logicodev</option>
+                        <option value="pointhi" {% if preferences.get_value('oscar-style') == 'pointhi' %}selected="selected"{% endif %}>Pointhi</option>
+                        <option value="logicodev-dark" {% if preferences.get_value('oscar-style') == 'logicodev-dark' %}selected="selected"{% endif %}>Logicodev dark</option>
+                    </select>
+                {% endcall %}
+
                 {% set label = _('Results on new tabs') %}
                 {% set info = _('Open result links on new browser tabs') %}
                 {% call preferences_item(info, label, rtl) %}
