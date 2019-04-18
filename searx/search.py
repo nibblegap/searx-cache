@@ -15,15 +15,15 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 (C) 2013- by Adam Tauber, <asciimoo@gmail.com>
 '''
 
-import gc
-import threading
+
 from time import time
 from uuid import uuid4
+from dataclasses import dataclass
+import asyncio
 
-import requests.exceptions
+import aiohttp
 from flask_babel import gettext
 
-import searx.poolrequests as requests_lib
 from searx import search_database
 from searx import logger
 from searx.answerers import ask
@@ -36,110 +36,118 @@ from searx.results import ResultContainer, SearchData
 from searx.utils import gen_useragent
 from searx.plugins import plugins
 
-from _thread import start_new_thread
-
 logger = logger.getChild('search')
 
 number_of_searches = 0
 
 
-def send_http_request(engine, request_params):
-    # create dictionary which contain all
-    # informations about the request
-    request_args = dict(
-        headers=request_params['headers'],
-        cookies=request_params['cookies'],
-        verify=request_params['verify']
-    )
+class SearchRequest:
 
-    # specific type of request (GET or POST)
-    if request_params['method'] == 'GET':
-        req = requests_lib.get
-    else:
-        req = requests_lib.post
-        request_args['data'] = request_params['data']
+    @dataclass
+    class Response:
+        text: str = None
+        status_code: int = 200
+        url: str = None
 
-    # send the request
-    return req(request_params['url'], **request_args)
+    def __init__(self, loop):
+        self.loop = loop
 
+    async def send_http_request(self, engine, request_params):
+        # create dictionary which contain all
+        # informations about the request
+        request_args = dict(
+            headers=request_params['headers'],
+            cookies=request_params['cookies'],
+        )
 
-def search_one_request(engine, query, request_params):
-    # update request parameters dependent on
-    # search-engine (contained in engines folder)
-    engine.request(query, request_params)
+        async with aiohttp.ClientSession() as session:
+            # specific type of request (GET or POST)
+            if request_params['method'] == 'GET':
+                req = session.get
+            else:
+                req = session.post
+                request_args['data'] = request_params['data']
 
-    # ignoring empty urls
-    if request_params['url'] is None:
-        return []
+            async with req(request_params['url'], **request_args) as response:
+                resp = SearchRequest.Response()
 
-    if not request_params['url']:
-        return []
+                resp.text = await response.text()
+                resp.status_code = response.status
+                resp.url = str(response.url)
 
-    # send request
-    response = send_http_request(engine, request_params)
+                return resp
 
-    # parse the response
-    response.search_params = request_params
-    return engine.response(response)
+    async def search_one_request(self, engine, query, request_params):
+        # update request parameters dependent on
+        # search-engine (contained in engines folder)
+        engine.request(query, request_params)
 
+        # ignoring empty urls
+        if request_params['url'] is None:
+            return []
 
-def search_one_request_safe(engine_name, query, request_params, result_container, start_time, timeout_limit):
-    # set timeout for all HTTP requests
-    requests_lib.set_timeout_for_thread(timeout_limit, start_time=start_time)
-    # reset the HTTP total time
-    requests_lib.reset_time_for_thread()
+        if not request_params['url']:
+            return []
 
-    #
-    engine = engines[engine_name]
+        # send request
+        response = await self.send_http_request(engine, request_params)
 
-    # suppose everything will be alright
-    requests_exception = False
+        # parse the response
+        response.search_params = request_params
+        return engine.response(response)
 
-    try:
-        # send requests and parse the results
-        search_results = search_one_request(engine, query, request_params)
+    async def search_one_request_safe(
+        self, engine_name, query, request_params, result_container, start_time, timeout_limit
+    ):
+        engine = engines[engine_name]
 
-        # add results
-        result_container.extend(engine_name, search_results)
+        # suppose everything will be alright
+        requests_exception = False
 
-        # update engine time when there is no exception
-        with threading.RLock():
-            engine.stats['engine_time'] += time() - start_time
+        try:
+            # send requests and parse the results
+            search_results = await self.search_one_request(engine, query, request_params)
+
+            # add results
+            result_container.extend(engine_name, search_results)
+
+            request_time = time() - start_time
+            logger.info(" > %s request done in %f second", engine_name, request_time)
+            # update engine time when there is no exception
+            engine.stats['engine_time'] += request_time
             engine.stats['engine_time_count'] += 1
             # update stats with the total HTTP time
-            engine.stats['page_load_time'] += requests_lib.get_time_for_thread()
+            engine.stats['page_load_time'] += request_time
             engine.stats['page_load_count'] += 1
 
-    except Exception as e:
-        search_duration = time() - start_time
+        except Exception as e:
+            search_duration = time() - start_time
 
-        with threading.RLock():
             engine.stats['errors'] += 1
 
-        if (issubclass(e.__class__, requests.exceptions.Timeout)):
-            result_container.add_unresponsive_engine((engine_name, gettext('timeout')))
-            # requests timeout (connect or read)
-            logger.error("engine {0} : HTTP requests timeout"
-                         "(search duration : {1} s, timeout: {2} s) : {3}"
-                         .format(engine_name, search_duration, timeout_limit, e.__class__.__name__))
-            requests_exception = True
-        elif (issubclass(e.__class__, requests.exceptions.RequestException)):
-            result_container.add_unresponsive_engine((engine_name, gettext('request exception')))
-            # other requests exception
-            logger.exception("engine {0} : requests exception"
+            if (issubclass(e.__class__, aiohttp.ServerTimeoutError)):
+                result_container.add_unresponsive_engine((engine_name, gettext('timeout')))
+                # requests timeout (connect or read)
+                logger.error("engine {0} : HTTP requests timeout"
                              "(search duration : {1} s, timeout: {2} s) : {3}"
-                             .format(engine_name, search_duration, timeout_limit, e))
-            requests_exception = True
-        else:
-            result_container.add_unresponsive_engine((
-                engine_name,
-                '{0}: {1}'.format(gettext('unexpected crash'), e),
-            ))
-            # others errors
-            logger.exception('engine {0} : exception : {1}'.format(engine_name, e))
+                             .format(engine_name, search_duration, timeout_limit, e.__class__.__name__))
+                requests_exception = True
+            elif (issubclass(e.__class__, aiohttp.ClientResponseError)):
+                result_container.add_unresponsive_engine((engine_name, gettext('request exception')))
+                # other requests exception
+                logger.exception("engine {0} : requests exception"
+                                 "(search duration : {1} s, timeout: {2} s) : {3}"
+                                 .format(engine_name, search_duration, timeout_limit, e))
+                requests_exception = True
+            else:
+                result_container.add_unresponsive_engine((
+                    engine_name,
+                    '{0}: {1}'.format(gettext('unexpected crash'), e),
+                ))
+                # others errors
+                logger.exception('engine {0} : exception : {1}'.format(engine_name, e))
 
-    # suspend or not the engine if there are HTTP errors
-    with threading.RLock():
+        # suspend or not the engine if there are HTTP errors
         if requests_exception:
             # update continuous_errors / suspend_end_time
             engine.continuous_errors += 1
@@ -151,26 +159,18 @@ def search_one_request_safe(engine_name, query, request_params, result_container
             engine.continuous_errors = 0
             engine.suspend_end_time = 0
 
+    async def search_multiple_requests(self, requests, result_container, start_time, timeout_limit):
+        tasks = []
+        for engine_name, query, request_params in requests:
+            task = asyncio.create_task(self.search_one_request_safe(
+                engine_name, query, request_params, result_container,
+                start_time, timeout_limit
+            ))
+            tasks.append(task)
 
-def search_multiple_requests(requests, result_container, start_time, timeout_limit):
-    search_id = uuid4().__str__()
+        await asyncio.gather(*tasks)
 
-    for engine_name, query, request_params in requests:
-        th = threading.Thread(
-            target=search_one_request_safe,
-            args=(engine_name, query, request_params, result_container, start_time, timeout_limit),
-            name=search_id,
-        )
-        th._engine_name = engine_name
-        th.start()
-
-    for th in threading.enumerate():
-        if th.name == search_id:
-            remaining_time = max(0.0, timeout_limit - (time() - start_time))
-            th.join(remaining_time)
-            if th.isAlive():
-                result_container.add_unresponsive_engine((th._engine_name, gettext('timeout')))
-                logger.warning('engine timeout: {0}'.format(th._engine_name))
+        logger.info('total time %f seconds', time() - start_time)
 
 
 # get default reqest parameter
@@ -190,6 +190,8 @@ class Search:
 
     def __init__(self, cachecls=search_database.CacheInterface):
         self.cache = cachecls()
+        self.loop = asyncio.get_event_loop()
+        self.search_req = SearchRequest()
 
     def __call__(self, request):
         """ Entry point to perform search request on engines
@@ -280,8 +282,9 @@ class Search:
 
         if requests:
             # send all search-request
-            search_multiple_requests(requests, result_container, start_time, timeout_limit)
-            start_new_thread(gc.collect, tuple())
+            self.loop.run_until_complete(self.search_req.search_multiple_requests(
+                requests, result_container, start_time, timeout_limit
+            ))
 
         # return results, suggestions, answers and infoboxes
         return result_container
