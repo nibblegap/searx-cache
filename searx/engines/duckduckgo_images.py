@@ -12,14 +12,13 @@
 
  @todo        avoid extra request
 """
-
+import requests
 from json import loads
 from searx.engines.xpath import extract_text
 from searx.engines.duckduckgo import (
     _fetch_supported_languages, supported_languages_url,
     get_region_code, language_aliases
 )
-from searx.poolrequests import get
 from searx.url_utils import urlencode
 
 # engine dependent config
@@ -36,8 +35,7 @@ site_url = 'https://duckduckgo.com/?{query}&iar=images&iax=1&ia=images'
 # run query in site to get vqd number needed for requesting images
 # TODO: find a way to get this number without an extra request (is it a hash of the query?)
 def get_vqd(query, headers):
-    query_url = site_url.format(query=urlencode({'q': query}))
-    res = get(query_url, headers=headers)
+    res = requests.get(site_url.format(query=urlencode({'q': query})), headers=headers)
     content = res.text
     if content.find('vqd=\'') == -1:
         raise Exception('Request failed')

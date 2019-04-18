@@ -11,8 +11,8 @@
  @parse       url, infobox
 """
 
+import requests
 from searx import logger
-from searx.poolrequests import get
 from searx.engines.xpath import extract_text
 from searx.engines.wikipedia import _fetch_supported_languages, supported_languages_url
 from searx.url_utils import urlencode
@@ -77,7 +77,7 @@ def response(resp):
     for search_result in search_results[:result_count]:
         wikidata_id = search_result.split('/')[-1]
         url = url_detail.format(query=urlencode({'page': wikidata_id, 'uselang': language}))
-        htmlresponse = get(url)
+        htmlresponse = requests.get(url)
         jsonresponse = loads(htmlresponse.text)
         results += getDetail(jsonresponse, wikidata_id, language, resp.search_params['language'])
 

@@ -10,12 +10,11 @@
  @parse       url, title, publishedDate, content
  More info on api: https://www.ncbi.nlm.nih.gov/books/NBK25501/
 """
-
+import requests
 from flask_babel import gettext
 from lxml import etree
 from datetime import datetime
 from searx.url_utils import urlencode
-from searx.poolrequests import get
 
 
 categories = ['science']
@@ -59,7 +58,7 @@ def response(resp):
 
     retrieve_url_encoded = pubmed_retrieve_api_url.format(**retrieve_notice_args)
 
-    search_results_xml = get(retrieve_url_encoded).content
+    search_results_xml = requests.get(retrieve_url_encoded).content
     search_results = etree.XML(search_results_xml).xpath('//PubmedArticleSet/PubmedArticle/MedlineCitation')
 
     for entry in search_results:

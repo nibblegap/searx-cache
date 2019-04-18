@@ -11,11 +11,11 @@
 """
 
 import re
+import requests
 from json import loads
 from lxml import html
 from dateutil import parser
 from searx import logger
-from searx.poolrequests import get as http_get
 from searx.url_utils import quote_plus, urlencode
 from io import StringIO
 
@@ -41,7 +41,7 @@ guest_client_id = ''
 
 
 def get_client_id():
-    response = http_get("https://soundcloud.com")
+    response = requests.get("https://soundcloud.com")
 
     if response.ok:
         tree = html.fromstring(response.content)
@@ -51,7 +51,7 @@ def get_client_id():
         # extracts valid app_js urls from soundcloud.com content
         for app_js_url in app_js_urls:
             # gets app_js and searches for the clientid
-            response = http_get(app_js_url)
+            response = requests.get(app_js_url)
             if response.ok:
                 cids = cid_re.search(response.text)
                 if cids is not None and len(cids.groups()):

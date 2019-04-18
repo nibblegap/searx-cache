@@ -15,7 +15,7 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 (C) 2013- by Adam Tauber, <asciimoo@gmail.com>
 '''
 
-
+import aiohttp
 from lxml import etree
 from json import loads
 from searx import settings
@@ -23,15 +23,13 @@ from searx.languages import language_codes
 from searx.engines import (
     categories, engines, engine_shortcuts
 )
-from searx.poolrequests import get as http_get
 from searx.url_utils import urlencode
 
 
 def get(*args, **kwargs):
     if 'timeout' not in kwargs:
         kwargs['timeout'] = settings['outgoing']['request_timeout']
-
-    return http_get(*args, **kwargs)
+    return requests.get(*args, **kwargs)
 
 
 def searx_bang(full_query):
