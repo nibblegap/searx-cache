@@ -9,7 +9,7 @@
 # @parse       url, title, content, suggestion
 
 import re
-from flask_babel import gettext
+from gettext import gettext
 from lxml import html, etree
 from searx.engines.xpath import extract_text, extract_url
 from searx import logger

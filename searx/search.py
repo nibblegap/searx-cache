@@ -17,12 +17,11 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 
 
 from time import time
-from uuid import uuid4
 from dataclasses import dataclass
 import asyncio
 
 import aiohttp
-from flask_babel import gettext
+from gettext import gettext
 
 from searx import search_database
 from searx import logger
@@ -43,14 +42,15 @@ number_of_searches = 0
 
 class SearchRequest:
 
+    def __init__(self, session):
+        self.session = session
+
     @dataclass
     class Response:
         text: str = None
         status_code: int = 200
         url: str = None
-
-    def __init__(self, loop):
-        self.loop = loop
+        content: str = None
 
     async def send_http_request(self, engine, request_params):
         # create dictionary which contain all
@@ -58,24 +58,25 @@ class SearchRequest:
         request_args = dict(
             headers=request_params['headers'],
             cookies=request_params['cookies'],
+            timeout=engine.timeout
         )
 
-        async with aiohttp.ClientSession() as session:
-            # specific type of request (GET or POST)
-            if request_params['method'] == 'GET':
-                req = session.get
-            else:
-                req = session.post
-                request_args['data'] = request_params['data']
+        # specific type of request (GET or POST)
+        if request_params['method'] == 'GET':
+            req = self.session.get
+        else:
+            req = self.session.post
+            request_args['data'] = request_params['data']
 
-            async with req(request_params['url'], **request_args) as response:
-                resp = SearchRequest.Response()
+        async with req(request_params['url'], **request_args) as response:
+            resp = SearchRequest.Response()
 
-                resp.text = await response.text()
-                resp.status_code = response.status
-                resp.url = str(response.url)
+            resp.text = await response.text()
+            resp.status_code = response.status
+            resp.content = await response.content.read()
+            resp.url = str(response.url)
 
-                return resp
+            return resp
 
     async def search_one_request(self, engine, query, request_params):
         # update request parameters dependent on
@@ -125,7 +126,7 @@ class SearchRequest:
 
             engine.stats['errors'] += 1
 
-            if (issubclass(e.__class__, aiohttp.ServerTimeoutError)):
+            if (issubclass(e.__class__, asyncio.TimeoutError)):
                 result_container.add_unresponsive_engine((engine_name, gettext('timeout')))
                 # requests timeout (connect or read)
                 logger.error("engine {0} : HTTP requests timeout"
@@ -188,26 +189,25 @@ def default_request_params():
 class Search:
     """Search information manager"""
 
-    def __init__(self, cachecls=search_database.CacheInterface):
+    def __init__(self, session, cachecls=search_database.CacheInterface):
         self.cache = cachecls()
-        self.loop = asyncio.get_event_loop()
-        self.search_req = SearchRequest()
+        self.search_req = SearchRequest(session)
 
-    def __call__(self, request):
+    async def __call__(self, request):
         """ Entry point to perform search request on engines
         """
         search_query = self.get_search_query_from_webapp(request.preferences, request.form)
-        searchData = self.cache.read(search_query)
+        searchData = await self.cache.read(search_query)
 
         if searchData is None:
-            result_container = self.search(search_query)
+            result_container = await self.search(search_query)
             searchData = self.create_search_data(search_query, result_container)
-            self.cache.save(searchData)
+            asyncio.create_task(self.cache.save(searchData))
 
-        self.search_with_plugins(request, searchData)
+        await self.search_with_plugins(request, searchData)
         return searchData
 
-    def search(self, search_query):
+    async def search(self, search_query):
         """ do search-request
 
         Return a ResultContainer object
@@ -282,14 +282,14 @@ class Search:
 
         if requests:
             # send all search-request
-            self.loop.run_until_complete(self.search_req.search_multiple_requests(
+            await self.search_req.search_multiple_requests(
                 requests, result_container, start_time, timeout_limit
-            ))
+            )
 
         # return results, suggestions, answers and infoboxes
         return result_container
 
-    def search_with_plugins(self, request, searchData):
+    async def search_with_plugins(self, request, searchData):
         ordered_plugin = request.user_plugins
         plugins.call(ordered_plugin, 'post_search', request, searchData)
 

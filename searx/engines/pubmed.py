@@ -11,7 +11,7 @@
  More info on api: https://www.ncbi.nlm.nih.gov/books/NBK25501/
 """
 import requests
-from flask_babel import gettext
+from gettext import gettext
 from lxml import etree
 from datetime import datetime
 from searx.url_utils import urlencode

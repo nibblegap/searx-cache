@@ -15,7 +15,7 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 (C) 2013- by Adam Tauber, <asciimoo@gmail.com>
 '''
 
-import aiohttp
+import requests
 from lxml import etree
 from json import loads
 from searx import settings

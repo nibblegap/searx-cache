@@ -1,6 +1,8 @@
-import threading
-import redis
 import pickle
+import time
+import asyncio
+
+import aioredis
 
 from searx import settings
 from searx.query import SearchQuery
@@ -24,8 +26,7 @@ class CacheInterface:
 
 class RedisCache(CacheInterface):
     def __init__(self):
-        self.pool = redis.ConnectionPool(host=settings['redis']['host'])
-        self.running = threading.Event()
+        self.pool = None
 
     def make_key(self, q):
         if q.time_range is None:
@@ -41,43 +42,41 @@ class RedisCache(CacheInterface):
             q.time_range,
         )
 
-    def _get_connection(self):
-        return redis.Redis(connection_pool=self.pool)
+    async def _get_connection(self):
+        if not self.pool:
+            host = settings["redis"]["host"]
+            self.pool = await aioredis.create_redis_pool(
+                f"redis://{host}", minsize=5, maxsize=10
+            )
+        return self.pool
 
-    def read(self, q):
-        conn = self._get_connection()
+    async def read(self, q):
+        redis = await self._get_connection()
         key = self.make_key(q)
-        response = conn.get(key)
+        response = await redis.get(key)
         if not response:
             return None
         return pickle.loads(response)
 
-    def _save(self, d):
-        conn = self._get_connection()
+    async def save(self, d):
+        redis = await self._get_connection()
         key = self.make_key(d)
-        history = conn.incr("SEARCH_HISTORY_INDEX")
-        conn.zadd("SEARCH_HISTORY_KEYS", {key: history})
-        conn.set(key, pickle.dumps(d, protocol=4))
+        history = await redis.incr("SEARCH_HISTORY_INDEX")
+        await redis.zadd("SEARCH_HISTORY_KEYS", history, key)
+        await redis.set(key, pickle.dumps(d, protocol=4))
 
-    def save(self, d):
-        threading.Thread(
-            target=self._save,
-            args=(d,),
-            name='save_search_' + str(d)
-        ).start()
-
-    def get_twenty_queries(self, x):
+    async def get_twenty_queries(self, x):
         result = []
 
-        conn = self._get_connection()
-        keys = conn.zrange('SEARCH_HISTORY_KEYS', int(x), int(x) + 20)
+        redis = await self._get_connection()
+        keys = await redis.zrange('SEARCH_HISTORY_KEYS', int(x), int(x) + 20)
         if not keys:
             return result
 
-        pipe = conn.pipeline()
+        pipe = redis.pipeline()
         for key in keys:
             pipe.get(key)
-        output = pipe.execute()
+        output = await pipe.execute()
         for row in output:
             row = pickle.loads(row)
             result.append(
@@ -94,10 +93,10 @@ class RedisCache(CacheInterface):
 
         return result
 
-    def update(self, d):
-        conn = self._get_connection()
+    async def update(self, d):
+        redis = await self._get_connection()
         key = self.make_key(d)
-        current = self.read(d)
+        current = await self.read(d)
         current.results = d.results
         current.paging = d.paging
         current.results_number = d.results_number
@@ -106,4 +105,28 @@ class RedisCache(CacheInterface):
         current.infoboxes = d.infoboxes
         current.suggestions = d.suggestions
         current.unresponsive_engines = d.unresponsive_engines
-        conn.set(key, pickle.dumps(current, protocol=4))
+        await redis.set(key, pickle.dumps(current, protocol=4))
+
+    async def wait_updating(self, start_time):
+        wait = settings["redis"]["upgrade_history"] - int(time.time() - start_time)
+        if wait > 0:
+            await asyncio.sleep(wait)
+
+    async def update_results(self, search_instance):
+        start_time = time.time()
+        x = 0
+
+        try:
+            while True:
+                queries = await self.get_twenty_queries(x)
+                for query in queries:
+                    result_container = await search_instance.search(query)
+                    searchData = search_instance.create_search_data(query, result_container)
+                    await self.update(searchData)
+                x += 20
+                if len(queries) < 20:
+                    x = 0
+                    await self.wait_updating(start_time)
+                    start_time = time.time()
+        except asyncio.CancelledError:
+            pass

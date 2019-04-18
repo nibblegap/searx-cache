@@ -21,7 +21,7 @@ import threading
 import json
 from pathlib import Path
 from babel.localedata import locale_identifiers
-from flask_babel import gettext
+from gettext import gettext
 from operator import itemgetter
 from requests import get
 from searx import settings

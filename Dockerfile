@@ -4,7 +4,9 @@ RUN apk add \
  git \
  build-base \
  libxml2-dev \
- libxslt-dev
+ libxslt-dev \
+ libffi-dev \
+ hiredis
 
 # Only to use the docker cache and optimize the build time
 WORKDIR /src

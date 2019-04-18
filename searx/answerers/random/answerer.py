@@ -3,7 +3,7 @@ import random
 import string
 import sys
 import uuid
-from flask_babel import gettext
+from gettext import gettext
 
 # required answerer attribute
 # specifies which search query keywords triggers this answerer

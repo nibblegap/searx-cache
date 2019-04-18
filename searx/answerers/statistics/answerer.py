@@ -1,7 +1,7 @@
 from functools import reduce
 from operator import mul
 
-from flask_babel import gettext
+from gettext import gettext
 
 keywords = ('min',
             'max',

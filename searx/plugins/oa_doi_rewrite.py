@@ -1,4 +1,4 @@
-from flask_babel import gettext
+from gettext import gettext
 import re
 from searx.url_utils import urlparse, parse_qsl
 from searx import settings

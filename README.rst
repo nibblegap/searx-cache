@@ -6,7 +6,7 @@ engine <https://en.wikipedia.org/wiki/Metasearch_engine>`__.
 
 Spot was forked from searx: read `documentation <https://asciimoo.github.io/searx>`__ and the `wiki <https://github.com/asciimoo/searx/wiki>`__ for more information.
 
-Spot is based on Python3.7+
+Spot is based on Python3.7+ and asyncio.
 
 Getting Started
 ~~~~~~~~~~~~

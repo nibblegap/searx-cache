@@ -11,7 +11,7 @@
 """
 
 from json import loads
-from flask_babel import gettext
+from gettext import gettext
 
 categories = ['science']
 
