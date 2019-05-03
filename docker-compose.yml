@@ -9,4 +9,5 @@ services:
     environment:
       SEARX_REDIS_HOST: redis
       VIRTUAL_HOST: ${SPOT_HOSTNAME:-spot}
+      LETSENCRYPT_HOST: ${SPOT_HOSTNAME:-spot}
       SEARX_LOGGER: INFO
