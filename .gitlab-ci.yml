@@ -26,6 +26,9 @@ build:web:
 
 build:docker:
   stage: build
+  image: docker:git
+  services:
+    - docker:dind
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
