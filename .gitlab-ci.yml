@@ -109,7 +109,7 @@ test:
 prod:
   extends: .deploy:template
   only:
-    - master
+    - tags
   variables:
     PUBLISH_USER: root
     PUBLISH_URL: spot.ecloud.global
