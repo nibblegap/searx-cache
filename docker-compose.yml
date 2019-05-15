@@ -6,7 +6,7 @@ services:
     image: redis:5-alpine
 
   spot:
-    build: .
+    image: registry.gitlab.e.foundation:5000/e/cloud/my-spot:${SPOT_DOCKER_TAG:-latest}
     restart: unless-stopped
     environment:
       SEARX_REDIS_HOST: redis

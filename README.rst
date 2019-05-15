@@ -34,6 +34,7 @@ First run the redis database:
 
 Then on spot workdir run the following commands to start spot:
 
+- ``export COMPOSE_FILE=docker-compose.yml:docker-compose-dev.yml``
 - ``docker-compose build spot``
 - ``docker-compose run --rm -v $(pwd):/ws -w /ws -e PYTHONPATH=/ws spot sh``
 - ``python3 -X dev searx/webapp.py``

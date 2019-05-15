@@ -94,8 +94,9 @@ coverage:
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}"
     - ssh -2 $PUBLISH_USER@$PUBLISH_URL "mkdir -p ${DEPLOY_FOLDER} && cd ${DEPLOY_FOLDER} && if [ ! -d ${CI_PROJECT_NAME} ] ; then git clone ${CI_PROJECT_URL}.git ; fi && cd ${CI_PROJECT_NAME} && git fetch && git checkout $CI_COMMIT_SHA"
-    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "SPOT_HOSTNAME=$SPOT_HOSTNAME && export SPOT_HOSTNAME && cd ${DEPLOY_FOLDER}/${CI_PROJECT_NAME} && docker-compose pull && docker-compose up -d --build --force-recreate"
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG && COMPOSE_FILE=$COMPOSE_FILE && SPOT_HOSTNAME=$SPOT_HOSTNAME && export SPOT_HOSTNAME COMPOSE_FILE SPOT_DOCKER_TAG && cd ${DEPLOY_FOLDER}/${CI_PROJECT_NAME} && docker-compose pull && docker-compose up -d --build --force-recreate"
 
 test:
   extends: .deploy:template
@@ -105,6 +106,7 @@ test:
     GIT_STRATEGY: none
     SPOT_HOSTNAME: spot.test.ecloud.global
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
+    COMPOSE_FILE: docker-compose.yml:docker-compose-dev.yml
 
 prod:
   extends: .deploy:template
@@ -115,4 +117,6 @@ prod:
     PUBLISH_URL: spot.ecloud.global
     GIT_STRATEGY: none
     SPOT_HOSTNAME: spot.ecloud.global
+    SPOT_DOCKER_TAG: ${CI_COMMIT_TAG}
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
+    COMPOSE_FILE: docker-compose.yml

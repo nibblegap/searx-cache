@@ -2,6 +2,7 @@ version: '3.6'
 
 services:
   spot:
+    build: .
     entrypoint:
       - coverage
       - run
