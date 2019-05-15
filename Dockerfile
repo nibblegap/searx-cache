@@ -6,13 +6,8 @@ RUN apk add \
  libxml2-dev \
  libxslt-dev
 
-# Only to use the docker cache and optimize the build time
-WORKDIR /src
-COPY requirements.txt /src/requirements.txt
-RUN pip3 install --prefix /install -r requirements.txt
-
 COPY . /src/
-RUN PYTHONPATH=/install/lib/python3.7/site-packages/ python3 setup.py install --prefix /install
+RUN pip3 install --prefix /install /src
 
 
 FROM python:3.7-alpine
