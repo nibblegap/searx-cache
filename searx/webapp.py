@@ -510,16 +510,10 @@ def index():
 
     results_copy = copy.deepcopy(search_data.results)
     if is_general_first_page:
-        for res in results_copy:
-            if res.get('category') == 'images':
-                if len(images) < 5:
-                    images.append(res)
-                results_copy.remove(res)
-            elif res.get('category') == 'videos':
-                if len(videos) < 2:
-                    videos.append(res)
-                results_copy.remove(res)
-            elif res.get('category') is None:
+        images = [r for r in results_copy if r.get('category') == 'images'][:5]
+        videos = [r for r in results_copy if r.get('category') == 'videos'][:2]
+        for res in search_data.results:
+            if res.get('category') != 'general':
                 results_copy.remove(res)
 
     # output
