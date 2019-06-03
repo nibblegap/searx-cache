@@ -42,7 +42,7 @@ Then on spot workdir run the following commands to start spot:
 Run tests:
 
 - ``docker run -it --rm -v $(pwd):/ws -w /ws -v /var/run/docker.sock:/var/run/docker.sock -e PYTHONPATH=/ws registry.gitlab.e.foundation:5000/e/cloud/my-spot/env bash``
-- ``pytest --pdb --pdbcls IPython.terminal.debugger:TerminalPdb tests``
+- ``COMPOSE_FILE=docker-compose.yml:docker-compose-dev.yml pytest --pdb --pdbcls IPython.terminal.debugger:TerminalPdb --dockerc-build -s tests/functional/``
 
 Bugs
 ~~~~
