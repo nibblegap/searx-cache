@@ -22,7 +22,6 @@ import hmac
 import json
 import os
 import time
-import copy
 
 import requests
 
@@ -508,21 +507,20 @@ def index():
         else:
             return index_error(e, output), 500
 
-    results_copy = copy.deepcopy(search_data.results)
     if is_general_first_page:
-        images = [r for r in results_copy if r.get('category') == 'images'][:5]
-        videos = [r for r in results_copy if r.get('category') == 'videos'][:2]
-        for res in search_data.results:
+        images = [r for r in search_data.results if r.get('category') == 'images'][:5]
+        videos = [r for r in search_data.results if r.get('category') == 'videos'][:2]
+        for res in list(search_data.results):
             if res.get('category') != 'general':
-                results_copy.remove(res)
+                search_data.results.remove(res)
 
     # output
-    config_results(results_copy, search_data.query)
+    config_results(search_data.results, search_data.query)
     config_results(images, search_data.query)
     config_results(videos, search_data.query)
 
     response = dict(
-        results=results_copy,
+        results=search_data.results,
         q=search_data.query,
         selected_category=selected_category,
         selected_categories=[selected_category],

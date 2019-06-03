@@ -1,6 +1,7 @@
 import threading
 import redis
 import pickle
+import copy
 
 from searx import settings
 from searx.query import SearchQuery
@@ -60,10 +61,11 @@ class RedisCache(CacheInterface):
         conn.set(key, pickle.dumps(d, protocol=4))
 
     def save(self, d):
+        data = copy.deepcopy(d)
         threading.Thread(
             target=self._save,
-            args=(d,),
-            name='save_search_' + str(d)
+            args=(data,),
+            name='save_search_' + str(data)
         ).start()
 
     def get_twenty_queries(self, x):
