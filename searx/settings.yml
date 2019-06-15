@@ -194,7 +194,6 @@ engines:
   - name : duckduckgo
     engine : duckduckgo
     shortcut : ddg
-    disabled : True
 
   - name : duckduckgo images
     engine : duckduckgo_images
@@ -290,6 +289,7 @@ engines:
     engine : google
     shortcut : go
     weight : 5
+    disabled : True
 
   - name : google images
     engine : google_images
