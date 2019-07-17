@@ -22,3 +22,9 @@ try:
     VERSION_STRING = get_distribution("searx").version
 except DistributionNotFound:
     VERSION_STRING = "0.0.0"
+
+try:
+    SEARX_VERSION, METADATA_VERSION = VERSION_STRING.split("+")
+except ValueError:
+    SEARX_VERSION = VERSION_STRING
+    METADATA_VERSION = ""

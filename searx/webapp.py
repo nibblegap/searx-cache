@@ -52,7 +52,7 @@ from searx.utils import (
     get_static_files, get_result_templates, get_themes, gen_useragent,
     dict_subset, prettify_url, match_language
 )
-from searx.version import VERSION_STRING
+from searx.version import VERSION_STRING, SEARX_VERSION, METADATA_VERSION
 from searx.languages import language_codes as languages
 from searx.search import Search
 from searx.search_database import RedisCache
@@ -333,7 +333,8 @@ def render(template_name, override_theme=None, **kwargs):
     if locale in rtl_locales and 'rtl' not in kwargs:
         kwargs['rtl'] = True
 
-    kwargs['searx_version'] = VERSION_STRING
+    kwargs['searx_version'] = SEARX_VERSION
+    kwargs['metadata_version'] = METADATA_VERSION
 
     kwargs['method'] = request.preferences.get_value('method')
 
