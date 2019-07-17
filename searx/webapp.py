@@ -785,34 +785,41 @@ def clear_cookies():
 
 @app.route('/config')
 def config():
-    return jsonify({'categories': categories.keys(),
-                    'engines': [{'name': engine_name,
-                                 'categories': engine.categories,
-                                 'shortcut': engine.shortcut,
-                                 'enabled': not engine.disabled,
-                                 'paging': engine.paging,
-                                 'language_support': engine.language_support,
-                                 'supported_languages':
-                                     engine.supported_languages.keys()
-                                     if isinstance(engine.supported_languages, dict)
-                                     else engine.supported_languages,
-                                 'safesearch': engine.safesearch,
-                                 'time_range_support': engine.time_range_support,
-                                 'timeout': engine.timeout}
-                                for engine_name, engine in engines.items()],
-                    'plugins': [{'name': plugin.name,
-                                 'enabled': plugin.default_on}
-                                for plugin in plugins],
-                    'instance_name': settings['general']['instance_name'],
-                    'locales': settings['locales'],
-                    'default_locale': settings['ui']['default_locale'],
-                    'autocomplete': settings['search']['autocomplete'],
-                    'safe_search': settings['search']['safe_search'],
-                    'default_theme': settings['ui']['default_theme'],
-                    'version': VERSION_STRING,
-                    'doi_resolvers': [r for r in settings['doi_resolvers']],
-                    'default_doi_resolver': settings['default_doi_resolver'],
-                    })
+    return jsonify(
+        {
+            "categories": list(categories.keys()),
+            "engines": [
+                {
+                    "name": engine_name,
+                    "categories": engine.categories,
+                    "shortcut": engine.shortcut,
+                    "enabled": not engine.disabled,
+                    "paging": engine.paging,
+                    "language_support": engine.language_support,
+                    "supported_languages": list(engine.supported_languages.keys())
+                    if isinstance(engine.supported_languages, dict)
+                    else engine.supported_languages,
+                    "safesearch": engine.safesearch,
+                    "time_range_support": engine.time_range_support,
+                    "timeout": engine.timeout,
+                }
+                for engine_name, engine in engines.items()
+            ],
+            "plugins": [
+                {"name": plugin.name, "enabled": plugin.default_on}
+                for plugin in plugins
+            ],
+            "instance_name": settings["general"]["instance_name"],
+            "locales": settings["locales"],
+            "default_locale": settings["ui"]["default_locale"],
+            "autocomplete": settings["search"]["autocomplete"],
+            "safe_search": settings["search"]["safe_search"],
+            "default_theme": settings["ui"]["default_theme"],
+            "version": VERSION_STRING,
+            "doi_resolvers": [r for r in settings["doi_resolvers"]],
+            "default_doi_resolver": settings["default_doi_resolver"],
+        }
+    )
 
 
 @app.errorhandler(404)

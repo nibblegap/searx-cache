@@ -27,3 +27,9 @@ def test_index(ctx, redisdb):
     assert len(response["results"]) > 5
     assert len(response["image_results"]) == 5
     assert len(response['videos_results']) == 2
+
+
+def test_config(ctx):
+    res = requests.get(ctx.url + "/config")
+    assert res.status_code == 200
+    assert res.json()["instance_name"] == "/e/ spot"
