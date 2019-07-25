@@ -24,7 +24,9 @@ build:web:
     - ./manage.sh styles
     - ./manage.sh grunt_build
 
-build:docker:
+
+
+.build:docker:
   stage: build
   image: docker:git
   services:
@@ -32,10 +34,20 @@ build:docker:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - docker build -t $CI_REGISTRY_IMAGE:${CI_COMMIT_TAG:-latest} .
-    - docker push $CI_REGISTRY_IMAGE:${CI_COMMIT_TAG:-latest}
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE
+
+build:docker:master:
+  extends: .build:docker
   only:
     - master
+
+build:docker:tags:
+  extends: .build:docker
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  only:
     - tags
 
 test:unit:
@@ -117,6 +129,6 @@ prod:
     PUBLISH_URL: spot.ecloud.global
     GIT_STRATEGY: none
     SPOT_HOSTNAME: spot.ecloud.global
-    SPOT_DOCKER_TAG: ${CI_COMMIT_TAG}
+    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
     COMPOSE_FILE: docker-compose.yml
