@@ -10,7 +10,7 @@ dev_requirements = open('requirements-dev.txt').read().splitlines()
 
 setup(
     name='searx',
-    use_scm_version=True,
+    use_scm_version={"tag_regex": r"^(?:[\w-]+-)?(?P<version>[vV]?\d+(?:\.\d+){0,2}.*)$"},
     description="A privacy-respecting, hackable metasearch engine",
     long_description=open('README.rst').read(),
     classifiers=[
