@@ -13,6 +13,7 @@ services:
       VIRTUAL_HOST: ${SPOT_HOSTNAME:-spot}
       LETSENCRYPT_HOST: ${SPOT_HOSTNAME:-spot}
       SEARX_LOGGER: INFO
+      SEARX_SECRET: "JCzqlUappxjqi2AHQmCYqqmuufPgdxn9"
 
   proxy:
     image: jwilder/nginx-proxy:alpine

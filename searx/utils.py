@@ -361,7 +361,7 @@ def load_module(filename, module_dir):
 
 
 def new_hmac(secret_key, url):
-    return hmac.new(bytes(secret_key, 'utf-8'), url, hashlib.sha256).hexdigest()
+    return hmac.new(secret_key.encode(), url.encode(), hashlib.sha256).hexdigest()
 
 
 def to_string(obj):
