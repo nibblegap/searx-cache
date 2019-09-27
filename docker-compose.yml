@@ -34,6 +34,7 @@ services:
     restart: unless-stopped
     environment:
       NGINX_PROXY_CONTAINER: proxy
+      DEFAULT_EMAIL: "contact@e.email"
     volumes:
       - /mnt/data/html:/usr/share/nginx/html
       - /mnt/data/vhosts:/etc/nginx/vhost.d
