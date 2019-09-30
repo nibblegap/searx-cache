@@ -19,7 +19,6 @@ services:
     restart: unless-stopped
     container_name: proxy
     volumes:
-      - ./etc/nginx/vhost.d/default:/etc/nginx/vhost.d/default
       - /mnt/data/html:/usr/share/nginx/html
       - /mnt/data/vhosts:/etc/nginx/vhost.d
       - /mnt/data/certs:/etc/nginx/certs:ro
