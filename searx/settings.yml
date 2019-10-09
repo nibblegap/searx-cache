@@ -294,6 +294,7 @@ engines:
   - name : google images
     engine : google_images
     shortcut : goi
+    disabled : True
 
   - name : google news
     engine : google_news
