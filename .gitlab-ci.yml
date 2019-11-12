@@ -1,4 +1,4 @@
-image: $CI_REGISTRY_IMAGE/env:latest
+image: $CI_REGISTRY_IMAGE:latest
 
 stages:
  - check

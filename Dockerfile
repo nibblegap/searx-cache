@@ -17,6 +17,7 @@ LABEL description="A privacy-respecting, hackable metasearch engine."
 RUN apk add \
  ca-certificates \
  libxslt \
+ build-base \
 && pip install coverage
 
 COPY --from=builder /install/ /usr/local/
