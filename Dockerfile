@@ -18,6 +18,7 @@ RUN apk add \
  ca-certificates \
  libxslt \
  build-base \
+ libffi-dev \
 && pip install coverage
 
 COPY --from=builder /install/ /usr/local/
