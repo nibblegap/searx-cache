@@ -19,6 +19,7 @@ RUN apk add \
  libxslt \
  build-base \
  libffi-dev \
+ openssl-dev \
 && pip install coverage
 
 COPY --from=builder /install/ /usr/local/
