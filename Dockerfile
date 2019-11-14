@@ -20,6 +20,7 @@ RUN apk add \
  build-base \
  libffi-dev \
  openssl-dev \
+ npm \
 && pip install coverage
 
 COPY --from=builder /install/ /usr/local/
