@@ -21,6 +21,7 @@ RUN apk add \
  libffi-dev \
  openssl-dev \
  npm \
+ docker \
 && pip install coverage
 
 COPY --from=builder /install/ /usr/local/
