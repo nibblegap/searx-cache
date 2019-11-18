@@ -17,14 +17,14 @@ ACTION="$1"
 #
 
 update_packages() {
-    pip3 install --upgrade pip
-    pip3 install --upgrade setuptools
-    pip3 install -r "$BASE_DIR/requirements.txt"
+    python3 -m pip install --upgrade pip
+    python3 -m pip install --upgrade setuptools
+    python3 -m pip install -r "$BASE_DIR/requirements.txt"
 }
 
 update_dev_packages() {
     update_packages
-    pip3 install -r "$BASE_DIR/requirements-dev.txt"
+    python3 -m pip install -r "$BASE_DIR/requirements-dev.txt"
 }
 
 locales() {
