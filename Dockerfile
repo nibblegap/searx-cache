@@ -1,13 +1,7 @@
-FROM python:3.7-alpine as builder
-
-RUN apk add \
- git \
- build-base \
- libxml2-dev \
- libxslt-dev
+FROM registry.gitlab.e.foundation:5000/e/cloud/my-spot/env as builder
 
 COPY . /src/
-RUN pip3 install --prefix /install /src
+RUN pip install --force-reinstall --prefix /install /src
 
 
 FROM python:3.7-alpine
