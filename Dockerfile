@@ -11,10 +11,12 @@ LABEL description="A privacy-respecting, hackable metasearch engine."
 RUN apk add \
  ca-certificates \
  libxslt \
+ py3-gunicorn \
 && pip install coverage
 
 COPY --from=builder /install/ /usr/local/
 
-EXPOSE 8888
+EXPOSE 80
 STOPSIGNAL SIGINT
-CMD ["searx-run"]
+
+CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:80", "--pythonpath", "/usr/local/lib/python3.7/site-packages", "searx.webapp:app"]

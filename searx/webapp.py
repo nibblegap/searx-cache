@@ -827,6 +827,13 @@ def page_not_found(e):
     return render('404.html'), 404
 
 
+@app.before_first_request
+def start_cache_refresh_task():
+    if settings['redis']['enable']:
+        logger.info("starting cache refresh task")
+        threading.Thread(target=update_results, name='results_updater').start()
+
+
 running = threading.Event()
 
 
@@ -856,7 +863,6 @@ def update_results():
 
 def run():
     logger.debug('starting webserver on %s:%s', settings['server']['port'], settings['server']['bind_address'])
-    threading.Thread(target=update_results, name='results_updater').start()
     print("engine server starting")
     app.run(
         debug=searx_debug,
@@ -866,7 +872,6 @@ def run():
         threaded=True
     )
     print("wait for shutdown...")
-    running.set()
 
 
 class ReverseProxyPathFix(object):
