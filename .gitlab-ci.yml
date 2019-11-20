@@ -1,4 +1,4 @@
-image: $CI_REGISTRY_IMAGE/env:latest
+image: $CI_REGISTRY_IMAGE/env
 
 stages:
  - check
@@ -50,6 +50,17 @@ build:docker:tags:
   only:
     - tags
 
+build:docker:env:
+   extends: .build:docker
+   script:
+     - docker build -t $CI_REGISTRY_IMAGE/env -f Dockerfile.env
+     - docker push $CI_REGISTRY_IMAGE/env
+   only:
+    changes:
+      - Dockerfile.env
+      - requirements-dev.txt
+      - requirements.txt
+
 test:unit:
   stage: test
   before_script:
@@ -70,7 +81,7 @@ test:functional:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
   before_script:
-    - docker run -id --rm -v $(pwd):/ws -e DOCKER_HOST=tcp://$(cat /etc/hosts | grep docker | cut -f1):2375/ -w /ws --name spotenv $CI_REGISTRY_IMAGE/env:latest sh
+    - docker run -id --rm -v $(pwd):/ws -e DOCKER_HOST=tcp://$(cat /etc/hosts | grep docker | cut -f1):2375/ -w /ws --name spotenv $CI_REGISTRY_IMAGE/env sh
     - docker exec -i spotenv ./manage.sh update_dev_packages
   script:
     - docker exec -i spotenv ./manage.sh functional_tests
