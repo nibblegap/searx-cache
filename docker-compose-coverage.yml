@@ -14,6 +14,11 @@ services:
     environment:
       COVERAGE_FILE: /coverage/func
 
+  nginx:
+    build:
+     dockerfile: Dockerfile.nginx
+     context: .
+
 volumes:
   coverage:
     name: spot-coverage

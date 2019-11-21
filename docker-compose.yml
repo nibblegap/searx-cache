@@ -6,35 +6,12 @@ services:
     image: redis:5-alpine
 
   spot:
-    image: registry.gitlab.e.foundation:5000/e/cloud/my-spot:${SPOT_DOCKER_TAG:-latest}
+    image: ${SPOT_DOCKER_IMG}:${SPOT_DOCKER_TAG}
     restart: unless-stopped
     environment:
       SEARX_REDIS_HOST: redis
-      VIRTUAL_HOST: ${SPOT_HOSTNAME:-spot}
-      LETSENCRYPT_HOST: ${SPOT_HOSTNAME:-spot}
       SEARX_LOGGER: INFO
 
-  proxy:
-    image: jwilder/nginx-proxy:alpine
+  nginx:
+    image: ${SPOT_NGINX_DOCKER_IMG}:${SPOT_NGINX_DOCKER_TAG}
     restart: unless-stopped
-    container_name: proxy
-    volumes:
-      - /mnt/data/html:/usr/share/nginx/html
-      - /mnt/data/vhosts:/etc/nginx/vhost.d
-      - /mnt/data/certs:/etc/nginx/certs:ro
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-
-  cert:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    restart: unless-stopped
-    environment:
-      NGINX_PROXY_CONTAINER: proxy
-    volumes:
-      - /mnt/data/html:/usr/share/nginx/html
-      - /mnt/data/vhosts:/etc/nginx/vhost.d
-      - /mnt/data/certs:/etc/nginx/certs
-      - /var/run/docker.sock:/var/run/docker.sock:ro

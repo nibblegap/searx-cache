@@ -8,11 +8,15 @@ from pytest_dockerc import Wait, Context
 class SpotContext(Context):
     @property
     def url(self):
-        addr = self.container_addr("spot")
-        port = self.container_port("spot")
+        addr = self.container_addr("nginx")
+        port = self.container_port("nginx")
         return f"http://{addr}:{port}"
 
     def wait_for_running_state(self):
+        spot_url = "http://{}:{}".format(self.container_addr("spot"), self.container_port("spot"))
+        Wait(ignored_exns=(requests.ConnectionError,), timeout=60)(
+            lambda: requests.get(spot_url)
+        )
         Wait(ignored_exns=(requests.ConnectionError,), timeout=60)(
             lambda: requests.get(self.url)
         )

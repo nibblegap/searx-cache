@@ -36,6 +36,8 @@ build:web:
   script:
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE
+    - docker build -t $CI_REGISTRY_IMAGE/nginx -f Dockerfile.nginx .
+    - docker push $CI_REGISTRY_IMAGE/nginx
 
 build:docker:master:
   extends: .build:docker
@@ -47,6 +49,8 @@ build:docker:tags:
   script:
     - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+    - docker build -t $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG -f Dockerfile.nginx .
+    - docker push $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG
   only:
     - tags
 
