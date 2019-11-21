@@ -12,7 +12,8 @@ setup(
     name='searx',
     use_scm_version={"tag_regex": r"^(?:[\w-]+-)?(?P<version>[vV]?\d+(?:\.\d+){0,2}.*)$"},
     description="A privacy-respecting, hackable metasearch engine",
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
