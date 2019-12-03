@@ -1,107 +1,7 @@
 image: $CI_REGISTRY_IMAGE/env
 
 stages:
- - check
- - build
- - test
- - report
  - deploy
-
-python:
-  stage: check
-  before_script:
-    - ./manage.sh update_dev_packages
-  script:
-    - ./manage.sh pep8_check
-
-build:web:
-  stage: build
-  before_script:
-    - ./manage.sh npm_packages
-    - ./manage.sh update_dev_packages
-  script:
-    - ./manage.sh locales
-    - ./manage.sh styles
-    - ./manage.sh grunt_build
-
-
-
-.build:docker:
-  stage: build
-  image: docker:git
-  services:
-    - docker:18-dind
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-  script:
-    - docker build -t $CI_REGISTRY_IMAGE .
-    - docker push $CI_REGISTRY_IMAGE
-    - docker build -t $CI_REGISTRY_IMAGE/nginx -f Dockerfile.nginx .
-    - docker push $CI_REGISTRY_IMAGE/nginx
-
-build:docker:master:
-  extends: .build:docker
-  only:
-    - master
-
-build:docker:tags:
-  extends: .build:docker
-  script:
-    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-    - docker build -t $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG -f Dockerfile.nginx .
-    - docker push $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG
-  only:
-    - tags
-
-build:docker:env:
-   extends: .build:docker
-   script:
-     - docker build -t $CI_REGISTRY_IMAGE/env -f Dockerfile.env
-     - docker push $CI_REGISTRY_IMAGE/env
-   only:
-    changes:
-      - Dockerfile.env
-      - requirements-dev.txt
-      - requirements.txt
-
-test:unit:
-  stage: test
-  before_script:
-    - ./manage.sh update_dev_packages
-  script:
-    - ./manage.sh unit_tests
-  artifacts:
-    paths:
-      - coverage
-    expire_in: 1 hour
-
-test:functional:
-  stage: test
-  image: docker:stable
-  services:
-    - docker:18-dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  before_script:
-    - docker run -id --rm -v $(pwd):/ws -e DOCKER_HOST=tcp://$(cat /etc/hosts | grep docker | cut -f1):2375/ -w /ws --name spotenv $CI_REGISTRY_IMAGE/env sh
-    - docker exec -i spotenv ./manage.sh update_dev_packages
-  script:
-    - docker exec -i spotenv ./manage.sh functional_tests
-  artifacts:
-    paths:
-      - coverage
-    expire_in: 1 hour
-
-coverage:
-  stage: report
-  script:
-    - ./manage.sh coverage
-  dependencies:
-    - test:unit
-    - test:functional
-  coverage: '/TOTAL.*\s+(\d+%)$/'
 
 .deploy:template:
   image: docker:stable
@@ -109,9 +9,6 @@ coverage:
   only:
     - branches
   when: manual
-  dependencies: []
-  variables:
-    DEPLOY_FOLDER: /mnt/data
   before_script:
     - 'which ssh-agent || ( apk --update add openssh-client )'
     - eval $(ssh-agent -s)
@@ -121,9 +18,10 @@ coverage:
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "docker ps && docker info && docker-compose version"
     - ssh -2 $PUBLISH_USER@$PUBLISH_URL "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}"
-    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "mkdir -p ${DEPLOY_FOLDER} && cd ${DEPLOY_FOLDER} && if [ ! -d ${CI_PROJECT_NAME} ] ; then git clone ${CI_PROJECT_URL}.git ; fi && cd ${CI_PROJECT_NAME} && git fetch && git checkout $CI_COMMIT_SHA"
-    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG && COMPOSE_FILE=$COMPOSE_FILE && SPOT_HOSTNAME=$SPOT_HOSTNAME && export SPOT_HOSTNAME COMPOSE_FILE SPOT_DOCKER_TAG && cd ${DEPLOY_FOLDER}/${CI_PROJECT_NAME} && docker-compose pull && docker-compose up -d --build --force-recreate"
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "mkdir -p ${DEPLOY_FOLDER} && cd ${DEPLOY_FOLDER} && if [ ! -d ${CI_PROJECT_NAME} ] ; then git clone ${CI_PROJECT_URL}.git ; fi && cd ${CI_PROJECT_NAME} && git clean -dffx && git fetch && git checkout $CI_COMMIT_SHA"
+    - ssh -2 $PUBLISH_USER@$PUBLISH_URL "SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG && COMPOSE_FILE=$COMPOSE_FILE && SPOT_HOSTNAME=$SPOT_HOSTNAME && export SPOT_HOSTNAME COMPOSE_FILE SPOT_DOCKER_TAG && cd ${DEPLOY_FOLDER}/${CI_PROJECT_NAME} && docker-compose pull && docker-compose up -d --build --force-recreate --remove-orphans"
 
 test:
   extends: .deploy:template
@@ -134,6 +32,7 @@ test:
     SPOT_HOSTNAME: spot.test.ecloud.global
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
     COMPOSE_FILE: docker-compose.yml:docker-compose-dev.yml
+    DEPLOY_FOLDER: /mnt/data
 
 prod:
   extends: .deploy:template
@@ -147,3 +46,4 @@ prod:
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
     COMPOSE_FILE: docker-compose.yml
+    DEPLOY_FOLDER: /mnt/data
