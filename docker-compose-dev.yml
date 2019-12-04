@@ -2,9 +2,11 @@ version: '3.6'
 
 services:
   spot:
-    build: .
+    build:
+      dockerfile: Dockerfile
+      context: .
 
   nginx:
     build:
-     dockerfile: Dockerfile.nginx
-     context: .
+      dockerfile: Dockerfile.nginx
+      context: .
