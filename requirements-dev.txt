@@ -1,8 +1,8 @@
-babel==2.3.4
-mock==2.0.0
+babel==2.7.0
+mock==3.0.5
 pycodestyle==2.5.0
-flake8==3.7.7
+flake8==3.7.9
 mockredispy==2.9.3
-pytest==5.3.2 
-pytest-cov==2.8.1 
+pytest==5.3.2
+pytest-cov==2.8.1
 pytest-dockerc==1.0.6
