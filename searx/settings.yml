@@ -650,6 +650,8 @@ engines:
   - name : vimeo
     engine : vimeo
     shortcut : vm
+    disabled: True
+
 
   - name : wolframalpha
     shortcut : wa
