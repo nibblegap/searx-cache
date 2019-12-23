@@ -1,5 +1,7 @@
 image: $CI_REGISTRY_IMAGE/env:latest
 
+DOCKER_TLS_CERTDIR: "/certs"
+
 stages:
  - check
  - build
@@ -24,18 +26,18 @@ build:web:
     - ./manage.sh styles
     - ./manage.sh grunt_build
 
-
-
 .build:docker:
   stage: build
   image: docker:git
   services:
-    - docker:18-dind
+    - docker:dind
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE
+  tags:
+    - harold
 
 build:docker:master:
   extends: .build:docker
@@ -65,7 +67,7 @@ test:functional:
   stage: test
   image: docker:stable
   services:
-    - docker:18-dind
+    - docker:dind
   variables:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
@@ -78,6 +80,8 @@ test:functional:
     paths:
       - coverage
     expire_in: 1 hour
+  tags:
+    - harold
 
 coverage:
   stage: report
