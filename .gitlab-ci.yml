@@ -1,6 +1,7 @@
 image: $CI_REGISTRY_IMAGE/env:latest
 
-DOCKER_TLS_CERTDIR: "/certs"
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
 
 stages:
  - check
