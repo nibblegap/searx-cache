@@ -39,6 +39,7 @@ build:web:
     - docker push $CI_REGISTRY_IMAGE
   tags:
     - harold
+    - privileged
 
 build:docker:master:
   extends: .build:docker
@@ -83,6 +84,7 @@ test:functional:
     expire_in: 1 hour
   tags:
     - harold
+    - privileged
 
 coverage:
   stage: report
