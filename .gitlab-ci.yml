@@ -65,10 +65,10 @@ test:unit:
   stage: deploy
   before_script:
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - echo "$PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - ssh $DOCKER_HOST "mkdir -p $(dirname $FILTRON_RULES) && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -89,7 +89,7 @@ deploy:spot.test.cloud.global:
     SPOT_MORTY_HOSTNAME: proxy.spot.test.ecloud.global
     SEARX_MORTY_URL: https://proxy.spot.test.ecloud.global
     COMPOSE_PROJECT_NAME: my-spot
-    SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
+    PRIVATE_KEY: ${PRIVATE_KEY_TEST}
   script:
     - docker-compose up -d --build --scale tor=5
     - docker-compose restart filtron
@@ -110,7 +110,7 @@ deploy:spot.cloud.global:
     COMPOSE_PROJECT_NAME: my-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
-    SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
+    PRIVATE_KEY: ${PRIVATE_KEY_PROD}
   script:
     - docker-compose pull
     - docker-compose up -d --scale tor=5
