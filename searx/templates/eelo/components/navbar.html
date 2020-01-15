@@ -1,0 +1,15 @@
+{% from 'eelo/macros.html' import navbar_menu %}
+<input type="checkbox" name="nav_toggle" id="nav_toggle" class="hidden">
+<nav>
+    <span id="eelo_links">
+        <a href="https://webmail.ecloud.global/">{{_('mail')}}</a>
+        <a href="https://drive.ecloud.global/">{{_('drive')}}</a>
+    </span>
+
+    <span>
+        <a href="{{ url_for('preferences') }}">{{ _('preferences') }}</a>
+    </span>
+</nav>
+<div id="nav_cover"></div>
+
+{{ navbar_menu() }}

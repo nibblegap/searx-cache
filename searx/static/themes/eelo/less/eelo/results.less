@@ -1,0 +1,299 @@
+@video-scale: 16;
+
+#results {
+  margin-top: @spacing_xx-large;
+  margin-bottom: @spacing_xx-large;
+}
+
+.result {
+  .result-template {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: @text-muted-color;
+
+    & + .result_header { margin-top: 0; }
+  }
+  .result_header {
+    margin-bottom: @spacing_small;
+  
+    .favicon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  .subheader > :not(:last-child), .subheader > * > :not(:last-child) {
+    margin-right: @spacing_large; 
+  }
+  .result-content {
+    margin-top: @spacing_medium;
+    margin-bottom: @spacing_small;
+
+    p, pre {
+      margin-top: @spacing_medium;
+      margin-bottom: @spacing_medium;
+    }
+  }
+
+  &.result-torrent {
+    .extra-info > :not(:last-child) { margin-right: @spacing_large; }
+  }
+  .videos-gallery &.result-torrent {
+    .torrent-banner {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      color: @text-muted-color;
+      font-weight: bold;
+      padding: @spacing_small @spacing_large;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      font-size: @fontsize_small;
+
+      .torrent-data {
+        text-transform: none;
+        font-weight: normal;
+
+        & > :not(:first-child) {
+          margin-left: @spacing_small;
+        }
+      }
+    }
+  }
+  &.result-videos, .videos-gallery &.result-torrent {
+    position: relative;
+    .widget-border(@dim-color-lighter);
+    border-radius: @corner-radius;
+
+    .result-content {
+      margin: 0px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+
+      .result_header { 
+        margin-top: 0; 
+        a {
+          word-wrap: break-word;
+        }
+      }
+
+      & > .thumbnail { position: relative; }
+      & > :not(.thumbnail) {
+        margin-top: @spacing_medium;
+        height: 100%;
+        display: flex;
+        padding: @spacing_medium @spacing_large;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .thumbnail > img { 
+        width: 100%;
+        height: 9px * @video-scale;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+
+      .subheader {
+        .result_engine {
+          float: right;
+          img {
+            width: 16px;
+            height: 16px;
+            margin-left: @spacing_medium;
+            vertical-align: middle;
+          }
+        }
+      }
+    }
+  }
+  
+  .external-link {
+    font-size: @fontsize_small;
+    color: #39a441;
+  }
+
+  .extra-info {
+    color: @text-muted-color;
+  }
+
+
+  .code-block {
+    background-color: @dim-color-superlighter;
+    padding: 0 @spacing_large;
+    border-radius: @corner-radius;
+    border: 1px solid @dim-color-light;
+
+    pre {
+      white-space: pre-wrap;
+    }
+  }
+}
+
+.result.result-default, .result.result-torrent {
+  margin-bottom: @spacing_xx-large;
+}
+.result.result-images {
+  display: inline;
+
+  .img-thumbnail {
+    width: 100%;
+    border: none;
+    margin-bottom: @spacing_medium;
+  }
+}
+
+#results.images-gallery {
+  display: flex;
+  flex-wrap: wrap;
+
+  .result.result-images {
+    display: block;
+    flex: 20%;
+    height: 200px;
+    max-height: 200px;
+    overflow: hidden;
+  }
+}
+.videos-gallery {
+  display: flex;
+  flex-wrap: wrap;
+
+  // torrents in grid mode do not need margin
+  .result.result-torrent { margin-bottom: 0; }
+}
+@supports(display: grid) {
+  #results.images-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: @spacing_medium;
+  
+    .result.result-images {
+      display: block;
+      text-align: center;
+      overflow: hidden;
+
+      .img-thumbnail {
+        height: 100%;
+        width: auto;
+      }
+    }
+  } 
+  .videos-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16px * @video-scale, 1fr));
+    grid-gap: @spacing_large;
+  
+    .result.result-videos, .result.result-torrent {
+      display: block;
+      overflow: hidden;
+    }
+  }
+}
+#default_images_container {
+  column-count: 5;
+  column-gap: @spacing_medium;
+  margin-bottom: @spacing_xx-large;
+
+  .img-thumb-link {
+    display: block;
+    max-height: 120px;
+    overflow: hidden;
+  }
+}
+
+
+#suggestions, #corrections {
+  form {
+    display: inline-block;
+    .btn { text-transform: none; }
+  }
+}
+
+
+.infobox {
+
+  margin-top: @spacing_xx-large;
+
+  .head {
+    .title {
+      font-size: @fontsize_x-large;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    small { color: @text-muted-color; }
+  }
+
+  .body {
+    .main-content {
+    }
+    .image-container {
+      max-height: 250px;
+      overflow: hidden;
+      text-align: center;
+    }
+    .content { flex: 3; }
+
+    img {
+      max-width: 100%;
+      width: 100%;
+      margin-top: @spacing_large;
+    }
+  }
+
+  .footer {
+    .links a {
+      padding-left: 0;
+      padding-top: 0;
+      padding-bottom: @spacing_large;
+      padding-right: @spacing_xx-large;
+      display: inline-block;
+      font-size: @fontsize_small;
+    }
+  }
+
+  table { 
+    margin-top: @spacing_large; 
+    width: 100%;
+  }
+  table tr {
+    vertical-align: top;
+
+    td {
+      padding: 0;
+      padding-bottom: @spacing_medium;
+    }
+
+    & > .label {
+      text-align: right;
+      color: @text-muted-color;
+      padding-right: @spacing_large;
+    }
+  }
+}
+
+.first-page-media-results {
+  margin-bottom: @spacing_xx-large;
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    .title { font-size: @fontsize_large; }
+  }
+}
+
+
+.tablet-mq({
+  #results.images-gallery {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+
+    .result.result-images {
+      height: 140px;
+      max-height: 140px;
+    }
+  }
+});

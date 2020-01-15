@@ -1,0 +1,149 @@
+<!-- use icons defined in icons.html -->
+{% macro icon(action, classes="") -%}
+  <svg class="icon {{ classes }}" viewBox="0 0 24 24" width="24px" height="24px">
+    <use href="#{{ action }}" xlink:href="#{{ action }}"></use>
+  </svg>
+{%- endmacro %}
+
+<!-- Search bar base -->
+{% macro search_bar(value="", inline=false, rtl=false, autofocus=false) -%}
+    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" id="search_form" {% if inline %}class="inline-search" {% endif %} role="search">
+        <div id="search_input_container" {% if rtl -%} class="rtl" {%- endif %}>
+            {% if inline %}
+            <a href="{{ url_for('index') }}" id="logo_link"><img src="{{ url_for('static', filename='themes/eelo/img/logo.png') }}" alt="" id="logo"></a>
+            {% endif %}
+            <input type="search" name="q" class="form-control" id="q" placeholder="{{ _('Search for...') }}" autocomplete="off" value="{{ value }}" {% if autofocus %}autofocus{% endif %}>
+            <button type="submit">{{ icon('search') }}</button>
+        </div>
+        
+        {{ caller() }}
+    </form>
+{%- endmacro %}
+
+{% macro navbar_menu() -%}
+    <label for="nav_toggle" id="nav_toggle_btn">{{icon("menu", "menu-open")}}{{icon("close", "menu-close")}}</label>
+{%- endmacro %}
+
+
+<!-- Draw favicon -->
+{% macro draw_favicon(favicon) -%}
+    <img width="32" height="32" class="favicon" src="{{ url_for('static', filename='themes/eelo/img/icons/' + favicon + '.png') }}" alt="{{ favicon }}" />
+{%- endmacro %}
+
+{%- macro result_link(url, title, classes='') -%}
+<a href="{{ url }}" {% if classes %}class="{{ classes }}" {% endif %}{% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %}>{{ title }}</a>
+{%- endmacro -%}
+
+<!-- Draw result header -->
+{% macro result_header(result, favicons, put_icon=True) -%}
+<h4 class="result_header">{% if result.engine~".png" in favicons and put_icon %}{{ draw_favicon(result.engine) }} {% endif %}{{ result_link(result.url, result.title|safe) }}</h4>
+{%- endmacro %}
+{% macro result_engine(result, favicons) -%}
+<span class="result_engine">{{ result.engine }}{% if result.engine~".png" in favicons %}{{ draw_favicon(result.engine)}}{% endif %}</span>
+{%- endmacro %}
+
+<!-- Draw result sub header -->
+{% macro result_sub_header(result) -%}
+<small class="subheader">
+    {% if result.publishedDate %}
+    <time class="text-muted" datetime="{{ result.pubdate }}" >{{ result.publishedDate }}</time>
+    {% endif %}
+    {% if caller %}
+    <span class="links">{{caller()}}</span>
+    {% endif %}
+</small>
+{%- endmacro %}
+
+<!-- Draw result footer -->
+{% macro result_footer(result) -%}
+
+<a class="external-link" href="{{result.url}}">{{ result.pretty_url }}</a>
+{%- endmacro %}
+
+<!-- Draw result footer -->
+{% macro result_footer_rtl(result) -%}
+    <div class="clearfix"></div>
+    {% for engine in result.engines %}
+        <span class="label label-default">{{ engine }}</span>
+    {% endfor %}
+    <small>{{ result_link("https://web.archive.org/web/" + result.url, icon('link') + _('cached'), "text-info") }}</small>
+    {% if proxify %}
+    <small>{{ result_link(proxify(result.url), icon('sort') + _('proxied'), "text-info") }}</small>
+    {% endif %}
+    <div class="external-link">{{ result.pretty_url }}</div>
+{%- endmacro %}
+
+{% macro checkbox_toggle(id, blocked) -%}
+    <input class="checkmark_input inverted" type="checkbox" id="{{ id }}" name="{{ id }}"{% if blocked %} checked="checked"{% endif %} class="onoffswitch-checkbox">
+    <label for="{{ id }}" class="checkmark">
+        {{ icon("checkbox_checked", "checked") }}
+        {{ icon("checkbox_unchecked", "unchecked") }}
+    </label>
+{%- endmacro %}
+
+{% macro support_toggle(supports) -%}
+    {% if supports %}
+    <span class="label label-success">
+        {{ _("supported") }}
+    </span>
+    {% else %}
+    <span class="label label-danger">
+        {{ _("not supported") }}
+    </span>
+    {% endif %}
+{%- endmacro %}
+
+
+
+{% macro search_link(text, q, method=None, time_range=None, lang=None, category=None) -%}
+<form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation">
+    <input type="hidden" name="q" value="{{ q }}" />
+    {% if time_range %}
+    <input type="hidden" name="time_range" value="{{ time_range }}" />
+    {% endif %}
+    {% if time_range %}
+    <input type="hidden" name="language" value="{{ lang }}" />
+    {% endif %}
+    {% if category %}
+    <input type="hidden" name="categories" value="{{ category }}" />
+    {% endif %}
+    <button type="submit" class="btn btn-flat" >{{ text }}</button>
+</form>
+{% endmacro %}
+
+
+{% macro collapser(text, id, classes) -%}
+<div class="collapser">
+    <input type="checkbox" class="hidden" id="{{id}}">
+    <label for="{{id}}" class="{{classes}}">{{text}}</label>
+    <div class="collapse">
+        {{ caller() }}
+    </div>
+</div>
+{%- endmacro %}
+
+
+{% macro format_filesize(filesize) -%}
+{% if filesize < 1024 %}{{ filesize }} {{ _('Bytes') }}
+{% elif filesize < 1024*1024 %}{{ '{0:0.2f}'.format(filesize/1024) }} {{ _('kiB') }}
+{% elif filesize < 1024*1024*1024 %}{{ '{0:0.2f}'.format(filesize/1024/1024) }} {{ _('MiB') }}
+{% elif filesize < 1024*1024*1024*1024 %}{{ '{0:0.2f}'.format(filesize/1024/1024/1024) }} {{ _('GiB') }}
+{% else %}{{ '{0:0.2f}'.format(filesize/1024/1024/1024/1024) }} {{ _('TiB') }}{% endif %}
+{%- endmacro %}
+
+
+{% macro errors_panel(errors, error_detail) -%}
+<section id="errors" class="danger">
+    <h4 class="title">{{_("Error!")}}</h4>
+    <ul>
+        {% for message in errors %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% if error_detail %}
+    <pre>
+{{error_detail}}
+    </pre>
+    {% endif %}
+</section>
+{%- endmacro %}

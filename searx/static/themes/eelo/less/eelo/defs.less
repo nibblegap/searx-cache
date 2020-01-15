@@ -1,0 +1,90 @@
+@black: #020f16;
+@grey: #eeeeee;
+@text-color: #60686f;
+@text-color-hl: #5c6469;
+@link-color: #1f6ed7;
+
+@color_accent: #5068dd;
+@color_accent__op: white;
+@color_accent__dark: #2344a2;
+@color_primary: blue;
+@color_base: blue;
+@color_base-text-hl: #5c6469;
+
+@color_danger: #e06572;
+@color_danger__op: white;
+
+@corner-radius: 8px;
+
+@dim-color-superlighter: rgba(0, 0, 0, 0.03);
+@dim-color-lighter: rgba(0, 0, 0, 0.1);
+@dim-color-light: rgba(0, 0, 0, 0.2);
+@dim-color-normal: rgba(0, 0, 0, 0.4);
+
+@text-muted-color: @dim-color-normal;
+
+
+@fontsize_xx-small: 8px;
+@fontsize_x-small: 11px;
+@fontsize_small: 14px;
+@fontsize_medium: 16px;
+@fontsize_large: 18px;
+@fontsize_x-large: 22px;
+@fontsize_xx-large: 22px;
+
+@spacing_xx-small: 2px;
+@spacing_x-small: 4px;
+@spacing_small: 6px;
+@spacing_medium: 8px;
+@spacing_large: 16px;
+@spacing_x-large: 24px;
+@spacing_xx-large: 32px;
+@spacing_huge: 38px;
+@spacing_x-huge: 48px;
+@spacing_xx-huge: 64px;
+
+@spacing_container: @spacing_large;
+@spacing_search_bar_contents: 56px;
+
+@size-content-small: 400px;
+@size-content: 600px;
+
+@size-desktop: 1100px;
+@size-mobile: 600px;
+
+
+.container-padding {
+  padding-left: @spacing_container;
+  padding-right: @spacing_container;
+}
+
+
+@color-transition: color .2s ease-in-out;
+@border-color-transition: border-color .2s ease-in-out;
+@background-color-transition: background-color .2s ease-in-out;
+@fill-transition: fill .2s ease-in-out;
+@box-shadow-transition: box-shadow .2s ease-in-out;
+
+.color-transition { transition: @color-transition; }
+.border-color-transition { transition: @border-color-transition; }
+.fill-transition { transition: @fill-transition; }
+.box-shadow-transition { transition: @box-shadow-transition; }
+
+.widget-border(@color: rgba(0, 0, 0, .2)) {
+  border: 2px solid @color;
+}
+
+
+.disabled { opacity: .4; }
+
+
+// media queries
+.tablet-mq(@rules) {
+  @media screen and (max-width: @size-desktop) { @rules(); }
+}
+.mobile-mq(@rules) {
+  @media screen and (max-width: @size-mobile) { @rules(); }
+}
+.mobile-landscape-mq(@rules) {
+  @media screen and (max-height: @size-mobile) and (orientation: landscape) { @rules(); }
+}

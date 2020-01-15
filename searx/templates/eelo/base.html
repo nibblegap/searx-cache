@@ -1,0 +1,108 @@
+{% from 'eelo/macros.html' import icon %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"{% if rtl %} dir="rtl"{% endif %}>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="spot ecloud global, powered by searx" />
+    <meta name="keywords" content="spot, ecloud, searx, search, search engine, metasearch, meta search" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="generator" content="searx/{{ searx_version }}">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , maximum-scale=1.0, user-scalable=1" />
+    {% block meta %}{% endblock %}
+    <title>{% block title %}{% endblock %}{{ instance_name }}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eelo.min.css') }}" type="text/css" />
+
+    {% for css in styles %}
+        <link rel="stylesheet" href="{{ url_for('static', filename=css) }}" type="text/css" />
+    {% endfor %}
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="{{ url_for('static', filename='js/html5shiv.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/respond.min.js') }}"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}" />
+
+    {% block styles %}
+    {% endblock %}
+    {% block head %}
+    {% endblock %}
+
+    <link title="{{ instance_name }}" type="application/opensearchdescription+xml" rel="search" href="{{ url_for('opensearch') }}"/>
+
+    <noscript>
+        <style type="text/css">
+            .tab-content > .active_if_nojs, .active_if_nojs {display: block !important; visibility: visible !important;}
+            .margin_top_if_nojs {margin-top: 20px;}
+            .hide_if_nojs {display: none !important;overflow:none !important;}
+            .disabled_if_nojs {pointer-events: none; cursor: default; text-decoration: line-through;}
+        </style>
+    </noscript>
+</head>
+
+
+<body>
+    {% include 'eelo/components/icons.html' %}
+    {% include 'eelo/components/navbar.html' %}
+
+    {% set inline_search_form = true %}
+    <main>
+
+    {% block site_alert_error %}
+    {% endblock %}
+    {% block site_alert_warning %}
+    {% endblock %}
+    {% block site_alert_info %}
+    {% endblock %}
+    {% block site_alert_success %}
+    {% endblock %}
+
+    {% block content %}
+    {% endblock %}
+
+    <div id="image_view_modal" class="hidden">
+        <div class="card-container">
+            <div id="image_view_card">
+                <button onclick="close_image_view_modal()">{{ icon("close") }}</button>
+                <img id="image_view_image" src="">
+                <div class="options">
+                    <a id="image_view_file_link" class="btn" {% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %} href="#">{{_("view file")}}</a>
+                    <a id="image_view_url_link" class="btn" {% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %} href="#">{{_("view source")}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </main>
+    <footer>
+        {% block footer %}
+        {% endblock %}
+        <p class="text-muted">
+            <small>
+                e Foundation 2018-2019,
+                {{ _('Powered by') }} <a href="https://gitlab.e.foundation/e/cloud/my-spot">Spot</a>
+                {{ metadata_version }}<br/>An open-source metasearch engine forked from <a href="https://asciimoo.github.io/searx/">Searx</a> {{ searx_version }}.
+                <span class="links">
+                    <a href="https://e.foundation">{{ _('About') }}</a>
+                    <a href="https://e.foundation/legal-notice-privacy">{{ _('Privacy') }}</a>
+                </span>
+            </small>
+        </p>
+    </footer>
+
+
+    <script src="{{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
+    {% if autocomplete %}<script src="{{ url_for('static', filename='js/typeahead.bundle.min.js') }}"></script>{% endif %}
+    <script src="{{ url_for('static', filename='js/require-2.1.15.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/searx.min.js') }}"
+            data-method="{{ method or 'POST' }}"
+            data-autocompleter="{% if autocomplete %}true{% else %}false{% endif %}"></script>
+
+    {% for script in scripts %}
+    <script src="{{ url_for('static', filename=script) }}"></script>
+    {% endfor %}
+</body>
+</html>

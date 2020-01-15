@@ -1,0 +1,38 @@
+{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, result_link, icon, format_filesize %}
+
+{{ result_header(result, favicons) }}
+{% call result_sub_header(result) %}
+    {% if result.magnetlink %}
+    {{ result_link(result.magnetlink, _('magnet link'), "magnetlink") }}
+    {% endif %}
+    {% if result.torrentfile %}
+    {{ result_link(result.torrentfile, _('torrent file'), "torrentfile") }}
+    {% endif %}
+{% endcall %}
+
+<div class="result-content">
+
+    <div class="extra-info">
+        {% if result.seed and result.leech -%}
+        <span>{{ _('Seeders') }}: {{ result.seed }}</span>
+        <span>{{ _('Leechers') }}: {{ result.leech }}</span>
+        {%- endif %}
+    
+        {% if result.filesize %}
+        <span class="badge"> {{ _('Filesize') }}:
+            {{ format_filesize(result.filesize) }}
+        </span>
+        {% endif %}
+    
+        {% if result.files %}
+        <span>
+            {{ _('Files') }}: {{ result.files }}
+        </span>
+        {% endif %}
+    </div>
+
+    <p>{% if result.content %}{{ result.content|safe }}{% endif %}</p>
+</div>
+
+
+{{ result_footer(result) }}

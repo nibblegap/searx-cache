@@ -1,0 +1,16 @@
+{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, icon %}
+
+{{ result_header(result, favicons) }}
+{% call result_sub_header(result) %}
+  {% if result.repository %}<a href="{{ result.repository }}" {% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %}>{{ result.repository }}</a>{% endif %}
+{% endcall %}
+
+<div class="result-content">
+  {% if result.content %}{{ result.content|safe }}{% endif %}
+
+  <div dir="ltr" class="code-block">
+    {{ result.codelines|code_highlighter(result.code_language)|safe }}
+  </div>
+</div>
+
+{{ result_footer(result) }}

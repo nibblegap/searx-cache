@@ -1,6 +1,6 @@
 $(document).ready(function() {
     if($('#q').length) {
-        $('#categories label').click(function(e) {
+        $('#categories label[for^="checkbox_"]').click(function(e) {
             $('#categories input[type="checkbox"]').each(function(i, checkbox) {
                 $(checkbox).prop('checked', false);
             });

@@ -133,6 +133,10 @@ npm_packages() {
     echo '[!] install NPM packages for simple theme'
     cd -- "$BASE_DIR/searx/static/themes/simple"
     npm install
+
+    echo '[!] install NPM packages for eelo theme'
+    cd -- "$BASE_DIR/searx/static/themes/eelo"
+    npm install
 }
 
 build_style() {
@@ -163,6 +167,8 @@ grunt_build() {
     grunt --gruntfile "$SEARX_DIR/static/themes/oscar/gruntfile.js"
     echo '[!] Grunt build : simple theme'
     grunt --gruntfile "$SEARX_DIR/static/themes/simple/gruntfile.js"
+    echo '[!] Grunt build : eelo theme'
+    grunt --gruntfile "$SEARX_DIR/static/themes/eelo/gruntfile.js"
 }
 
 docker_build() {

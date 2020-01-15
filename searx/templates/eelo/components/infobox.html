@@ -1,0 +1,51 @@
+{% from 'eelo/macros.html' import result_link with context %}
+
+<div class="infobox">
+    <div class="head">
+        <h4 class="title">{{ infobox.infobox }}</h4>
+        <small>{{infobox.engine}}</small>
+    </div>
+
+    <div class="body">
+
+        <div class="main-content">
+            {% if infobox.img_src %}
+            <div class="image-container">
+                <img class="main-image" src="{{ image_proxify(infobox.img_src) }}" alt=""/>
+            </div>
+            {% endif %}
+    
+            {% if infobox.content %}
+            <p class="content"><bdi>{{ infobox.content }}</bdi></p> 
+            {% endif %}
+        </div>
+
+        {% if infobox.attributes %}
+        <table>
+            {% for attribute in infobox.attributes %}
+            <tr>
+                <td class="label"><bdi>{{ attribute.label }}</bdi></td>
+                {% if attribute.image %}
+                <td class="value"><img class="img-responsive" src="{{ image_proxify(attribute.image.src) }}" alt="{{ attribute.image.alt }}" /></td>
+                {% else %}
+                <td class="value"><bdi>{{ attribute.value }}</bdi></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        {% if infobox.urls %}
+        <div class="links">
+            <p>{{_("More information:")}}</p>
+            <bdi>
+            {% for url in infobox.urls %}
+            {{ result_link(url.url, url.title, 'btn btn-flat') }}
+            {% endfor %}
+            </bdi>
+        </div>
+        {% endif %}
+    </div>
+</div>

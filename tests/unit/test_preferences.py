@@ -128,7 +128,7 @@ class TestPreferences(SearxTestCase):
 
     def test_encode(self):
         from searx.preferences import Preferences
-        pref = Preferences(['oscar'], ['general'], {}, [])
+        pref = Preferences(['oscar', 'eelo'], ['general'], {}, [])
         url_params = 'eJx1VMmO2zAM_Zr6YrTocujJh6JF0QEKzKAz7VVgJNohLIseUU7ivy-VcWy5yyGOTVGP73GLKJNPYjiYgGeT4NB8BS9YOSY' \
             'TUdifMDYM-vmGY1d5CN0EHTYOK88W_PXNkcDBozOjnzoK0vyi4bWnHs2RU4-zvHr_-RF9a-5Cy3GARByy7X7EkKMoBeMp9CuPQ-SzYMx' \
             '8Vr9P1qKI-XJ_p1fOkRJWNCgVM0a-zAttmBJbHkaPSZlNts-_jiuBFgUh2mPztkpHHLBhsRArDHvm356eHh5vATS0Mqagr0ZsZO_V8hT' \

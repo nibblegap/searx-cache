@@ -1,0 +1,16 @@
+{% extends "eelo/base.html" %}
+{% block content %}
+
+{% if errors %}
+{% from 'eelo/macros.html' import errors_panel %}
+<div class="content-small-centered">
+    {{ errors_panel(errors, error_details) }}
+</div>
+{% endif %}
+
+<div id="index">
+    <img src="{{ url_for('static', filename='img/logo_searx_a.png') }}" alt="searx logo" />
+    <img id="logo_inline" src="{{ url_for('static', filename='img/logo_searx_a.png') }}" alt="e logo" />
+    {% include 'eelo/components/search.html' %}
+</div>
+{% endblock %}

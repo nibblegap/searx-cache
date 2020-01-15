@@ -1,0 +1,126 @@
+{% extends "eelo/base.html" %}
+{% from "eelo/macros.html" import search_link %}
+
+
+{%- macro search_url() %}{{ base_url }}?q={{ q|urlencode }}{% if selected_categories %}&amp;categories={{ selected_categories|join(",") | replace(' ','+') }}{% endif %}{% if pageno > 1 %}&amp;pageno={{ pageno }}{% endif %}{% if time_range %}&amp;time_range={{ time_range }}{% endif %}{% if current_language != 'all' %}&amp;language={{ current_language }}{% endif %}{% endmacro -%}
+{% block title %}{{ q|e }} - {% endblock %}
+{% block meta %}<link rel="alternate" type="application/rss+xml" title="Searx search: {{ q|e }}" href="{{ search_url() }}&amp;format=rss">{% endblock %}
+{% block content %}
+
+    <div id="search_bar_area">
+        {% include 'eelo/components/search_full.html' %}
+    </div>
+
+    {% set use_gallery_layout = 'images' in selected_categories or 'videos' in selected_categories %}
+    <div class="container contents {% if use_gallery_layout or (not results and not answers) %} full {% endif %}">
+        <div>
+            {% if corrections %}
+            <div class="result" id="corrections">
+                <span class="text-muted">{{ _('Did you mean:') }}
+                    {% for correction in corrections %}
+                    {{ search_link(correction, correction, method) }}
+                    {% endfor %}
+                </span>
+                ?
+            </div>
+            {% endif %}
+
+            {% if answers %}
+            {% for answer in answers %}
+            <div class="result well">
+                <span>{{ answer }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if not results and not answers %}
+                {% include 'eelo/messages/no_results.html' %}
+            {% else %}
+
+
+                {% macro put_results(results_slice, no_image=False) -%}
+                {%- for result in results_slice %}
+                {% set template = result.template|replace('.html', '') if result['template'] else None %}
+                {% if no_image and template == "images" and not use_gallery_layout %}
+                {% else %}
+                <div class="result {% if template %}result-{{ template }}{% else %} result-default {% endif %}">
+                    {% if template in ["torrent"] and not use_gallery_layout %}
+                    <small class="result-template">{{template}}</small>
+                    {% endif %}
+
+                    {% set index = loop.index %}
+                    {% if result.template %}
+                        {# Torrents presented in a gallery like layout are different than the regular layout #}
+                        {% if template == "torrent" and 'videos' in selected_categories %}
+                        {% include get_result_template('eelo', 'video_torrent.html') %}
+                        {% else %}
+                        {% include get_result_template('eelo', result['template']) %}
+                        {% endif %}
+                    {% else %}
+                        {% include 'eelo/result_templates/default.html' %}
+                    {% endif %}
+                </div>
+                {% endif %}
+                {%- endfor %}
+                {%- endmacro %}
+
+
+                <div id="results" {% if use_gallery_layout %} class="{{selected_categories[0]}}-gallery" {% endif %}>
+                    {{ put_results(results, True) }}
+                </div>
+
+                {% if paging %}
+                {% macro search_form_attrs(pageno) -%}
+                    {%- for category in selected_categories -%}
+                        <input type="hidden" name="category_{{ category }}" value="1"/>
+                    {%- endfor -%}
+                    <input type="hidden" name="q" value="{{ q|e }}" />
+                    <input type="hidden" name="pageno" value="{{ pageno }}" />
+                    <input type="hidden" name="time_range" value="{{ time_range }}" />
+                    <input type="hidden" name="language" value="{{ current_language }}" />
+                {%- endmacro %}
+
+                <div id="pagination" {% if rtl %} class="rtl" {% endif %} >
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
+                        {{ search_form_attrs(pageno - 1) }}
+                        <button type="submit" class="btn btn-default" {% if pageno == 1 %}disabled{% endif %}><span class="glyphicon glyphicon-forward"></span> {{ _('previous page') }}</button>
+                    </form>
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
+                        {{ search_form_attrs(pageno + 1) }}
+                        <button type="submit" class="btn primary"><span class="glyphicon glyphicon-backward"></span> {{ _('next page') }}</button>
+                    </form>
+                </div><!-- /#pagination -->
+                {% endif %}
+
+            {% endif %}
+
+        </div>
+
+        <div>
+            {% if errors %}
+            {% from 'eelo/macros.html' import errors_panel %}
+            {{ errors_panel(errors) }}
+            {% endif %}
+
+            {% if infoboxes %}
+                {% for infobox in infoboxes %}
+                    {% include 'eelo/components/infobox.html' %}
+                {% endfor %}
+            {% endif %}
+
+
+            {% if suggestions %}
+            <div id="suggestions" class="infobox">
+                <h4 class="panel-title">{{ _('Suggestions') }}</h4>
+                <p>
+                    {% for suggestion in suggestions %}
+                    {{ search_link(suggestion, suggestion, method) }}
+                    {% endfor %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+
+    </div>
+{% endblock %}

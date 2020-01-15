@@ -1,0 +1,28 @@
+<div id="no_results_msg">
+  <img src="{{ url_for('static', filename='img/empty_space.svg') }}" alt="">
+  <h2>{{_("Sorry, no results found!")}}</h2>
+</div>
+
+
+
+{% if unresponsive_engines %}
+<div id="unresponsive_engines" class="content-small-centered">
+    <section>
+        <p>{{ _('Some engines are not working as expected!') }}</p>
+        <pre>
+{% for engine_name, error_type in unresponsive_engines %}
+- {{ engine_name }} ({{ error_type }}){% if not loop.last %}<br/>{% endif %}
+{% endfor %}
+        </pre>
+    </section>
+
+    <section>
+        <p>{{ _('Please, try the following.') }}</p>
+        <ul>
+            <li>{{_("Search again later")}}</li>
+            <li>{{_("Try another query")}}</li>
+            <li>{{_("Report this problem")}}</li>
+        </ul>
+    </section>
+</div>
+{% endif %}

@@ -1,0 +1,29 @@
+{% macro category_widget(category) -%}
+    <input class="hidden" type="checkbox" id="checkbox_{{ category|replace(' ', '_') }}" name="category_{{ category }}" {% if category in selected_categories %}checked="checked"{% endif %} />
+    <label for="checkbox_{{ category|replace(' ', '_') }}">{{ _(category) }}</label>
+{%- endmacro -%}
+
+{% set main_categories = ["general", "images", "videos", "news"] %}
+
+<div id="categories" {% if rtl %} class="rtl" {% endif %}>
+    {% for category in categories %}
+        {% if category in main_categories + selected_categories %}
+            {{ category_widget(category) }}
+        {% endif %}
+    {% endfor %}
+
+    <div id="more_categories_container">
+        <input type="checkbox" name="more_categories_toggle" id="more_categories_toggle" class="hidden">
+        <label for="more_categories_toggle" id="show_more_categories">{{_("More")}}</label>
+        <label for="more_categories_toggle" id="show_less_categories">{{_("Less")}}</label>
+        <span id="show_more_categories_" class="hidden">{{_("More")}}</span>
+        <span id="show_less_categories_" class="hidden">{{_("Less")}}</span>
+        <div id="more_categories">
+            {% for category in categories %}
+                {% if not (category in main_categories + ["map"] or category in selected_categories) %}
+                    {{ category_widget(category) }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

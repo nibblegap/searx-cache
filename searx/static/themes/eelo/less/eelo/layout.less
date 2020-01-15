@@ -1,0 +1,146 @@
+
+#pagination {
+  margin-top: @spacing_x-huge;
+  display: flex;
+  justify-content: space-between;
+}
+
+.container {
+  max-width: @size-desktop;
+  .container-padding();
+
+  display: flex;
+  justify-content: space-between;
+  margin: auto;
+
+  >:first-child {
+    max-width: @size-content;
+    width: @size-content;
+  }
+  >:last-child:not(:first-child) {
+    max-width: @size-content-small;
+    width: @size-content-small;
+  }
+}
+
+.container.full {
+  max-width: 100%;
+  >:first-child {
+    max-width: 100%;
+    width: 100%;
+  }
+  >:last-child:not(:first-child) {
+    display: none;
+  }
+
+  #pagination {
+    max-width: @size-content-small;
+    width: @size-content-small;
+    margin: auto;
+    justify-content: space-around;
+  }
+}
+
+#search_bar_area {
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
+#search_bar_area #search_form, #no_results_msg, .content-small-centered {
+  max-width: @size-content;
+  margin: auto;
+}
+#no_results_msg, #page_not_found_404 {
+  text-align: center;
+  margin-top: @spacing_xx-huge;
+  margin-bottom: @spacing_xx-huge;
+  img {
+    max-width: 70%;
+  }
+}
+#errors {
+  .widget-border(@color_danger);
+  border-radius: @corner-radius;
+  padding: @spacing_medium;
+
+  .title {
+    margin-top: 0;
+    margin-bottom: @spacing_medium;
+  }
+  pre {
+    background-color: fade(@color_danger, 10%);
+  }
+}
+
+
+.inline {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.tablet-mq({
+  .container {
+    flex-direction: column-reverse;
+
+    > * { margin: auto; }
+  }
+  #preferences.container {
+    flex-direction: column;
+    margin-top: @spacing_large;
+  }
+});
+
+.mobile-mq({
+  .container {
+    max-width: 100%;
+    .container-padding();
+  
+    > :first-child, > :last-child:not(:first-child) {
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+
+  main {
+    margin-top: @spacing_large;
+  }
+
+  #search_input_container {
+    margin-left: @spacing_container;
+    margin-right: @spacing_container;
+  }
+
+  .container.full #pagination {
+    max-width: 100%;
+    width: 100%;
+  }
+});
+
+
+// Move somewhere else?
+#index {
+  max-width: @size-content;
+  margin: auto;
+
+  img {
+    width: 300px;
+    display: block;
+    margin: auto;
+    margin-top: 64px;
+    margin-bottom: 64px;
+  }
+  img#logo_inline { display: none; }
+}
+.mobile-mq({
+  #index img {
+    width: 50vmin;
+    margin-bottom: @spacing_x-large;
+  }
+});
+.mobile-landscape-mq({
+  #index img {
+    width: 70vmin;
+    margin-top: @spacing_xx-large;
+    display: none; 
+  }
+  #index img#logo_inline { display: block; }
+});

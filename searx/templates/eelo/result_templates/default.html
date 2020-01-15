@@ -1,0 +1,13 @@
+{% from 'eelo/macros.html' import result_header, result_sub_header, result_footer, result_footer_rtl, icon with context %}
+
+{{ result_header(result, favicons) }}
+{% call result_sub_header(result) %}
+{% endcall %}
+
+<div class="result-content">
+    <span>
+        {% if result.content %}{{ result.content|safe }}{% endif %}
+    </span>
+</div>
+
+{{ result_footer(result) }}
