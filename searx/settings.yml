@@ -1,16 +1,16 @@
 general:
     debug : False # Debug mode, only for development
-    instance_name : "searx" # displayed name
+    instance_name : "/e/ spot" # displayed name
 
 search:
     safe_search : 0 # Filter results. 0: None, 1: Moderate, 2: Strict
-    autocomplete : "" # Existing autocomplete backends: "dbpedia", "duckduckgo", "google", "startpage", "wikipedia" - leave blank to turn it off by default
+    autocomplete : "duckduckgo" # Existing autocomplete backends: "dbpedia", "duckduckgo", "google", "startpage", "wikipedia" - leave blank to turn it off by default
     ban_time_on_fail : 5 # ban time in seconds after engine errors
     max_ban_time_on_fail : 120 # max ban time in seconds after engine errors
 
 server:
-    port : 8888
-    bind_address : "127.0.0.1" # address to listen on
+    port : 80
+    bind_address : "0.0.0.0" # address to listen on
     secret_key : "ultrasecretkey" # change this!
     base_url : False # Set custom base_url. Possible values: False or "https://your.custom.host/location/"
     image_proxy : False # Proxying image results through searx
@@ -19,7 +19,7 @@ server:
 ui:
     static_path : "" # Custom static path - leave it blank if you didn't change
     templates_path : "" # Custom templates path - leave it blank if you didn't change
-    default_theme : oscar # ui theme
+    default_theme : eelo # ui theme
     default_locale : "" # Default interface locale - leave blank to detect from browser information or use codes from the 'locales' config section
     theme_args :
         oscar_style : logicodev # default style of oscar
@@ -95,6 +95,7 @@ engines:
   - name : bing images
     engine : bing_images
     shortcut : bii
+    disabled: True
 
   - name : bing news
     engine : bing_news
@@ -103,6 +104,7 @@ engines:
   - name : bing videos
     engine : bing_videos
     shortcut : biv
+    disabled: True
 
   - name : bitbucket
     engine : xpath
@@ -119,6 +121,7 @@ engines:
   - name : btdigg
     engine : btdigg
     shortcut : bt
+    disabled : True
 
   - name : ccc-tv
     engine : xpath
@@ -301,6 +304,7 @@ engines:
   - name : google videos
     engine : google_videos
     shortcut : gov
+    disabled : True
 
   - name : google scholar
     engine : xpath
@@ -399,6 +403,7 @@ engines:
     base_url : 'https://invidio.us/'
     shortcut: iv
     timeout : 5.0
+    disabled : True
 
   - name: kickass
     engine : kickass
@@ -488,6 +493,7 @@ engines:
   - name : openstreetmap
     engine : openstreetmap
     shortcut : osm
+    disabled : True
 
   - name : openrepos
     engine : xpath
@@ -511,12 +517,14 @@ engines:
   - name : photon
     engine : photon
     shortcut : ph
+    disabled : True
 
   - name : piratebay
     engine : piratebay
     shortcut : tpb
     url: https://pirateproxy.red/
     timeout : 3.0
+    disabled: True
 
   - name : pubmed
     engine : pubmed
@@ -623,6 +631,7 @@ engines:
     shortcut : tor
     url: https://torrentz2.eu/
     timeout : 3.0
+    disabled: True
 
   - name : twitter
     engine : twitter
@@ -756,6 +765,7 @@ engines:
     shortcut : speu
     engine : seedpeer
     categories: files, music, videos
+    disabled: True
 
 #  - name : yacy
 #    engine : yacy

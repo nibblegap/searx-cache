@@ -1,0 +1,58 @@
+version: '3.6'
+
+x-logging:
+  &default-logging
+  options:
+    max-size: '1g'
+    max-file: '5'
+  driver: json-file
+
+services:
+  spot:
+    build: .
+    logging: *default-logging
+    restart: unless-stopped
+    environment:
+      SEARX_SECRET: ":@)%NN0+OqNdy:{prWQlZ{p9|oO9p-UyJq@%V!~G:arrSx6fXz.{jd%=XF44ncj"
+      GUNICORN_LOGGER: 1
+      GUNICORN_LEVEL: INFO
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    logging: *default-logging
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.spot.rule=Host(`${SPOT_HOSTNAME}`)"
+      - "traefik.http.routers.spot.entrypoints=websecure"
+      - "traefik.http.routers.spot.tls.certresolver=spotchallenge"
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.spot-ratelimit.ratelimit.average=50"
+      - "traefik.http.middlewares.spot-ratelimit.ratelimit.burst=20"
+
+  traefik:
+    image: "traefik:v2.1.2"
+    logging: *default-logging
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.spotchallenge.acme.tlschallenge=true"
+      - "--certificatesresolvers.spotchallenge.acme.email=contact@e.email"
+      - "--certificatesresolvers.spotchallenge.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+volumes:
+  letsencrypt:

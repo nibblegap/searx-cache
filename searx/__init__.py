@@ -78,7 +78,14 @@ if searx_debug:
 else:
     logging.basicConfig(level=logging.WARNING)
 
-logger = logging.getLogger('searx')
+logger = logging.getLogger("searx")
+
+if "GUNICORN_LOGGER" in environ:
+    logger = logging.getLogger()
+    gunicorn_logger = logging.getLogger("gunicorn.error")
+    logger.handlers = gunicorn_logger.handlers
+    logger.setLevel(environ.get("GUNICORN_LEVEL", "INFO"))
+
 logger.debug('read configuration from %s', settings_path)
 # Workaround for openssl versions <1.0.2
 # https://github.com/certifi/python-certifi/issues/26
