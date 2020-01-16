@@ -1,0 +1,106 @@
+image: $CI_REGISTRY_IMAGE/env:latest
+
+stages:
+ - check
+ - build
+ - test
+ - deploy
+
+python:
+  stage: check
+  before_script:
+    - ./manage.sh update_dev_packages
+  script:
+    - ./manage.sh pep8_check
+
+build:web:
+  stage: build
+  before_script:
+    - ./manage.sh npm_packages
+    - ./manage.sh update_dev_packages
+  script:
+    - ./manage.sh locales
+    - ./manage.sh styles
+    - ./manage.sh grunt_build
+
+.build:docker:
+  stage: build
+  image: docker:git
+  services:
+    - docker:18-dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE
+    - docker build -t $CI_REGISTRY_IMAGE/nginx -f nginx.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE/nginx
+
+build:docker:master:
+  extends: .build:docker
+  only:
+    - master
+
+build:docker:tags:
+  extends: .build:docker
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+    - docker build -t $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG -f nginx.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG
+  only:
+    - tags
+
+test:unit:
+  stage: test
+  before_script:
+    - ./manage.sh update_dev_packages
+  script:
+    - ./manage.sh py_test_coverage
+  coverage: '/TOTAL.*\s+(\d+%)$/'
+
+.deploy:template:
+  stage: deploy
+  before_script:
+    - pip install docker-compose
+    - apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+deploy:spot.test.cloud.global:
+  extends: .deploy:template
+  when: manual
+  only:
+    - branches
+  environment:
+    name: test
+    url: https://spot.test.ecloud.global
+  variables:
+    DOCKER_HOST: ssh://root@spot.test.ecloud.global
+    SPOT_HOSTNAME: spot.test.ecloud.global
+    COMPOSE_PROJECT_NAME: my-spot
+    SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
+  script:
+    - docker-compose up -d --build
+
+deploy:spot.cloud.global:
+  extends: .deploy:template
+  only:
+    - tags
+  environment:
+    name: prod
+    url: https://spot.ecloud.global
+  variables:
+    DOCKER_HOST: ssh://root@spot.ecloud.global
+    SPOT_HOSTNAME: spot.ecloud.global
+    COMPOSE_PROJECT_NAME: my-spot
+    COMPOSE_FILE: docker-compose.yml:docker-compose-prod.yml
+    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
+  script:
+    - docker-compose up -d
