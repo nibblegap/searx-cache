@@ -117,7 +117,17 @@ class SearchLanguageSetting(EnumStringSetting):
             elif lang in self.choices:
                 data = lang
             else:
-                data = self.value
+                res = None
+                for lg in self.choices:
+                    if data == lg.split('-')[0]:
+                        res = lg
+                        break
+
+                if res is None:
+                    data = self.value
+                else:
+                    data = res
+
         self.value = data
 
 
@@ -243,8 +253,8 @@ class Preferences(object):
         super(Preferences, self).__init__()
 
         self.key_value_settings = {'categories': MultipleChoiceSetting(['general'], choices=categories + ['none']),
-                                   'language': SearchLanguageSetting(settings['search']['language'],
-                                                                     choices=LANGUAGE_CODES),
+                                   'language': SearchLanguageSetting(settings['ui']['default_locale'],
+                                                                     choices=list(LANGUAGE_CODES) + ['']),
                                    'locale': EnumStringSetting(settings['ui']['default_locale'],
                                                                choices=list(settings['locales'].keys()) + ['']),
                                    'autocomplete': EnumStringSetting(settings['search']['autocomplete'],
