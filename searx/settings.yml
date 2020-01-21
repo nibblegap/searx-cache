@@ -91,6 +91,7 @@ engines:
   - name : bing
     engine : bing
     shortcut : bi
+    disabled : True
 
   - name : bing images
     engine : bing_images
@@ -197,7 +198,6 @@ engines:
   - name : duckduckgo
     engine : duckduckgo
     shortcut : ddg
-    disabled : True
 
   - name : duckduckgo images
     engine : duckduckgo_images
@@ -292,6 +292,7 @@ engines:
   - name : google
     engine : google
     shortcut : go
+    disabled : True
 
   - name : google images
     engine : google_images
@@ -536,7 +537,6 @@ engines:
     engine : qwant
     shortcut : qw
     categories : general
-    disabled : True
 
   - name : qwant images
     engine : qwant
