@@ -20,17 +20,17 @@ below to run spot for production or local environment.
 
 ### Like production
 
-3 containes are used for production, traefik as edge router,
-nginx to server static files and spot as backend.
+3 containers are used for production, traefik as edge router,
+filtron to drop malicious requests, nginx to server static files and spot as backend.
 
 * Run the docker-compose up command to start the project 
 ```
-docker-compose up --build spot nginx
+COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build spot nginx filtron
 ```
 
-* Getting the ip of the nginx service and go to `http://<nginx-ip>`, below the docker way to get the IP of the nginx container
+* Getting the ip of the nginx service and go to `http://<nginx-ip>`, below the docker way to get the IP of the filtron container
 ```
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_nginx_1
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_filtron_1
 ```
 
 ### For developer

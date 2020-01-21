@@ -35,6 +35,8 @@ build:web:
     - docker push $CI_REGISTRY_IMAGE
     - docker build -t $CI_REGISTRY_IMAGE/nginx -f nginx.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/nginx
+    - docker build -t $CI_REGISTRY_IMAGE/filtron -f filtron.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE/filtron
 
 build:docker:master:
   extends: .build:docker
@@ -48,6 +50,8 @@ build:docker:tags:
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
     - docker build -t $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG -f nginx.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG
+    - docker build -t $CI_REGISTRY_IMAGE/filtron:$CI_COMMIT_REF_SLUG -f filtron.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE/filtron:$CI_COMMIT_REF_SLUG
   only:
     - tags
 
@@ -83,6 +87,7 @@ deploy:spot.test.cloud.global:
     DOCKER_HOST: ssh://root@spot.test.ecloud.global
     SPOT_HOSTNAME: spot.test.ecloud.global
     COMPOSE_PROJECT_NAME: my-spot
+    COMPOSE_FILE: docker-compose.yml:docker-compose-build.yml
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
   script:
     - docker-compose up -d --build
@@ -98,7 +103,6 @@ deploy:spot.cloud.global:
     DOCKER_HOST: ssh://root@spot.ecloud.global
     SPOT_HOSTNAME: spot.ecloud.global
     COMPOSE_PROJECT_NAME: my-spot
-    COMPOSE_FILE: docker-compose.yml:docker-compose-prod.yml
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}

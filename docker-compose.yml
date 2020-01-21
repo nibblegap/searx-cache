@@ -9,7 +9,7 @@ x-logging:
 
 services:
   spot:
-    build: .
+    image: ${SPOT_DOCKER_IMG}:${SPOT_DOCKER_TAG}
     logging: *default-logging
     restart: unless-stopped
     environment:
@@ -18,9 +18,12 @@ services:
       GUNICORN_LEVEL: INFO
 
   nginx:
-    build:
-      context: .
-      dockerfile: nginx.Dockerfile
+    image: ${SPOT_NGINX_DOCKER_IMG}:${SPOT_NGINX_DOCKER_TAG}
+    logging: *default-logging
+    restart: unless-stopped
+
+  filtron:
+    image: ${SPOT_FILTRON_DOCKER_IMG}:${SPOT_FILTRON_DOCKER_TAG}
     logging: *default-logging
     restart: unless-stopped
     labels:

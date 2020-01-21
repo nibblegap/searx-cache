@@ -1,9 +1,0 @@
-version: '3.6'
-
-services:
-  spot:
-    image: ${SPOT_DOCKER_IMG}:${SPOT_DOCKER_TAG}
-
-  nginx:
-    image: ${SPOT_NGINX_DOCKER_IMG}:${SPOT_NGINX_DOCKER_TAG}
-
