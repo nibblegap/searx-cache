@@ -81,10 +81,11 @@
         {% block footer %}
         {% endblock %}
         <p class="text-muted">
+            {% set version = searx_version.split('+') %}
             <small>
                 e Foundation 2018-2019,
-                {{ _('Powered by') }} <a href="https://gitlab.e.foundation/e/cloud/my-spot">Spot</a>
-                {{ metadata_version }}<br/>An open-source metasearch engine forked from <a href="https://asciimoo.github.io/searx/">Searx</a> {{ searx_version }}.
+                {{ _('Powered by') }} <a href="https://gitlab.e.foundation/e/cloud/my-spot">Spot</a> {{ version[1] }}<br/>
+                An open-source metasearch engine forked from <a href="https://asciimoo.github.io/searx/">Searx</a> {{ version[0] }}.
                 <span class="links">
                     <a href="https://e.foundation">{{ _('About') }}</a>
                     <a href="https://e.foundation/legal-notice-privacy">{{ _('Privacy') }}</a>
