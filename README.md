@@ -12,6 +12,18 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 * docker packaging thinking to be production ready
 * better locale support
 
+## Architecture
+
+```mermaid
+graph TD
+  A(traefik) --> |https://spot.ecloud.global| B(filtron)
+  A(traefik) --> |https://proxy.spot.ecloud.global| C(morty)
+  C --> |image link| C
+  B --> D(nginx)
+  D --> |static file| D
+  D --> |API| E(spot)
+```
+
 ## Getting Started
 
 You can run spot with docker-compose. First of all you have to install

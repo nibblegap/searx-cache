@@ -100,3 +100,7 @@ if 'SEARX_SECRET' in environ:
     settings['server']['secret_key'] = environ['SEARX_SECRET']
 if 'SEARX_BIND_ADDRESS' in environ:
     settings['server']['bind_address'] = environ['SEARX_BIND_ADDRESS']
+if 'SEARX_MORTY_URL' in environ:
+    settings.setdefault('result_proxy', {})['url'] = environ['SEARX_MORTY_URL']
+if 'SEARX_MORTY_KEY' in environ:
+    settings.setdefault('result_proxy', {})['key'] = bytes(environ['SEARX_MORTY_KEY'], 'utf-8')

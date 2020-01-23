@@ -13,3 +13,8 @@ services:
     build:
       context: .
       dockerfile: filtron.Dockerfile
+
+  morty:
+    build:
+      context: .
+      dockerfile: morty.Dockerfile
