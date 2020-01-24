@@ -14,6 +14,15 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 
 ## Architecture
 
+5 services are used for production:
+
+* [traefik](https://docs.traefik.io/) as edge router to publish services.
+* [filtron](https://github.com/asciimoo/filtron) as reverse HTTP proxy to filter requests by different rules.
+* [morty](https://github.com/asciimoo/morty) as proxy to serve thumbnails.
+* [nginx](https://www.nginx.com/) as http server to serve static files.
+* Spot the meta search engine.
+
+
 ```mermaid
 graph TD
   A(traefik) --> |https://spot.ecloud.global| B(filtron)
@@ -32,15 +41,14 @@ below to run spot for production or local environment.
 
 ### Like production
 
-3 containers are used for production, traefik as edge router,
-filtron to drop malicious requests, nginx to server static files and spot as backend.
-
 * Run the docker-compose up command to start the project 
 ```
+COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build morty
+SPOT_MORTY_URL=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_morty_1)
 COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build spot nginx filtron
 ```
 
-* Getting the ip of the nginx service and go to `http://<nginx-ip>`, below the docker way to get the IP of the filtron container
+* Getting the ip of the filtron service and go to `http://<ip>`, below the docker way to get the IP of the filtron container
 ```
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_filtron_1
 ```
@@ -55,4 +63,4 @@ docker run -it --rm -v $(pwd):/ws -w /ws registry.gitlab.e.foundation:5000/e/clo
 SEARX_DEBUG=1 python -X dev searx/webapp.py
 ```
 
-Then go open your browser and navigate to the container IP.
+Then, open your browser and navigate to the container IP.
