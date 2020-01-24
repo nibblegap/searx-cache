@@ -9,18 +9,25 @@ x-logging:
 
 services:
   spot:
-    build: .
+    image: ${SPOT_DOCKER_IMG}:${SPOT_DOCKER_TAG}
     logging: *default-logging
     restart: unless-stopped
     environment:
       SEARX_SECRET: ":@)%NN0+OqNdy:{prWQlZ{p9|oO9p-UyJq@%V!~G:arrSx6fXz.{jd%=XF44ncj"
+      SEARX_MORTY_URL: "${SPOT_MORTY_URL}"
+      SEARX_MORTY_KEY: "${SEARX_MORTY_KEY:-KHN0ZGluKT0gNWNmNzQ0Y2JlNjI4MDRjODAwZGUyMGY5ZjZlZTFmZWI1NTg2YTg5OAo=}"
       GUNICORN_LOGGER: 1
       GUNICORN_LEVEL: INFO
 
   nginx:
-    build:
-      context: .
-      dockerfile: nginx.Dockerfile
+    image: ${SPOT_NGINX_DOCKER_IMG}:${SPOT_NGINX_DOCKER_TAG}
+    logging: *default-logging
+    restart: unless-stopped
+    environment:
+      SPOT_MORTY_URL: "${SPOT_MORTY_URL}"
+
+  filtron:
+    image: ${SPOT_FILTRON_DOCKER_IMG}:${SPOT_FILTRON_DOCKER_TAG}
     logging: *default-logging
     restart: unless-stopped
     labels:
@@ -32,8 +39,18 @@ services:
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.spot-ratelimit.ratelimit.average=50"
-      - "traefik.http.middlewares.spot-ratelimit.ratelimit.burst=20"
+
+  morty:
+    image: ${SPOT_MORTY_DOCKER_IMG}:${SPOT_MORTY_DOCKER_TAG}
+    logging: *default-logging
+    restart: unless-stopped
+    environment:
+      SEARX_MORTY_KEY: "${SEARX_MORTY_KEY:-KHN0ZGluKT0gNWNmNzQ0Y2JlNjI4MDRjODAwZGUyMGY5ZjZlZTFmZWI1NTg2YTg5OAo=}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.spot_proxy.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"
+      - "traefik.http.routers.spot_proxy.entrypoints=websecure"
+      - "traefik.http.routers.spot_proxy.tls.certresolver=spotchallenge"
 
   traefik:
     image: "traefik:v2.1.2"

@@ -1,4 +1,4 @@
-<a href="{{ result.img_src }}" {% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %} data-url="{{ result.url }}" onclick="show_image_view_modal(event)" class="img-thumb-link">
+<a href="{{ result.img_src }}" {% if results_on_new_tab %}target="_blank" rel="noopener noreferrer"{% else %}rel="noreferrer"{% endif %} data-url="{{ result.url }}" id="show_image_view_modal" class="img-thumb-link">
     <img src="{% if result.thumbnail_src %}{{ image_proxify(result.thumbnail_src) }}{% else %}{{ image_proxify(result.img_src) }}{% endif %}" alt="{{ result.title|striptags }}" title="{{ result.title|striptags }}" class="img-thumbnail">
     <div class="hidden">{{ result.content }}</div>
 </a>
