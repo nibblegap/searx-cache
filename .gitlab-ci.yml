@@ -72,7 +72,7 @@ test:unit:
   stage: deploy
   before_script:
     - pip install docker-compose
-    - apk add openssh-client
+    - apk add openssh-client docker
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
@@ -114,6 +114,8 @@ deploy:spot.cloud.global:
     COMPOSE_PROJECT_NAME: my-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_FILTRON_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_MORTY_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
