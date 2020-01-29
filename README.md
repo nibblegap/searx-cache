@@ -21,6 +21,7 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 * [morty](https://github.com/asciimoo/morty) as proxy to serve thumbnails.
 * [nginx](https://www.nginx.com/) as http server to serve static files.
 * Spot the meta search engine.
+* [tor](https://www.torproject.org) as open network that helps you defend against traffic analysis.
 
 
 ```mermaid
@@ -31,6 +32,9 @@ graph TD
   B --> D(nginx)
   D --> |static file| D
   D --> |API| E(spot)
+  E --> H(tor1)
+  E --> I(tor2)
+  E --> J(torN)
 ```
 
 ## Getting Started
@@ -45,7 +49,7 @@ below to run spot for production or local environment.
 ```
 COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build morty
 SPOT_MORTY_URL=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_morty_1)
-COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build spot nginx filtron
+COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build spot nginx filtron tor
 ```
 
 * Getting the ip of the filtron service and go to `http://<ip>`, below the docker way to get the IP of the filtron container
