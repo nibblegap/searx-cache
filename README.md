@@ -14,7 +14,7 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 
 ## Architecture
 
-5 services are used for production:
+6 services are used for production:
 
 * [traefik](https://docs.traefik.io/) as edge router to publish services.
 * [filtron](https://github.com/asciimoo/filtron) as reverse HTTP proxy to filter requests by different rules.
