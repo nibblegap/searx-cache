@@ -104,3 +104,7 @@ if 'SEARX_MORTY_URL' in environ:
     settings.setdefault('result_proxy', {})['url'] = environ['SEARX_MORTY_URL']
 if 'SEARX_MORTY_KEY' in environ:
     settings.setdefault('result_proxy', {})['key'] = bytes(environ['SEARX_MORTY_KEY'], 'utf-8')
+if 'SEARX_PROXY_HTTP' in environ:
+    settings['outgoing'].setdefault('proxies', {})['http'] = environ['SEARX_PROXY_HTTP']
+if 'SEARX_PROXY_HTTPS' in environ:
+    settings['outgoing'].setdefault('proxies', {})['https'] = environ['SEARX_PROXY_HTTPS']
