@@ -2,11 +2,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"{% if rtl %} dir="rtl"{% endif %}>
 <head>
+    {% set version = searx_version.split('+') %}
     <meta charset="UTF-8" />
     <meta name="description" content="spot ecloud global, powered by searx" />
     <meta name="keywords" content="spot, ecloud, searx, search, search engine, metasearch, meta search" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="generator" content="searx/{{ searx_version }}">
+    <meta name="generator" content="searx/{{ version[0] }}">
     <meta name="referrer" content="no-referrer">
     <meta name="viewport" content="width=device-width, initial-scale=1 , maximum-scale=1.0, user-scalable=1" />
     {% block meta %}{% endblock %}
@@ -81,7 +82,6 @@
         {% block footer %}
         {% endblock %}
         <p class="text-muted">
-            {% set version = searx_version.split('+') %}
             <small>
                 e Foundation 2018-2019,
                 {{ _('Powered by') }} <a href="https://gitlab.e.foundation/e/cloud/my-spot">Spot</a> {{ version[1] }}<br/>
