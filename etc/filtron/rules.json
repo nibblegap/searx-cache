@@ -12,7 +12,7 @@
         "aggregations": ["Header:X-Forwarded-For"],
         "actions": [
             {"name": "block",
-             "params": {"message": "Rate limit exceeded, try again later."}}
+             "params": {"message": "Rate limit exceeded 9001, try again later."}}
         ]
     },
     {
@@ -23,7 +23,7 @@
         "stop": true,
         "actions": [
             {"name": "block",
-             "params": {"message": "Rate limit exceeded, try again later."}}
+             "params": {"message": "Rate limit exceeded 9002, try again later."}}
         ]
     },
     {
@@ -37,7 +37,7 @@
                 "filters": ["Header:User-Agent=([Cc][Uu][Rr][Ll]|[wW]get|Scrapy|splash|JavaFX|FeedFetcher|python-requests|Go-http-client|Java|Jakarta|okhttp|HttpClient|Jersey|Python|libwww-perl|Ruby|SynHttpClient|UniversalFeedParser)"],
                 "actions": [
                     {"name": "block",
-                     "params": {"message": "Rate limit exceeded"}}
+                     "params": {"message": "Rate limit exceeded 10001"}}
                 ]
             },
             {
@@ -47,7 +47,7 @@
                 "filters": ["Header:User-Agent=(Googlebot|GoogleImageProxy|bingbot|Baiduspider|yacybot|YandexMobileBot|YandexBot|Yahoo! Slurp|MJ12bot|AhrefsBot|archive.org_bot|msnbot|MJ12bot|SeznamBot|linkdexbot|Netvibes|SMTBot|zgrab|James BOT|Sogou|Abonti|Pixray|Spinn3r|SemrushBot|Exabot|ZmEu|BLEXBot|bitlybot)"],
                 "actions": [
                     {"name": "block",
-                     "params": {"message": "Rate limit exceeded"}}
+                     "params": {"message": "Rate limit exceeded 10002"}}
                 ]
             },
             {
@@ -57,7 +57,7 @@
                 "stop": true,
                 "actions": [
                     {"name": "block",
-                     "params": {"message": "Rate limit exceeded"}}
+                     "params": {"message": "Rate limit exceeded 10003"}}
                 ]
             },
             {
@@ -67,7 +67,7 @@
                 "stop": true,
                 "actions": [
                     {"name": "block",
-                     "params": {"message": "Rate limit exceeded"}}
+                     "params": {"message": "Rate limit exceeded 10004"}}
                 ]
             },
             {
@@ -77,7 +77,7 @@
                 "stop": true,
                 "actions": [
                     {"name": "block",
-                     "params": {"message": "Rate limit exceeded"}}
+                     "params": {"message": "Rate limit exceeded 10005"}}
                 ]
             },
             {
@@ -89,7 +89,7 @@
                 "aggregations": ["Header:X-Forwarded-For"],
                 "actions": [
                     {"name": "block",
-		             "params": {"message": "Rate limit exceeded, try again later."}}
+		             "params": {"message": "Rate limit exceeded 10006, try again later."}}
                 ]
             },
             {
@@ -99,7 +99,7 @@
                 "aggregations": ["Header:X-Forwarded-For"],
                 "actions": [
                     {"name": "block",
-                     "params": {"message": "Rate limit exceeded, try again later."}}
+                     "params": {"message": "Rate limit exceeded 10007, try again later."}}
                 ]
             },
             {
@@ -110,7 +110,7 @@
                 "aggregations": ["Header:X-Forwarded-For", "Header:User-Agent"],
                 "actions": [
                     {"name": "block",
-                     "params": {"message": "Rate limit exceeded, try again later."}}
+                     "params": {"message": "Rate limit exceeded 10008, try again later."}}
 		]
             }
         ]
