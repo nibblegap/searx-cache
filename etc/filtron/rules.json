@@ -51,16 +51,6 @@
                 ]
             },
             {
-                "name": "block missing accept-language",
-                "filters": ["!Header:Accept-Language"],
-                "limit": 0,
-                "stop": true,
-                "actions": [
-                    {"name": "block",
-                     "params": {"message": "Rate limit exceeded 10003"}}
-                ]
-            },
-            {
                 "name": "block Connection:close",
                 "filters": ["Header:Connection=close"],
                 "limit": 0,
