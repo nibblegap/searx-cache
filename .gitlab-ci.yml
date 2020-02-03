@@ -119,4 +119,4 @@ deploy:spot.cloud.global:
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker-compose up -d --scale tor=5
+    - docker-compose up -d --build --scale tor=5
