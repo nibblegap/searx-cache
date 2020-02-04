@@ -9,12 +9,13 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 ## Changes between Spot and Searx
 
 * eelo theme
+* redis cache on http requests (TTL 1 day)
 * docker packaging thinking to be production ready
 * better locale support
 
 ## Architecture
 
-6 services are used for production:
+7 services are used for production:
 
 * [traefik](https://docs.traefik.io/) as edge router to publish services.
 * [filtron](https://github.com/asciimoo/filtron) as reverse HTTP proxy to filter requests by different rules.
@@ -22,6 +23,7 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 * [nginx](https://www.nginx.com/) as http server to serve static files.
 * Spot the meta search engine.
 * [tor](https://www.torproject.org) as open network that helps you defend against traffic analysis.
+* [redis](https://redis.io/) as memory storage to cache http requests
 
 
 ```mermaid
@@ -35,6 +37,7 @@ graph TD
   E --> H(tor1)
   E --> I(tor2)
   E --> J(torN)
+  E --> |cache| K(redis)
 ```
 
 ## Getting Started
@@ -63,8 +66,9 @@ You can directly run spot, with a python command inside a docker container which
 contains all dependencies.
 
 ```
-docker run -it --rm -v $(pwd):/ws -w /ws registry.gitlab.e.foundation:5000/e/cloud/my-spot/env sh
-SEARX_DEBUG=1 python -X dev searx/webapp.py
+docker-compose up -d redis
+docker run -it --rm -v $(pwd):/ws -w /ws --network=my-spot_default registry.gitlab.e.foundation:5000/e/cloud/my-spot/env sh
+PYTHONPATH=$(pwd) SEARX_REDIS_HOST=redis SEARX_DEBUG=1 python -X dev searx/webapp.py
 ```
 
 Then, open your browser and navigate to the container IP.
