@@ -61,21 +61,11 @@
                 ]
             },
             {
-                "name": "block accept everything",
-                "filters": ["!Header:Accept=text/html"],
-                "limit": 0,
-                "stop": true,
-                "actions": [
-                    {"name": "block",
-                     "params": {"message": "Rate limit exceeded 10005"}}
-                ]
-            },
-            {
                 "name": "rss/json limit",
                 "interval": 3600,
                 "limit": 4,
                 "stop": true,
-                "filters": ["Param:format=(csv|json|rss)"],
+                "filters": ["Param:format=(csv|rss)"],
                 "aggregations": ["Header:X-Forwarded-For"],
                 "actions": [
                     {"name": "block",
