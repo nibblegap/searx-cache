@@ -3,6 +3,7 @@ import requests
 from itertools import cycle
 from threading import RLock, local
 from searx import settings
+from searx.cache import redis_cache
 from time import time
 
 
@@ -128,9 +129,10 @@ def request(method, url, **kwargs):
     return response
 
 
-def get(url, **kwargs):
-    kwargs.setdefault('allow_redirects', True)
-    return request('get', url, **kwargs)
+if "redis_host" not in settings["server"]:
+    def get(url, **kwargs):
+        kwargs.setdefault('allow_redirects', True)
+        return request('get', url, **kwargs)
 
 
 def options(url, **kwargs):
@@ -143,8 +145,9 @@ def head(url, **kwargs):
     return request('head', url, **kwargs)
 
 
-def post(url, data=None, **kwargs):
-    return request('post', url, data=data, **kwargs)
+if "redis_host" not in settings["server"]:
+    def post(url, data=None, **kwargs):
+        return request('post', url, data=data, **kwargs)
 
 
 def put(url, data=None, **kwargs):
@@ -157,3 +160,16 @@ def patch(url, data=None, **kwargs):
 
 def delete(url, **kwargs):
     return request('delete', url, **kwargs)
+
+
+if "redis_host" in settings["server"]:
+    @redis_cache()
+    def get(url, **kwargs):
+        kwargs = kwargs.get("kwargs", kwargs)
+        kwargs.setdefault('allow_redirects', True)
+        return request('get', url, **kwargs)
+
+    @redis_cache()
+    def post(url, data=None, **kwargs):
+        kwargs = kwargs.get("kwargs", kwargs)
+        return request('post', url, data=data, **kwargs)

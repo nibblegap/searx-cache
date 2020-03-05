@@ -108,3 +108,5 @@ if 'SEARX_PROXY_HTTP' in environ:
     settings['outgoing'].setdefault('proxies', {})['http'] = environ['SEARX_PROXY_HTTP']
 if 'SEARX_PROXY_HTTPS' in environ:
     settings['outgoing'].setdefault('proxies', {})['https'] = environ['SEARX_PROXY_HTTPS']
+if 'SEARX_REDIS_HOST' in environ:
+    settings['server']['redis_host'] = environ['SEARX_REDIS_HOST']
