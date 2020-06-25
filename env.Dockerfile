@@ -5,4 +5,5 @@ COPY requirements.txt requirements-dev.txt /
 RUN apk add build-base git libxml2-dev libxslt-dev libffi-dev openssl-dev npm \
 && pip install -r /requirements.txt \
 && pip install -r /requirements-dev.txt \
+&& pip install virtualenv \
 && rm -f /requirements.txt /requirements-dev.txt

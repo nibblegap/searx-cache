@@ -24,7 +24,6 @@ setup(
     keywords='metasearch searchengine search web http',
     author='Adam Tauber',
     author_email='asciimoo@gmail.com',
-    url='https://github.com/asciimoo/searx',
     license='GNU Affero General Public License',
     packages=find_packages(exclude=["tests*"]),
     zip_safe=False,
