@@ -11,7 +11,7 @@ python:
   before_script:
     - ./manage.sh update_dev_packages
   script:
-    - ./manage.sh pep8_check
+    - make test.pep8
 
 build:web:
   stage: build
@@ -20,8 +20,7 @@ build:web:
     - ./manage.sh update_dev_packages
   script:
     - ./manage.sh locales
-    - ./manage.sh styles
-    - ./manage.sh grunt_build
+    - make V=1 themes.eelo
 
 .build:docker:
   stage: build
@@ -65,7 +64,7 @@ test:unit:
   before_script:
     - ./manage.sh update_dev_packages
   script:
-    - ./manage.sh py_test_coverage
+    - make test.coverage
   coverage: '/TOTAL.*\s+(\d+%)$/'
 
 .deploy:template:
