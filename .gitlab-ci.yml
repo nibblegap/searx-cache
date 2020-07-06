@@ -25,6 +25,8 @@ build:web:
 .build:docker:
   stage: build
   image: docker:git
+  tags:
+    - generic_privileged
   services:
     - docker:18-dind
   before_script:
@@ -38,7 +40,6 @@ build:web:
     - docker push $CI_REGISTRY_IMAGE/filtron
     - docker build -t $CI_REGISTRY_IMAGE/morty -f morty.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/morty
-
 
 build:docker:master:
   extends: .build:docker
