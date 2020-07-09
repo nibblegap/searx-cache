@@ -99,9 +99,8 @@ if sys.version_info[0] == 3:
     unicode = str
     PY3 = True
 else:
-    PY3 = False
-    logger.warning('\033[1;31m *** Deprecation Warning ***\033[0m')
-    logger.warning('\033[1;31m Python2 is deprecated\033[0m')
+    logger.warning('\033[1;31m Python2 is no longer supported\033[0m')
+    exit(1)
 
 # serve pages with HTTP/1.1
 from werkzeug.serving import WSGIRequestHandler
@@ -575,7 +574,9 @@ def index():
         search_query, raw_text_query = get_search_query_from_webapp(request.preferences, request.form)
         # search = Search(search_query) #  without plugins
         search = SearchWithPlugins(search_query, request.user_plugins, request)
+
         result_container = search.search()
+
     except Exception as e:
         # log exception
         logger.exception('search error')
@@ -591,6 +592,10 @@ def index():
     number_of_results = result_container.results_number()
     if number_of_results < result_container.results_length():
         number_of_results = 0
+
+    # checkin for a external bang
+    if result_container.redirect_url:
+        return redirect(result_container.redirect_url)
 
     # UI
     advanced_search = request.form.get('advanced_search', None)
@@ -665,6 +670,7 @@ def index():
         cont_disp = 'attachment;Filename=searx_-_{0}.csv'.format(search_query.query.decode('utf-8'))
         response.headers.add('Content-Disposition', cont_disp)
         return response
+
     elif output_format == 'rss':
         response_rss = render(
             'opensearch_response_rss.xml',
