@@ -11,7 +11,6 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 * eelo theme
 * redis cache on http requests (TTL 1 day)
 * docker packaging thinking to be production ready
-* better locale support
 
 ## Architecture
 
