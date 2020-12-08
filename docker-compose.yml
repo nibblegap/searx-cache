@@ -47,6 +47,7 @@ services:
       - "traefik.http.routers.spot.rule=Host(`${SPOT_HOSTNAME}`)"
       - "traefik.http.routers.spot.entrypoints=websecure"
       - "traefik.http.routers.spot.tls.certresolver=spotchallenge"
+      - "traefik.http.routers.spot.tls.domains[0].main=${SPOT_HOSTNAME}"
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
@@ -63,6 +64,8 @@ services:
       - "traefik.http.routers.spot_proxy.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"
       - "traefik.http.routers.spot_proxy.entrypoints=websecure"
       - "traefik.http.routers.spot_proxy.tls.certresolver=spotchallenge"
+      - "traefik.http.routers.spot_proxy.tls.domains[0].main=${SPOT_HOSTNAME}"
+      - "traefik.http.routers.spot_proxy.tls.domains[0].sans=${SPOT_MORTY_HOSTNAME}"
 
   traefik:
     build:
@@ -75,8 +78,10 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.spotchallenge.acme.dnschallenge.resolvers=1.1.1.1:53"
+      - "--certificatesresolvers.spotchallenge.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.spotchallenge.acme.tlschallenge=true"
-      - "--certificatesresolvers.spotchallenge.acme.email=contact@e.email"
+      - "--certificatesresolvers.spotchallenge.acme.email=dev@e.email"
       - "--certificatesresolvers.spotchallenge.acme.storage=/letsencrypt/acme.json"
       - "--providers.file.filename=/etc/traefik/config.yml"
     ports:
