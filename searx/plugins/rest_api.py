@@ -22,6 +22,16 @@ def proxify(url):
     if not settings.get('result_proxy'):
         return url
 
+    if url.startswith('data:image/'):
+        # 50 is an arbitrary number to get only the beginning of the image.
+        partial_base64 = url[len('data:image/'):50].split(';')
+        if len(partial_base64) == 2 \
+           and partial_base64[0] in ['gif', 'png', 'jpeg', 'pjpeg', 'webp', 'tiff', 'bmp']\
+           and partial_base64[1].startswith('base64,'):
+            return url
+        else:
+            return None
+
     url_params = dict(mortyurl=url.encode('utf-8'))
 
     if settings['result_proxy'].get('key'):
