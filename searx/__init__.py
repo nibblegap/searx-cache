@@ -16,6 +16,7 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 '''
 
 import certifi
+import base64
 import logging
 from os import environ
 from os.path import realpath, dirname, join, abspath, isfile
@@ -104,7 +105,7 @@ if 'SEARX_BIND_ADDRESS' in environ:
 if 'SEARX_MORTY_URL' in environ:
     settings.setdefault('result_proxy', {})['url'] = environ['SEARX_MORTY_URL']
 if 'SEARX_MORTY_KEY' in environ:
-    settings.setdefault('result_proxy', {})['key'] = bytes(environ['SEARX_MORTY_KEY'], 'utf-8')
+    settings.setdefault('result_proxy', {})['key'] = base64.b64decode(environ['SEARX_MORTY_KEY'])
 if 'SEARX_PROXY_HTTP' in environ:
     settings['outgoing'].setdefault('proxies', {})['http'] = environ['SEARX_PROXY_HTTP']
 if 'SEARX_PROXY_HTTPS' in environ:
