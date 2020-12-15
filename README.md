@@ -46,17 +46,13 @@ below to run spot for production or local environment.
 
 ### Like production
 
-* Run the docker-compose up command to start the project 
+Run the docker-compose to start the project
+
 ```
-COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build morty
-SPOT_MORTY_URL=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_morty_1)
-COMPOSE_FILE=docker-compose.yml:docker-compose-build.yml docker-compose up --build spot nginx filtron tor
+docker-compose up -d
 ```
 
-* Getting the ip of the filtron service and go to `http://<ip>`, below the docker way to get the IP of the filtron container
-```
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-spot_filtron_1
-```
+Then go to http://localhost:8088.
 
 ### For developer
 

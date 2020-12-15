@@ -36,10 +36,6 @@ build:web:
     - docker push $CI_REGISTRY_IMAGE
     - docker build -t $CI_REGISTRY_IMAGE/nginx -f nginx.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/nginx
-    - docker build -t $CI_REGISTRY_IMAGE/filtron -f filtron.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/filtron
-    - docker build -t $CI_REGISTRY_IMAGE/morty -f morty.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/morty
 
 build:docker:master:
   extends: .build:docker
@@ -53,10 +49,6 @@ build:docker:tags:
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
     - docker build -t $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG -f nginx.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_SLUG
-    - docker build -t $CI_REGISTRY_IMAGE/filtron:$CI_COMMIT_REF_SLUG -f filtron.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/filtron:$CI_COMMIT_REF_SLUG
-    - docker build -t $CI_REGISTRY_IMAGE/morty:$CI_COMMIT_REF_SLUG -f morty.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/morty:$CI_COMMIT_REF_SLUG
   only:
     - tags
 
@@ -92,7 +84,6 @@ deploy:spot.test.cloud.global:
     SPOT_MORTY_HOSTNAME: proxy.spot.test.ecloud.global
     SPOT_MORTY_URL: https://proxy.spot.test.ecloud.global
     COMPOSE_PROJECT_NAME: my-spot
-    COMPOSE_FILE: docker-compose.yml:docker-compose-build.yml
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
   script:
     - docker-compose up -d --build --scale tor=5
@@ -112,9 +103,8 @@ deploy:spot.cloud.global:
     COMPOSE_PROJECT_NAME: my-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
-    SPOT_FILTRON_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
-    SPOT_MORTY_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker-compose up -d --build --scale tor=5
+    - docker-compose pull
+    - docker-compose up -d --scale tor=5
