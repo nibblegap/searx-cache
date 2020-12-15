@@ -14,9 +14,8 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 
 ## Architecture
 
-7 services are used for production:
+6 services are used for production:
 
-* [traefik](https://docs.traefik.io/) as edge router to publish services.
 * [filtron](https://github.com/asciimoo/filtron) as reverse HTTP proxy to filter requests by different rules.
 * [morty](https://github.com/asciimoo/morty) as proxy to serve thumbnails.
 * [nginx](https://www.nginx.com/) as http server to serve static files.
@@ -27,8 +26,8 @@ Spot was forked from searx: read [documentation](https://asciimoo.github.io/sear
 
 ```mermaid
 graph TD
-  A(traefik) --> |https://spot.ecloud.global| B(filtron)
-  A(traefik) --> |https://proxy.spot.ecloud.global| C(morty)
+  A(reverse proxy) --> |http://localhost:8088| B(filtron)
+  A(reverse proxy) --> |https://localhost:8089| C(morty)
   C --> |image link| C
   B --> D(nginx)
   D --> |static file| D

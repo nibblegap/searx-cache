@@ -45,12 +45,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.spot.rule=Host(`${SPOT_HOSTNAME}`)"
-      - "traefik.http.routers.spot.entrypoints=websecure"
-      - "traefik.http.routers.spot.tls.certresolver=spotchallenge"
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=web"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
   morty:
     image: ${SPOT_MORTY_DOCKER_IMG}:${SPOT_MORTY_DOCKER_TAG}
@@ -61,35 +55,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.spot_proxy.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"
-      - "traefik.http.routers.spot_proxy.entrypoints=websecure"
-      - "traefik.http.routers.spot_proxy.tls.certresolver=spotchallenge"
-
-  traefik:
-    build:
-      context: .
-      dockerfile: traefik.Dockerfile
-    logging: *default-logging
-    restart: unless-stopped
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.spotchallenge.acme.tlschallenge=true"
-      - "--certificatesresolvers.spotchallenge.acme.email=contact@e.email"
-      - "--certificatesresolvers.spotchallenge.acme.storage=/letsencrypt/acme.json"
-      - "--providers.file.filename=/etc/traefik/config.yml"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "letsencrypt:/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   tor:
     image: osminogin/tor-simple
     logging: *default-logging
     restart: unless-stopped
-
-volumes:
-  letsencrypt:
