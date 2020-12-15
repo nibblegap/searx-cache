@@ -71,8 +71,6 @@ test:unit:
 .deploy:template:
   stage: deploy
   before_script:
-    - pip install docker-compose
-    - apk add openssh-client docker
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
