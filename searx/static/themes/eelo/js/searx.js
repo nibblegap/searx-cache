@@ -118,6 +118,9 @@ function build_image(images) {
   var res = "";
 
   for (i = 0; i < images.length; i++) {
+    if (images[i].thumbnail_src === undefined) {
+        continue;
+    }
     res += "\
       <div class='result result-images'>\
         <a href=" + images[i].img_src + "' data-url='" + images[i].url + "' class='img-thumb-link'>\
