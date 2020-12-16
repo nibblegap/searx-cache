@@ -1,10 +1,8 @@
 import hmac
 import hashlib
-
-from flask_babel import gettext
-
-from searx import settings
 from urllib.parse import urlencode
+from flask_babel import gettext
+from searx import settings
 
 
 name = gettext('Rest API')
