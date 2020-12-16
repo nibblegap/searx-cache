@@ -81,12 +81,16 @@ deploy:spot.test.cloud.global:
     url: https://spot.test.ecloud.global
   variables:
     DOCKER_HOST: ssh://root@spot.test.ecloud.global
+    FILTRON_RULES: /etc/filtron/rules.json
     SPOT_HOSTNAME: spot.test.ecloud.global
     SPOT_MORTY_HOSTNAME: proxy.spot.test.ecloud.global
     SPOT_MORTY_URL: https://proxy.spot.test.ecloud.global
     COMPOSE_PROJECT_NAME: my-spot
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
   script:
+    - ssh  $DOCKER_HOST "mkdir -p /etc/filtron && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
     - docker-compose up -d --build --scale tor=5
 
 deploy:spot.cloud.global:
@@ -98,6 +102,7 @@ deploy:spot.cloud.global:
     url: https://spot.ecloud.global
   variables:
     DOCKER_HOST: ssh://root@spot.ecloud.global
+    FILTRON_RULES: /etc/filtron/rules.json
     SPOT_HOSTNAME: spot.ecloud.global
     SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
     SPOT_MORTY_URL: https://proxy.spot.ecloud.global
@@ -106,6 +111,8 @@ deploy:spot.cloud.global:
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_PROD}
   script:
+    - ssh  $DOCKER_HOST "mkdir -p /etc/filtron && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
     - docker-compose pull
     - docker-compose up -d --scale tor=5
