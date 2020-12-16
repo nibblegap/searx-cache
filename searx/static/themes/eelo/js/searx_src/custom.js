@@ -81,7 +81,7 @@ $(document).ready(function(){
       "time_range": $("select[name='time_range']").find('option:selected').attr("value")
     });
 
-    fetch("/?categories=images&" + query_params, {"headers": headers})
+    fetch(window.location.origin + "/search?categories=images&" + query_params, {"headers": headers})
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.results) {
@@ -89,7 +89,7 @@ $(document).ready(function(){
         }
       });
 
-    fetch("/?categories=videos&" + query_params, {"headers": headers})
+    fetch(window.location.origin + "/search?categories=videos&" + query_params, {"headers": headers})
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.results) {
