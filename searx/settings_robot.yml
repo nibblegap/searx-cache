@@ -8,7 +8,7 @@ search:
 server:
     port : 11111
     bind_address : 127.0.0.1
-    secret_key : "ultrasecretkey" # change this!
+    secret_key : "changedultrasecretkey"
     base_url : False
     http_protocol_version : "1.0"
 
@@ -16,6 +16,9 @@ ui:
     static_path : ""
     templates_path : ""
     default_theme : oscar
+
+preferences:
+    lock: []
 
 outgoing:
     request_timeout : 1.0 # seconds
@@ -39,7 +42,7 @@ locales:
 doi_resolvers :
   oadoi.org : 'https://oadoi.org/'
   doi.org : 'https://doi.org/'
-  doai.io  : 'https://doai.io/'
+  doai.io  : 'https://dissem.in/'
   sci-hub.tw : 'https://sci-hub.tw/'
 
-default_doi_resolver : 'oadoi.org'
+default_doi_resolver : 'sci-hub.tw'

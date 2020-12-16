@@ -14,11 +14,10 @@
 """
 
 import re
+from urllib.parse import urlencode
 from lxml import html
-from searx import logger, utils
-from searx.engines.xpath import extract_text
-from searx.url_utils import urlencode
-from searx.utils import match_language, gen_useragent, eval_xpath
+from searx import logger
+from searx.utils import eval_xpath, extract_text, match_language
 
 logger = logger.getChild('bing engine')
 
@@ -47,7 +46,7 @@ def request(query, params):
     else:
         lang = match_language(params['language'], supported_languages, language_aliases)
 
-    query = u'language:{} {}'.format(lang.split('-')[0].upper(), query.decode('utf-8')).encode('utf-8')
+    query = 'language:{} {}'.format(lang.split('-')[0].upper(), query)
 
     search_path = search_string.format(
         query=urlencode({'q': query}),
@@ -99,7 +98,6 @@ def response(resp):
             result_len = int(result_len_container)
     except Exception as e:
         logger.debug('result error :\n%s', e)
-        pass
 
     if result_len and _get_offset_from_pageno(resp.search_params.get("pageno", 0)) > result_len:
         return []

@@ -4,7 +4,7 @@ import hashlib
 from flask_babel import gettext
 
 from searx import settings
-from searx.url_utils import urlencode
+from urllib.parse import urlencode
 
 
 name = gettext('Rest API')

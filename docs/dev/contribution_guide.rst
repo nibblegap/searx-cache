@@ -87,7 +87,7 @@ In order to submit a patch, please follow the steps below:
 
 - Add yourself to the :origin:`AUTHORS.rst` file.
 
-- Choose meaning full commit messages, read `Conventional Commits`_
+- Choose meaningful commit messages, read `Conventional Commits`_
 
   .. code::
 
@@ -117,8 +117,8 @@ Translation currently takes place on :ref:`transifex <translation>`.
 Documentation
 =============
 
-.. _Sphinx: http://www.sphinx-doc.org
-.. _reST: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+.. _Sphinx: https://www.sphinx-doc.org
+.. _reST: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 
 .. sidebar:: The reST sources
 
@@ -141,6 +141,9 @@ Here is an example which makes a complete rebuild:
 live build
 ----------
 
+.. _sphinx-autobuild:
+   https://github.com/executablebooks/sphinx-autobuild/blob/master/README.md
+
 .. sidebar:: docs-clean
 
    It is recommended to assert a complete rebuild before deploying (use
@@ -156,8 +159,20 @@ changed.
    $ make docs-live
    ...
    The HTML pages are in dist/docs.
-   ... Serving on http://0.0.0.0:8080
+   ... Serving on http://0.0.0.0:8000
    ... Start watching changes
+
+Live builds are implemented by sphinx-autobuild_.  Use environment
+``$(SPHINXOPTS)`` to pass arguments to the sphinx-autobuild_ command.  Except
+option ``--host`` (which is always set to ``0.0.0.0``) you can pass any
+argument.  E.g to find and use a free port, use:
+
+.. code:: sh
+
+   $ SPHINXOPTS="--port 0" make docs-live
+   ...
+   ... Serving on http://0.0.0.0:50593
+   ...
 
 
 .. _deploy on github.io:
@@ -182,4 +197,4 @@ needed git add, commit and push:
    cd gh-pages; git checkout gh-pages >/dev/null
    Switched to a new branch 'gh-pages'
    ...
-   doc available at --> https://asciimoo.github.io/searx
+   doc available at --> https://searx.github.io/searx

@@ -16,19 +16,16 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 '''
 
 
-import sys
 from lxml import etree
 from json import loads
+from urllib.parse import urlencode
+
 from searx import settings
 from searx.languages import language_codes
 from searx.engines import (
     categories, engines, engine_shortcuts
 )
 from searx.poolrequests import get as http_get
-from searx.url_utils import urlencode
-
-if sys.version_info[0] == 3:
-    unicode = str
 
 
 def get(*args, **kwargs):
@@ -41,22 +38,22 @@ def get(*args, **kwargs):
 def searx_bang(full_query):
     '''check if the searchQuery contain a bang, and create fitting autocompleter results'''
     # check if there is a query which can be parsed
-    if len(full_query.getSearchQuery()) == 0:
+    if len(full_query.getQuery()) == 0:
         return []
 
     results = []
 
     # check if current query stats with !bang
-    first_char = full_query.getSearchQuery()[0]
+    first_char = full_query.getQuery()[0]
     if first_char == '!' or first_char == '?':
-        if len(full_query.getSearchQuery()) == 1:
+        if len(full_query.getQuery()) == 1:
             # show some example queries
             # TODO, check if engine is not avaliable
             results.append(first_char + "images")
             results.append(first_char + "wikipedia")
             results.append(first_char + "osm")
         else:
-            engine_query = full_query.getSearchQuery()[1:]
+            engine_query = full_query.getQuery()[1:]
 
             # check if query starts with categorie name
             for categorie in categories:
@@ -75,32 +72,32 @@ def searx_bang(full_query):
 
     # check if current query stats with :bang
     elif first_char == ':':
-        if len(full_query.getSearchQuery()) == 1:
+        if len(full_query.getQuery()) == 1:
             # show some example queries
             results.append(":en")
             results.append(":en_us")
             results.append(":english")
             results.append(":united_kingdom")
         else:
-            engine_query = full_query.getSearchQuery()[1:]
+            engine_query = full_query.getQuery()[1:]
 
             for lc in language_codes:
-                lang_id, lang_name, country, english_name = map(unicode.lower, lc)
+                lang_id, lang_name, country, english_name = map(str.lower, lc)
 
                 # check if query starts with language-id
                 if lang_id.startswith(engine_query):
                     if len(engine_query) <= 2:
-                        results.append(u':{lang_id}'.format(lang_id=lang_id.split('-')[0]))
+                        results.append(':{lang_id}'.format(lang_id=lang_id.split('-')[0]))
                     else:
-                        results.append(u':{lang_id}'.format(lang_id=lang_id))
+                        results.append(':{lang_id}'.format(lang_id=lang_id))
 
                 # check if query starts with language name
                 if lang_name.startswith(engine_query) or english_name.startswith(engine_query):
-                    results.append(u':{lang_name}'.format(lang_name=lang_name))
+                    results.append(':{lang_name}'.format(lang_name=lang_name))
 
                 # check if query starts with country
                 if country.startswith(engine_query.replace('_', ' ')):
-                    results.append(u':{country}'.format(country=country.replace(' ', '_')))
+                    results.append(':{country}'.format(country=country.replace(' ', '_')))
 
     # remove duplicates
     result_set = set(results)
@@ -116,7 +113,7 @@ def searx_bang(full_query):
 
 def dbpedia(query, lang):
     # dbpedia autocompleter, no HTTPS
-    autocomplete_url = 'http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?'
+    autocomplete_url = 'https://lookup.dbpedia.org/api/search.asmx/KeywordSearch?'
 
     response = get(autocomplete_url + urlencode(dict(QueryString=query)))
 
@@ -124,8 +121,7 @@ def dbpedia(query, lang):
 
     if response.ok:
         dom = etree.fromstring(response.content)
-        results = dom.xpath('//a:Result/a:Label//text()',
-                            namespaces={'a': 'http://lookup.dbpedia.org/'})
+        results = dom.xpath('//Result/Label//text()')
 
     return results
 

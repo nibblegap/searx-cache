@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from searx.testing import SearxTestCase
-from searx.preferences import Preferences
-from searx.engines import engines
-
+from searx.search import SearchQuery, EngineRef
 import searx.search
+import searx.engines
 
 
 SAFESEARCH = 0
 PAGENO = 1
 PUBLIC_ENGINE_NAME = 'general dummy'
-PRIVATE_ENGINE_NAME = 'general private offline'
 TEST_ENGINES = [
     {
         'name': PUBLIC_ENGINE_NAME,
@@ -20,16 +18,21 @@ TEST_ENGINES = [
         'timeout': 3.0,
         'tokens': [],
     },
-    {
-        'name': PRIVATE_ENGINE_NAME,
-        'engine': 'dummy-offline',
-        'categories': 'general',
-        'shortcut': 'do',
-        'timeout': 3.0,
-        'offline': True,
-        'tokens': ['my-token'],
-    },
 ]
+
+
+class SearchQueryTestCase(SearxTestCase):
+
+    def test_repr(self):
+        s = SearchQuery('test', [EngineRef('bing', 'general', False)], ['general'], 'all', 0, 1, '1', 5.0, 'g')
+        self.assertEqual(repr(s),
+                         "SearchQuery('test', [EngineRef('bing', 'general', False)], ['general'], 'all', 0, 1, '1', 5.0, 'g')")  # noqa
+
+    def test_eq(self):
+        s = SearchQuery('test', [EngineRef('bing', 'general', False)], ['general'], 'all', 0, 1, None, None, None)
+        t = SearchQuery('test', [EngineRef('google', 'general', False)], ['general'], 'all', 0, 1, None, None, None)
+        self.assertEqual(s, s)
+        self.assertNotEqual(s, t)
 
 
 class SearchTestCase(SearxTestCase):
@@ -40,92 +43,57 @@ class SearchTestCase(SearxTestCase):
 
     def test_timeout_simple(self):
         searx.search.max_request_timeout = None
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PUBLIC_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, None,
-                                               preferences=Preferences(['eelo'], ['general'], engines, []))
+        search_query = SearchQuery('test', [EngineRef(PUBLIC_ENGINE_NAME, 'general')],
+                                   ['general'], 'en-US', SAFESEARCH, PAGENO, None, None)
         search = searx.search.Search(search_query)
         search.search()
-        self.assertEquals(search.actual_timeout, 3.0)
+        self.assertEqual(search.actual_timeout, 3.0)
 
     def test_timeout_query_above_default_nomax(self):
         searx.search.max_request_timeout = None
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PUBLIC_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, 5.0,
-                                               preferences=Preferences(['eelo'], ['general'], engines, []))
+        search_query = SearchQuery('test', [EngineRef(PUBLIC_ENGINE_NAME, 'general')],
+                                   ['general'], 'en-US', SAFESEARCH, PAGENO, None, 5.0)
         search = searx.search.Search(search_query)
         search.search()
-        self.assertEquals(search.actual_timeout, 3.0)
+        self.assertEqual(search.actual_timeout, 3.0)
 
     def test_timeout_query_below_default_nomax(self):
         searx.search.max_request_timeout = None
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PUBLIC_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, 1.0,
-                                               preferences=Preferences(['eelo'], ['general'], engines, []))
+        search_query = SearchQuery('test', [EngineRef(PUBLIC_ENGINE_NAME, 'general')],
+                                   ['general'], 'en-US', SAFESEARCH, PAGENO, None, 1.0)
         search = searx.search.Search(search_query)
         search.search()
-        self.assertEquals(search.actual_timeout, 1.0)
+        self.assertEqual(search.actual_timeout, 1.0)
 
     def test_timeout_query_below_max(self):
         searx.search.max_request_timeout = 10.0
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PUBLIC_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, 5.0,
-                                               preferences=Preferences(['eelo'], ['general'], engines, []))
+        search_query = SearchQuery('test', [EngineRef(PUBLIC_ENGINE_NAME, 'general')],
+                                   ['general'], 'en-US', SAFESEARCH, PAGENO, None, 5.0)
         search = searx.search.Search(search_query)
         search.search()
-        self.assertEquals(search.actual_timeout, 5.0)
+        self.assertEqual(search.actual_timeout, 5.0)
 
     def test_timeout_query_above_max(self):
         searx.search.max_request_timeout = 10.0
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PUBLIC_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, 15.0,
-                                               preferences=Preferences(['eelo'], ['general'], engines, []))
+        search_query = SearchQuery('test', [EngineRef(PUBLIC_ENGINE_NAME, 'general')],
+                                   ['general'], 'en-US', SAFESEARCH, PAGENO, None, 15.0)
         search = searx.search.Search(search_query)
         search.search()
-        self.assertEquals(search.actual_timeout, 10.0)
-
-    def test_query_private_engine_without_token(self):
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PRIVATE_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, 2.0,
-                                               preferences=Preferences(['eelo'], ['general'], engines, []))
-        search = searx.search.Search(search_query)
-        results = search.search()
-        self.assertEquals(results.results_length(), 0)
-
-    def test_query_private_engine_with_incorrect_token(self):
-        preferences_with_tokens = Preferences(['eelo'], ['general'], engines, [])
-        preferences_with_tokens.parse_dict({'tokens': 'bad-token'})
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PRIVATE_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, 2.0,
-                                               preferences=preferences_with_tokens)
-        search = searx.search.Search(search_query)
-        results = search.search()
-        self.assertEquals(results.results_length(), 0)
-
-    def test_query_private_engine_with_correct_token(self):
-        preferences_with_tokens = Preferences(['eelo'], ['general'], engines, [])
-        preferences_with_tokens.parse_dict({'tokens': 'my-token'})
-        search_query = searx.query.SearchQuery('test', [{'category': 'general', 'name': PRIVATE_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, 2.0,
-                                               preferences=preferences_with_tokens)
-        search = searx.search.Search(search_query)
-        results = search.search()
-        self.assertEquals(results.results_length(), 1)
+        self.assertEqual(search.actual_timeout, 10.0)
 
     def test_external_bang(self):
-        search_query = searx.query.SearchQuery('yes yes',
-                                               [{'category': 'general', 'name': PUBLIC_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, None,
-                                               preferences=Preferences(['eelo'], ['general'], engines, [],),
-                                               external_bang="yt")
+        search_query = SearchQuery('yes yes',
+                                   [EngineRef(PUBLIC_ENGINE_NAME, 'general')],
+                                   ['general'], 'en-US', SAFESEARCH, PAGENO, None, None,
+                                   external_bang="yt")
         search = searx.search.Search(search_query)
         results = search.search()
         # For checking if the user redirected with the youtube external bang
         self.assertTrue(results.redirect_url is not None)
 
-        search_query = searx.query.SearchQuery('youtube never gonna give you up',
-                                               [{'category': 'general', 'name': PUBLIC_ENGINE_NAME}],
-                                               ['general'], 'en-US', SAFESEARCH, PAGENO, None, None,
-                                               preferences=Preferences(['eelo'], ['general'], engines, []),)
+        search_query = SearchQuery('youtube never gonna give you up',
+                                   [EngineRef(PUBLIC_ENGINE_NAME, 'general')],
+                                   ['general'], 'en-US', SAFESEARCH, PAGENO, None, None)
 
         search = searx.search.Search(search_query)
         results = search.search()

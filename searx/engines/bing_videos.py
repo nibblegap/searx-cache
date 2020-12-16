@@ -12,10 +12,11 @@
 
 from json import loads
 from lxml import html
-from searx.url_utils import urlencode
+from urllib.parse import urlencode
 from searx.utils import match_language
 
-from searx.engines.bing import _fetch_supported_languages, supported_languages_url, language_aliases
+from searx.engines.bing import language_aliases
+from searx.engines.bing import _fetch_supported_languages, supported_languages_url  # NOQA # pylint: disable=unused-import
 
 categories = ['videos']
 paging = True

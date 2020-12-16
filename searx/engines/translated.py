@@ -9,23 +9,20 @@
  @parse       url, title, content
 """
 import re
-from sys import version_info
 from searx.utils import is_valid_lang
 
-if version_info[0] == 3:
-    unicode = str
-
 categories = ['general']
-url = u'http://api.mymemory.translated.net/get?q={query}&langpair={from_lang}|{to_lang}{key}'
-web_url = u'http://mymemory.translated.net/en/{from_lang}/{to_lang}/{query}'
+url = 'https://api.mymemory.translated.net/get?q={query}&langpair={from_lang}|{to_lang}{key}'
+web_url = 'https://mymemory.translated.net/en/{from_lang}/{to_lang}/{query}'
 weight = 100
+https_support = True
 
-parser_re = re.compile(u'.*?([a-z]+)-([a-z]+) (.{2,})$', re.I)
+parser_re = re.compile('.*?([a-z]+)-([a-z]+) (.{2,})$', re.I)
 api_key = ''
 
 
 def request(query, params):
-    m = parser_re.match(unicode(query, 'utf8'))
+    m = parser_re.match(query)
     if not m:
         return params
 

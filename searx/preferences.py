@@ -6,16 +6,11 @@
 
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from zlib import compress, decompress
-from sys import version
+from urllib.parse import parse_qs, urlencode
 
 from searx import settings, autocomplete
 from searx.languages import language_codes as languages
-from searx.utils import match_language
-from searx.url_utils import parse_qs, urlencode
-
-if version[0] == '3':
-    # pylint: disable=invalid-name
-    unicode = str
+from searx.webutils import VALID_LANGUAGE_CODE
 
 
 COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 5  # 5 years
@@ -37,12 +32,13 @@ class ValidationException(Exception):
     """
 
 
-class Setting(object):
+class Setting:
     """Base class of user settings"""
 
-    def __init__(self, default_value, **kwargs):
-        super(Setting, self).__init__()
+    def __init__(self, default_value, locked=False, **kwargs):
+        super().__init__()
         self.value = default_value
+        self.locked = locked
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -120,6 +116,9 @@ class MultipleChoiceSetting(EnumStringSetting):
         self.value = elements
 
     def parse_form(self, data):  # pylint: disable=missing-function-docstring
+        if self.locked:
+            return
+
         self.value = []
         for choice in data:
             if choice in self.choices and choice not in self.value:  # pylint: disable=no-member
@@ -154,6 +153,9 @@ class SetSetting(Setting):
             self.values.add(element)
 
     def parse_form(self, data):  # pylint: disable=missing-function-docstring
+        if self.locked:
+            return
+
         elements = data.split(',')
         self.values = set(elements)  # pylint: disable=attribute-defined-outside-init
 
@@ -167,9 +169,7 @@ class SearchLanguageSetting(EnumStringSetting):
     """Available choices may change, so user's value may not be in choices anymore"""
 
     def _validate_selection(self, selection):
-        if selection != "" and not match_language(
-                # pylint: disable=no-member
-                selection, self.choices, fallback=None):
+        if selection != '' and not VALID_LANGUAGE_CODE.match(selection):
             raise ValidationException('Invalid language code: "{0}"'.format(selection))
 
     def parse(self, data):
@@ -185,17 +185,8 @@ class SearchLanguageSetting(EnumStringSetting):
             elif lang in self.choices:
                 data = lang
             else:
-                res = None
-                for lg in self.choices:
-                    if data == lg.split('-')[0]:
-                        res = lg
-                        break
-
-                if res is None:
-                    data = self.value
-                else:
-                    data = res
-
+                data = self.value
+        self._validate_selection(data)
         self.value = data
 
 
@@ -249,6 +240,9 @@ class SwitchableSetting(Setting):
             self.enabled = set(data[ENABLED].split(','))
 
     def parse_form(self, items):   # pylint: disable=missing-function-docstring
+        if self.locked:
+            return
+
         items = self.transform_form_items(items)
         self.disabled = set()  # pylint: disable=attribute-defined-outside-init
         self.enabled = set()   # pylint: disable=attribute-defined-outside-init
@@ -285,7 +279,7 @@ class EnginesSetting(SwitchableSetting):
     """Engine settings"""
 
     def _post_init(self):
-        super(EnginesSetting, self)._post_init()
+        super()._post_init()
         transformed_choices = []
         for engine_name, engine in self.choices.items():  # pylint: disable=no-member,access-member-before-definition
             for category in engine.categories:
@@ -312,7 +306,7 @@ class PluginsSetting(SwitchableSetting):
     """Plugin settings"""
 
     def _post_init(self):
-        super(PluginsSetting, self)._post_init()
+        super()._post_init()
         transformed_choices = []
         for plugin in self.choices:  # pylint: disable=access-member-before-definition
             transformed_choice = dict()
@@ -325,30 +319,36 @@ class PluginsSetting(SwitchableSetting):
         return [item[len('plugin_'):] for item in items]
 
 
-class Preferences(object):
+class Preferences:
     """Validates and saves preferences to cookies"""
 
     def __init__(self, themes, categories, engines, plugins):
-        super(Preferences, self).__init__()
+        super().__init__()
 
         self.key_value_settings = {
             'categories': MultipleChoiceSetting(
-                ['general'], choices=categories + ['none']
+                ['general'],
+                is_locked('categories'),
+                choices=categories + ['none']
             ),
             'language': SearchLanguageSetting(
                 settings['search'].get('default_lang', ''),
+                is_locked('language'),
                 choices=list(LANGUAGE_CODES) + ['']
             ),
             'locale': EnumStringSetting(
                 settings['ui'].get('default_locale', ''),
+                is_locked('locale'),
                 choices=list(settings['locales'].keys()) + ['']
             ),
             'autocomplete': EnumStringSetting(
                 settings['search'].get('autocomplete', ''),
+                is_locked('autocomplete'),
                 choices=list(autocomplete.backends.keys()) + ['']
             ),
             'image_proxy': MapSetting(
                 settings['server'].get('image_proxy', False),
+                is_locked('image_proxy'),
                 map={
                     '': settings['server'].get('image_proxy', 0),
                     '0': False,
@@ -358,11 +358,13 @@ class Preferences(object):
                 }
             ),
             'method': EnumStringSetting(
-                'POST',
+                settings['server'].get('method', 'POST'),
+                is_locked('method'),
                 choices=('GET', 'POST')
             ),
             'safesearch': MapSetting(
                 settings['search'].get('safe_search', 0),
+                is_locked('safesearch'),
                 map={
                     '0': 0,
                     '1': 1,
@@ -371,10 +373,12 @@ class Preferences(object):
             ),
             'theme': EnumStringSetting(
                 settings['ui'].get('default_theme', 'oscar'),
+                is_locked('theme'),
                 choices=themes
             ),
             'results_on_new_tab': MapSetting(
-                False,
+                settings['ui'].get('results_on_new_tab', False),
+                is_locked('results_on_new_tab'),
                 map={
                     '0': False,
                     '1': True,
@@ -383,11 +387,25 @@ class Preferences(object):
                 }
             ),
             'doi_resolver': MultipleChoiceSetting(
-                ['oadoi.org'], choices=DOI_RESOLVERS
+                ['oadoi.org'],
+                is_locked('doi_resolver'),
+                choices=DOI_RESOLVERS
             ),
             'oscar-style': EnumStringSetting(
                 settings['ui'].get('theme_args', {}).get('oscar_style', 'logicodev'),
+                is_locked('oscar-style'),
                 choices=['', 'logicodev', 'logicodev-dark', 'pointhi']),
+            'advanced_search': MapSetting(
+                settings['ui'].get('advanced_search', False),
+                is_locked('advanced_search'),
+                map={
+                    '0': False,
+                    '1': True,
+                    'False': False,
+                    'True': True,
+                    'on': True,
+                }
+            ),
         }
 
         self.engines = EnginesSetting('engines', choices=engines)
@@ -399,6 +417,8 @@ class Preferences(object):
         """Return preferences as URL parameters"""
         settings_kv = {}
         for k, v in self.key_value_settings.items():
+            if v.locked:
+                continue
             if isinstance(v, MultipleChoiceSetting):
                 settings_kv[k] = ','.join(v.get_value())
             else:
@@ -412,20 +432,22 @@ class Preferences(object):
 
         settings_kv['tokens'] = ','.join(self.tokens.values)
 
-        return urlsafe_b64encode(compress(urlencode(settings_kv).encode('utf-8'))).decode('utf-8')
+        return urlsafe_b64encode(compress(urlencode(settings_kv).encode())).decode()
 
     def parse_encoded_data(self, input_data):
         """parse (base64) preferences from request (``flask.request.form['preferences']``)"""
-        decoded_data = decompress(urlsafe_b64decode(input_data.encode('utf-8')))
+        decoded_data = decompress(urlsafe_b64decode(input_data.encode()))
         dict_data = {}
         for x, y in parse_qs(decoded_data).items():
-            dict_data[x.decode('utf8')] = y[0].decode('utf8')
+            dict_data[x.decode()] = y[0].decode()
         self.parse_dict(dict_data)
 
     def parse_dict(self, input_data):
         """parse preferences from request (``flask.request.form``)"""
         for user_setting_name, user_setting in input_data.items():
             if user_setting_name in self.key_value_settings:
+                if self.key_value_settings[user_setting_name].locked:
+                    continue
                 self.key_value_settings[user_setting_name].parse(user_setting)
             elif user_setting_name == 'disabled_engines':
                 self.engines.parse_cookie((input_data.get('disabled_engines', ''),
@@ -480,6 +502,8 @@ class Preferences(object):
         """Save cookie in the HTTP reponse obect
         """
         for user_setting_name, user_setting in self.key_value_settings.items():
+            if self.key_value_settings[user_setting_name].locked:
+                continue
             user_setting.save(user_setting_name, resp)
         self.engines.save(resp)
         self.plugins.save(resp)
@@ -498,3 +522,13 @@ class Preferences(object):
                     break
 
         return valid
+
+
+def is_locked(setting_name):
+    """Checks if a given setting name is locked by settings.yml
+    """
+    if 'preferences' not in settings:
+        return False
+    if 'lock' not in settings['preferences']:
+        return False
+    return setting_name in settings['preferences']['lock']

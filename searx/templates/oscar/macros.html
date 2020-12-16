@@ -1,6 +1,6 @@
 <!-- Draw glyphicon icon from bootstrap-theme -->
-{% macro icon(action) -%}
-    <span class="glyphicon glyphicon-{{ action }}"></span>
+{% macro icon(action, alt) -%}
+    <span title="{{ alt }}" class="glyphicon glyphicon-{{ action }}"></span>
 {%- endmacro %}
 
 <!-- Draw favicon -->
@@ -32,7 +32,11 @@
             <span class="label label-default">{{ engine }}</span>
         {%- endfor -%}
         {%- if result.url -%}
-        <small>{{ result_link("https://web.archive.org/web/" + result.url, icon('link') + _('cached'), "text-info", id) }}</small>
+            {% if result.cached_url %}
+            <small>{{ result_link(result.cached_url, icon('link') + _('cached'), "text-info", id) }}</small>
+            {% elif not result.is_onion %}
+            <small>{{ result_link("https://web.archive.org/web/" + result.url, icon('link') + _('cached'), "text-info", id) }}</small>
+            {% endif %}
         {%- endif -%}
         {%- if proxify -%}
         <small>{{ result_link(proxify(result.url), icon('sort') + _('proxied'), "text-info", id) }}</small>
@@ -43,6 +47,20 @@
     {%- endif -%}
 {%- endmacro %}
 
+<!-- Draw result footer without cache link -->
+{% macro result_footer_nocache(result) -%}
+    <div class="clearfix"></div>
+    <div class="pull-right">
+    {% for engine in result.engines %}
+        <span class="label label-default">{{ engine }}</span>
+    {% endfor %}
+    {% if proxify %}
+    <small>{{ result_link(proxify(result.url), icon('sort') + _('proxied'), "text-info") }}</small>
+    {% endif %}
+</div>
+<div class="external-link">{{ result.pretty_url }}</div>
+{%- endmacro %}
+
 <!-- Draw result footer -->
 {% macro result_footer_rtl(result, id) -%}
     <div class="clearfix"></div>{{- "" -}}
@@ -50,7 +68,11 @@
         <span class="label label-default">{{ engine }}</span>
     {%- endfor %}
     {%- if result.url -%}
-    <small>{{ result_link("https://web.archive.org/web/" + result.url, icon('link') + _('cached'), "text-info", id) }}</small>
+        {% if result.cached_url %}
+        <small>{{ result_link(result.cached_url, icon('link') + _('cached'), "text-info", id) }}</small>
+        {% elif not result.is_onion %}
+        <small>{{ result_link("https://web.archive.org/web/" + result.url, icon('link') + _('cached'), "text-info", id) }}</small>
+        {% endif %}
     {%- endif -%}
     {% if proxify -%}
     <small>{{ result_link(proxify(result.url), icon('sort') + _('proxied'), "text-info", id) }}</small>
@@ -58,6 +80,18 @@
     {%- if result.pretty_url -%}
     <div class="external-link">{{ result.pretty_url }}</div>
     {%- endif %}
+{%- endmacro %}
+
+<!-- Draw result footer without cache link -->
+{% macro result_footer_nocache_rtl(result) -%}
+    <div class="clearfix"></div>
+    {% for engine in result.engines %}
+        <span class="label label-default">{{ engine }}</span>
+    {% endfor %}
+    {% if proxify %}
+    <small>{{ result_link(proxify(result.url), icon('sort') + _('proxied'), "text-info") }}</small>
+    {% endif %}
+    <div class="external-link">{{ result.pretty_url }}</div>
 {%- endmacro %}
 
 {% macro preferences_item_header(info, label, rtl, id) -%}
@@ -82,6 +116,10 @@
         <span class="col-sm-5 col-md-6 help-block">{{ info }}</span>
     </div>
     {% endif %}
+{%- endmacro %}
+
+{% macro custom_select_class(rtl) -%}
+custom-select{% if rtl %}-rtl{% endif %}
 {%- endmacro %}
 
 {% macro checkbox_toggle(id, blocked) -%}

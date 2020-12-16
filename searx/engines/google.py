@@ -18,12 +18,12 @@ Definitions`_.
 
 # pylint: disable=invalid-name, missing-function-docstring
 
+from urllib.parse import urlencode, urlparse
 from lxml import html
-from flask_babel import gettext
-from searx.engines.xpath import extract_text
 from searx import logger
-from searx.url_utils import urlencode, urlparse
-from searx.utils import match_language, eval_xpath
+from searx.utils import match_language, extract_text, eval_xpath, eval_xpath_list, eval_xpath_getindex
+from searx.exceptions import SearxEngineCaptchaException
+
 
 logger = logger.getChild('google engine')
 
@@ -116,12 +116,12 @@ g_section_with_header = './g-section-with-header'
 # the title is a h3 tag relative to the result group
 title_xpath = './/h3[1]'
 
-# in the result group there is <div class="r" ../> it's first child is a <a
-# href=...> (on some results, the <a> is the first "descendant", not ""child")
-href_xpath = './/div[@class="r"]//a/@href'
+# in the result group there is <div class="yuRUbf" ../> it's first child is a <a
+# href=...>
+href_xpath = './/div[@class="yuRUbf"]//a/@href'
 
-# in the result group there is <div class="s" ../> containing he *content*
-content_xpath = './/div[@class="s"]'
+# in the result group there is <div class="IsZvec" ../> containing he *content*
+content_xpath = './/div[@class="IsZvec"]'
 
 # Suggestions are links placed in a *card-section*, we extract only the text
 # from the links not the links itself.
@@ -130,14 +130,6 @@ suggestion_xpath = '//div[contains(@class, "card-section")]//a'
 # Since google does *auto-correction* on the first query these are not really
 # *spelling suggestions*, we use them anyway.
 spelling_suggestion_xpath = '//div[@class="med"]/p/a'
-
-
-def extract_text_from_dom(result, xpath):
-    """returns extract_text on the first result selected by the xpath or None"""
-    r = eval_xpath(result, xpath)
-    if len(r) > 0:
-        return extract_text(r[0])
-    return None
 
 
 def get_lang_country(params, lang_list, custom_aliases):
@@ -211,10 +203,10 @@ def response(resp):
     # detect google sorry
     resp_url = urlparse(resp.url)
     if resp_url.netloc == 'sorry.google.com' or resp_url.path == '/sorry/IndexRedirect':
-        raise RuntimeWarning('sorry.google.com')
+        raise SearxEngineCaptchaException()
 
     if resp_url.path.startswith('/sorry'):
-        raise RuntimeWarning(gettext('CAPTCHA required'))
+        raise SearxEngineCaptchaException()
 
     # which subdomain ?
     # subdomain = resp.search_params.get('google_subdomain')
@@ -230,18 +222,17 @@ def response(resp):
         logger.debug("did not found 'answer'")
 
     # results --> number_of_results
-    try:
-        _txt = eval_xpath(dom, '//div[@id="result-stats"]//text()')[0]
-        _digit = ''.join([n for n in _txt if n.isdigit()])
-        number_of_results = int(_digit)
-        results.append({'number_of_results': number_of_results})
-
-    except Exception as e:  # pylint: disable=broad-except
-        logger.debug("did not 'number_of_results'")
-        logger.error(e, exc_info=True)
+        try:
+            _txt = eval_xpath_getindex(dom, '//div[@id="result-stats"]//text()', 0)
+            _digit = ''.join([n for n in _txt if n.isdigit()])
+            number_of_results = int(_digit)
+            results.append({'number_of_results': number_of_results})
+        except Exception as e:  # pylint: disable=broad-except
+            logger.debug("did not 'number_of_results'")
+            logger.error(e, exc_info=True)
 
     # parse results
-    for result in eval_xpath(dom, results_xpath):
+    for result in eval_xpath_list(dom, results_xpath):
 
         # google *sections*
         if extract_text(eval_xpath(result, g_section_with_header)):
@@ -249,9 +240,14 @@ def response(resp):
             continue
 
         try:
-            title = extract_text(eval_xpath(result, title_xpath)[0])
-            url = eval_xpath(result, href_xpath)[0]
-            content = extract_text_from_dom(result, content_xpath)
+            title_tag = eval_xpath_getindex(result, title_xpath, 0, default=None)
+            if title_tag is None:
+                # this not one of the common google results *section*
+                logger.debug('ingoring <div class="g" ../> section: missing title')
+                continue
+            title = extract_text(title_tag)
+            url = eval_xpath_getindex(result, href_xpath, 0)
+            content = extract_text(eval_xpath_getindex(result, content_xpath, 0, default=None), allow_none=True)
             results.append({
                 'url': url,
                 'title': title,
@@ -266,11 +262,11 @@ def response(resp):
             continue
 
     # parse suggestion
-    for suggestion in eval_xpath(dom, suggestion_xpath):
+    for suggestion in eval_xpath_list(dom, suggestion_xpath):
         # append suggestion
         results.append({'suggestion': extract_text(suggestion)})
 
-    for correction in eval_xpath(dom, spelling_suggestion_xpath):
+    for correction in eval_xpath_list(dom, spelling_suggestion_xpath):
         results.append({'correction': extract_text(correction)})
 
     # return results
@@ -282,11 +278,11 @@ def _fetch_supported_languages(resp):
     ret_val = {}
     dom = html.fromstring(resp.text)
 
-    radio_buttons = eval_xpath(dom, '//*[@id="langSec"]//input[@name="lang"]')
+    radio_buttons = eval_xpath_list(dom, '//*[@id="langSec"]//input[@name="lr"]')
 
     for x in radio_buttons:
         name = x.get("data-name")
-        code = x.get("value")
+        code = x.get("value").split('_')[-1]
         ret_val[code] = {"name": name}
 
     return ret_val

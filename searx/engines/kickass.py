@@ -12,9 +12,8 @@
 
 from lxml import html
 from operator import itemgetter
-from searx.engines.xpath import extract_text
-from searx.utils import get_torrent_size, convert_str_to_int
-from searx.url_utils import quote, urljoin
+from urllib.parse import quote, urljoin
+from searx.utils import extract_text, get_torrent_size, convert_str_to_int
 
 # engine dependent config
 categories = ['videos', 'music', 'files']

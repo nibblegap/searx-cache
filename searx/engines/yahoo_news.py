@@ -11,14 +11,12 @@
 
 import re
 from datetime import datetime, timedelta
+from urllib.parse import urlencode
 from lxml import html
-from searx.engines.xpath import extract_text, extract_url
-from searx.engines.yahoo import (
-    parse_url, _fetch_supported_languages, supported_languages_url, language_aliases
-)
+from searx.engines.yahoo import parse_url, language_aliases
+from searx.engines.yahoo import _fetch_supported_languages, supported_languages_url  # NOQA # pylint: disable=unused-import
 from dateutil import parser
-from searx.url_utils import urlencode
-from searx.utils import match_language
+from searx.utils import extract_text, extract_url, match_language
 
 # engine dependent config
 categories = ['news']
@@ -58,7 +56,7 @@ def request(query, params):
 
 def sanitize_url(url):
     if ".yahoo.com/" in url:
-        return re.sub(u"\\;\\_ylt\\=.+$", "", url)
+        return re.sub("\\;\\_ylt\\=.+$", "", url)
     else:
         return url
 

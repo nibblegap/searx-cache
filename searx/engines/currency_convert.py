@@ -1,42 +1,35 @@
 import json
 import re
-import os
-import sys
 import unicodedata
+from searx.data import CURRENCIES  # NOQA
 
-from io import open
-from datetime import datetime
-
-if sys.version_info[0] == 3:
-    unicode = str
 
 categories = []
 url = 'https://duckduckgo.com/js/spice/currency/1/{0}/{1}'
 weight = 100
 
-parser_re = re.compile(b'.*?(\\d+(?:\\.\\d+)?) ([^.0-9]+) (?:in|to) ([^.0-9]+)', re.I)
-
-db = 1
+parser_re = re.compile('.*?(\\d+(?:\\.\\d+)?) ([^.0-9]+) (?:in|to) ([^.0-9]+)', re.I)
+https_support = True
 
 
 def normalize_name(name):
-    name = name.decode('utf-8').lower().replace('-', ' ').rstrip('s')
+    name = name.lower().replace('-', ' ').rstrip('s')
     name = re.sub(' +', ' ', name)
     return unicodedata.normalize('NFKD', name).lower()
 
 
 def name_to_iso4217(name):
-    global db
+    global CURRENCIES
 
     name = normalize_name(name)
-    currencies = db['names'].get(name, [name])
-    return currencies[0]
+    currency = CURRENCIES['names'].get(name, [name])
+    return currency[0]
 
 
 def iso4217_to_name(iso4217, language):
-    global db
+    global CURRENCIES
 
-    return db['iso4217'].get(iso4217, {}).get(language, iso4217)
+    return CURRENCIES['iso4217'].get(iso4217, {}).get(language, iso4217)
 
 
 def request(query, params):
@@ -48,8 +41,6 @@ def request(query, params):
     amount = float(amount)
     from_currency = name_to_iso4217(from_currency.strip())
     to_currency = name_to_iso4217(to_currency.strip())
-
-    q = (from_currency + to_currency).upper()
 
     params['url'] = url.format(from_currency, to_currency)
     params['amount'] = amount
@@ -85,15 +76,3 @@ def response(resp):
     results.append({'answer': answer, 'url': url})
 
     return results
-
-
-def load():
-    global db
-
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    json_data = open(current_dir + "/../data/currencies.json", 'r', encoding='utf-8').read()
-
-    db = json.loads(json_data)
-
-
-load()

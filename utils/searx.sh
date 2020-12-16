@@ -36,6 +36,7 @@ GIT_BRANCH="${GIT_BRANCH:-master}"
 SEARX_PYENV="${SERVICE_HOME}/searx-pyenv"
 SEARX_SRC="${SERVICE_HOME}/searx-src"
 SEARX_SETTINGS_PATH="/etc/searx/settings.yml"
+SEARX_SETTINGS_TEMPLATE="${REPO_ROOT}/utils/templates/etc/searx/use_default_settings.yml"
 SEARX_UWSGI_APP="searx.ini"
 # shellcheck disable=SC2034
 SEARX_UWSGI_SOCKET="/run/uwsgi/app/searx/socket"
@@ -76,6 +77,19 @@ texlive-xetex-bin texlive-collection-fontsrecommended
 texlive-collection-latex dejavu-sans-fonts dejavu-serif-fonts
 dejavu-sans-mono-fonts"
 
+# yum packages
+SEARX_PACKAGES_centos="\
+python36-virtualenv python36 python36-pip python36-lxml python-babel
+uwsgi uwsgi-plugin-python3
+git @development-tools libxml2
+ShellCheck"
+
+BUILD_PACKAGES_centos="\
+firefox graphviz graphviz-gd ImageMagick librsvg2-tools
+texlive-xetex-bin texlive-collection-fontsrecommended
+texlive-collection-latex dejavu-sans-fonts dejavu-serif-fonts
+dejavu-sans-mono-fonts"
+
 case $DIST_ID-$DIST_VERS in
     ubuntu-16.04|ubuntu-18.04)
         SEARX_PACKAGES="${SEARX_PACKAGES_debian}"
@@ -98,6 +112,10 @@ case $DIST_ID-$DIST_VERS in
     fedora-*)
         SEARX_PACKAGES="${SEARX_PACKAGES_fedora}"
         BUILD_PACKAGES="${BUILD_PACKAGES_fedora}"
+        ;;
+    centos-7)
+        SEARX_PACKAGES="${SEARX_PACKAGES_centos}"
+        BUILD_PACKAGES="${BUILD_PACKAGES_centos}"
         ;;
 esac
 
@@ -122,7 +140,7 @@ usage() {
     cat <<EOF
 usage::
   $(basename "$0") shell
-  $(basename "$0") install    [all|user|searx-src|pyenv|uwsgi|packages|buildhost]
+  $(basename "$0") install    [all|user|searx-src|pyenv|uwsgi|packages|settings|buildhost]
   $(basename "$0") update     [searx]
   $(basename "$0") remove     [all|user|pyenv|searx-src]
   $(basename "$0") activate   [service]
@@ -396,14 +414,14 @@ install_settings() {
     if [[ ! -f ${SEARX_SETTINGS_PATH} ]]; then
         info_msg "install settings ${REPO_ROOT}/searx/settings.yml"
         info_msg "  --> ${SEARX_SETTINGS_PATH}"
-        cp "${REPO_ROOT}/searx/settings.yml" "${SEARX_SETTINGS_PATH}"
+        cp "${SEARX_SETTINGS_TEMPLATE}" "${SEARX_SETTINGS_PATH}"
         configure_searx
         return
     fi
 
     rst_para "Diff between origin's setting file (+) and current (-):"
-    echo
-    $DIFF_CMD "${SEARX_SETTINGS_PATH}" "${SEARX_SRC}/searx/settings.yml"
+    echo "${SEARX_SETTINGS_PATH}" "${SEARX_SETTINGS_TEMPLATE}"
+    $DIFF_CMD "${SEARX_SETTINGS_PATH}" "${SEARX_SETTINGS_TEMPLATE}"
 
     local action
     choose_one action "What should happen to the settings file? " \
@@ -417,7 +435,7 @@ install_settings() {
         "use origin settings")
             backup_file "${SEARX_SETTINGS_PATH}"
             info_msg "install origin settings"
-            cp "${SEARX_SRC}/searx/settings.yml" "${SEARX_SETTINGS_PATH}"
+            cp "${SEARX_SETTINGS_TEMPLATE}" "${SEARX_SETTINGS_PATH}"
             ;;
         "start interactiv shell")
             backup_file "${SEARX_SETTINGS_PATH}"
@@ -425,7 +443,7 @@ install_settings() {
             sudo -H -i
             rst_para 'Diff between new setting file (-) and current (+):'
             echo
-            $DIFF_CMD "${SEARX_SRC}/searx/settings.yml" "${SEARX_SETTINGS_PATH}"
+            $DIFF_CMD "${SEARX_SETTINGS_TEMPLATE}" "${SEARX_SETTINGS_PATH}"
             wait_key
             ;;
     esac
@@ -714,7 +732,7 @@ EOF
         arch-*)
             systemctl --no-pager -l status "uwsgi@${SERVICE_NAME%.*}"
             ;;
-        fedora-*)
+        fedora-*|centos-7)
             systemctl --no-pager -l status uwsgi
             ;;
     esac
@@ -729,7 +747,7 @@ EOF
         case $DIST_ID-$DIST_VERS in
             ubuntu-*|debian-*) tail -f /var/log/uwsgi/app/searx.log ;;
             arch-*)  journalctl -f -u "uwsgi@${SERVICE_NAME%.*}" ;;
-            fedora-*)  journalctl -f -u uwsgi ;;
+            fedora-*|centos-7)  journalctl -f -u uwsgi ;;
         esac
     done
 
@@ -790,15 +808,19 @@ rst-doc() {
     local debian="${SEARX_PACKAGES_debian}"
     local arch="${SEARX_PACKAGES_arch}"
     local fedora="${SEARX_PACKAGES_fedora}"
+    local centos="${SEARX_PACKAGES_centos}"
     local debian_build="${BUILD_PACKAGES_debian}"
     local arch_build="${BUILD_PACKAGES_arch}"
     local fedora_build="${BUILD_PACKAGES_fedora}"
+    local centos_build="${SEARX_PACKAGES_centos}"
     debian="$(echo "${debian}" | sed 's/.*/          & \\/' | sed '$ s/.$//')"
     arch="$(echo "${arch}"     | sed 's/.*/          & \\/' | sed '$ s/.$//')"
     fedora="$(echo "${fedora}" | sed 's/.*/          & \\/' | sed '$ s/.$//')"
+    centos="$(echo "${centos}" | sed 's/.*/          & \\/' | sed '$ s/.$//')"
     debian_build="$(echo "${debian_build}" | sed 's/.*/          & \\/' | sed '$ s/.$//')"
     arch_build="$(echo "${arch_build}"     | sed 's/.*/          & \\/' | sed '$ s/.$//')"
     fedora_build="$(echo "${fedora_build}" | sed 's/.*/          & \\/' | sed '$ s/.$//')"
+    centos_build="$(echo "${centos_build}" | sed 's/.*/          & \\/' | sed '$ s/.$//')"
 
     eval "echo \"$(< "${REPO_ROOT}/docs/build-templates/searx.rst")\""
 
@@ -850,7 +872,7 @@ EOF
 
 EOF
                 ;;
-                fedora-*) cat <<EOF
+                fedora-*|centos-7) cat <<EOF
 
 .. code:: bash
 

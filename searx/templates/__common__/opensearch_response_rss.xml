@@ -4,12 +4,12 @@
      xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Searx search: {{ q|e }}</title>
-    <link>{{ base_url }}?q={{ q|e }}</link>
+    <link>{{ url_for('search', _external=True) }}?q={{ q|e }}</link>
     <description>Search results for "{{ q|e }}" - searx</description>
     <opensearch:totalResults>{{ number_of_results }}</opensearch:totalResults>
     <opensearch:startIndex>1</opensearch:startIndex>
     <opensearch:itemsPerPage>{{ number_of_results }}</opensearch:itemsPerPage>
-    <atom:link rel="search" type="application/opensearchdescription+xml" href="{{ base_url }}opensearch.xml"/>
+    <atom:link rel="search" type="application/opensearchdescription+xml" href="{{ opensearch_url }}"/>
     <opensearch:Query role="request" searchTerms="{{ q|e }}" startPage="1" />
     {% if error_message %}
     <item>

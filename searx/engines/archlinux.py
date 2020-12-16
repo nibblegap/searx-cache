@@ -11,9 +11,9 @@
  @parse        url, title
 """
 
+from urllib.parse import urlencode, urljoin
 from lxml import html
-from searx.engines.xpath import extract_text
-from searx.url_utils import urlencode, urljoin
+from searx.utils import extract_text, eval_xpath_list, eval_xpath_getindex
 
 # engine dependent config
 categories = ['it']
@@ -105,7 +105,7 @@ def request(query, params):
     # if our language is hosted on the main site, we need to add its name
     # to the query in order to narrow the results to that language
     if language in main_langs:
-        query += b' (' + main_langs[language] + b')'
+        query += ' (' + main_langs[language] + ')'
 
     # prepare the request parameters
     query = urlencode({'search': query})
@@ -131,8 +131,8 @@ def response(resp):
     dom = html.fromstring(resp.text)
 
     # parse results
-    for result in dom.xpath(xpath_results):
-        link = result.xpath(xpath_link)[0]
+    for result in eval_xpath_list(dom, xpath_results):
+        link = eval_xpath_getindex(result, xpath_link, 0)
         href = urljoin(base_url, link.attrib.get('href'))
         title = extract_text(link)
 

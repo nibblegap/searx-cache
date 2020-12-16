@@ -12,6 +12,7 @@ python:
     - ./manage.sh update_dev_packages
   script:
     - make test.pep8
+    - make test.pylint
 
 build:web:
   stage: build

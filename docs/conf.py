@@ -10,6 +10,7 @@ GIT_BRANCH = os.environ.get("GIT_BRANCH", "master")
 from searx.brand import SEARX_URL
 from searx.brand import DOCS_URL
 
+
 # Project --------------------------------------------------------------
 
 project = u'searx'
@@ -28,15 +29,15 @@ exclude_patterns = ['build-templates/*.rst']
 
 from searx import webapp
 jinja_contexts = {
-    'webapp': dict(**webapp.__dict__)
+    'webapp': dict(**webapp.__dict__),
 }
 
 # usage::   lorem :patch:`f373169` ipsum
 extlinks = {}
 
 # upstream links
-extlinks['wiki'] = ('https://github.com/asciimoo/searx/wiki/%s', ' ')
-extlinks['pull'] = ('https://github.com/asciimoo/searx/pull/%s', 'PR ')
+extlinks['wiki'] = ('https://github.com/searx/searx/wiki/%s', ' ')
+extlinks['pull'] = ('https://github.com/searx/searx/pull/%s', 'PR ')
 
 # links to custom brand
 extlinks['origin'] = (GIT_URL + '/blob/' + GIT_BRANCH + '/%s', 'git://')
@@ -48,11 +49,11 @@ extlinks['man'] = ('https://manpages.debian.org/jump?q=%s', '')
 #extlinks['role'] = (
 #    'https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#role-%s', '')
 extlinks['duref'] = (
-    'http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#%s', '')
+    'https://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#%s', '')
 extlinks['durole'] = (
-    'http://docutils.sourceforge.net/docs/ref/rst/roles.html#%s', '')
+    'https://docutils.sourceforge.net/docs/ref/rst/roles.html#%s', '')
 extlinks['dudir'] =  (
-    'http://docutils.sourceforge.net/docs/ref/rst/directives.html#%s', '')
+    'https://docutils.sourceforge.net/docs/ref/rst/directives.html#%s', '')
 extlinks['ctan'] =  (
     'https://ctan.org/pkg/%s', 'CTAN: ')
 
@@ -81,11 +82,12 @@ intersphinx_mapping = {
     "sphinx" : ("https://www.sphinx-doc.org/en/master/", None),
 }
 
-issues_github_path = "asciimoo/searx"
+issues_github_path = "searx/searx"
 
 # HTML -----------------------------------------------------------------
 
 sys.path.append(os.path.abspath('_themes'))
+sys.path.insert(0, os.path.abspath("../utils/"))
 html_theme_path = ['_themes']
 html_theme = "searx"
 
@@ -99,7 +101,7 @@ html_theme_options = {"index_sidebar_logo": True}
 html_context = {
     "project_links": [
         ProjectLink("Source", GIT_URL),
-        ProjectLink("Wiki", "https://github.com/asciimoo/searx/wiki"),
+        ProjectLink("Wiki", "https://github.com/searx/searx/wiki"),
         ProjectLink("Public instances", "https://searx.space/"),
         ProjectLink("Twitter", "https://twitter.com/Searx_engine"),
     ]

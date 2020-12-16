@@ -12,13 +12,13 @@
 
 """
 
+from urllib.parse import urlencode
 from lxml import html
 from json import loads
-import re
-from searx.url_utils import urlencode
 from searx.utils import match_language
 
-from searx.engines.bing import _fetch_supported_languages, supported_languages_url, language_aliases
+from searx.engines.bing import language_aliases
+from searx.engines.bing import _fetch_supported_languages, supported_languages_url  # NOQA # pylint: disable=unused-import
 
 # engine dependent config
 categories = ['images']
@@ -80,19 +80,18 @@ def response(resp):
 
     # parse results
     for result in dom.xpath('//div[@class="imgpt"]'):
-
-        img_format = result.xpath('./div[contains(@class, "img_info")]/span/text()')[0]
-        # Microsoft seems to experiment with this code so don't make the path too specific,
-        # just catch the text section for the first anchor in img_info assuming this to be
-        # the originating site.
-        source = result.xpath('./div[contains(@class, "img_info")]//a/text()')[0]
-
         try:
+            img_format = result.xpath('./div[contains(@class, "img_info")]/span/text()')[0]
+            # Microsoft seems to experiment with this code so don't make the path too specific,
+            # just catch the text section for the first anchor in img_info assuming this to be
+            # the originating site.
+            source = result.xpath('./div[contains(@class, "img_info")]//a/text()')[0]
+
             m = loads(result.xpath('./a/@m')[0])
 
             # strip 'Unicode private use area' highlighting, they render to Tux
             # the Linux penguin and a standing diamond on my machine...
-            title = m.get('t', '').replace(u'\ue000', '').replace(u'\ue001', '')
+            title = m.get('t', '').replace('\ue000', '').replace('\ue001', '')
             results.append({'template': 'images.html',
                             'url': m['purl'],
                             'thumbnail_src': m['turl'],

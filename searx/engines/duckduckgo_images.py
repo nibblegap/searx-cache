@@ -14,13 +14,11 @@
 """
 
 from json import loads
-from searx.engines.xpath import extract_text
-from searx.engines.duckduckgo import (
-    _fetch_supported_languages, supported_languages_url,
-    get_region_code, language_aliases
-)
+from urllib.parse import urlencode
+from searx.exceptions import SearxEngineAPIException
+from searx.engines.duckduckgo import get_region_code
+from searx.engines.duckduckgo import _fetch_supported_languages, supported_languages_url  # NOQA # pylint: disable=unused-import
 from searx.poolrequests import get
-from searx.url_utils import urlencode
 
 # engine dependent config
 categories = ['images']
@@ -40,7 +38,7 @@ def get_vqd(query, headers):
     res = get(query_url, headers=headers)
     content = res.text
     if content.find('vqd=\'') == -1:
-        raise Exception('Request failed')
+        raise SearxEngineAPIException('Request failed')
     vqd = content[content.find('vqd=\'') + 5:]
     vqd = vqd[:vqd.find('\'')]
     return vqd
@@ -74,10 +72,7 @@ def response(resp):
     results = []
 
     content = resp.text
-    try:
-        res_json = loads(content)
-    except:
-        raise Exception('Cannot parse results')
+    res_json = loads(content)
 
     # parse results
     for result in res_json['results']:

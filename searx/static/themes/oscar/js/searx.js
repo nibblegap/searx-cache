@@ -124,6 +124,13 @@ $(document).ready(function(){
     $('#q.autofocus').focus();
 
     /**
+     * Empty search bar when click on reset button
+     */
+    $("#clear_search").click(function () {
+	document.getElementById("q").value = "";
+    });
+
+    /**
      * select full content on click if class="select-all-on-click"
      */
     $(".select-all-on-click").click(function () {
@@ -202,6 +209,17 @@ $(document).ready(function(){
         var tabs = $(a.target).parents("ul");
         tabs.children().attr("aria-selected", "false");
         $(a.target).parent().attr("aria-selected", "true");
+    });
+});
+;window.addEventListener('load', function() {
+    // Hide infobox toggle if shrunk size already fits all content.
+    $('.infobox').each(function() {
+        var infobox_body = $(this).find('.infobox_body');
+        var total_height = infobox_body.prop('scrollHeight') + infobox_body.find('img.infobox_part').height();
+        var max_height = infobox_body.css('max-height').replace('px', '');
+        if (total_height <= max_height) {
+            $(this).find('.infobox_toggle').hide();
+        }
     });
 });
 ;/**

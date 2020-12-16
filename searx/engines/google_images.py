@@ -24,19 +24,12 @@ Definitions`_.
 
 """
 
+from urllib.parse import urlencode, urlparse, unquote
 from lxml import html
-from flask_babel import gettext
 from searx import logger
-from searx.url_utils import urlencode, urlparse
-from searx.utils import eval_xpath
-from searx.engines.xpath import extract_text
-
-# pylint: disable=unused-import
-from searx.engines.google import (
-    supported_languages_url,
-    _fetch_supported_languages,
-)
-# pylint: enable=unused-import
+from searx.exceptions import SearxEngineCaptchaException
+from searx.utils import extract_text, eval_xpath
+from searx.engines.google import _fetch_supported_languages, supported_languages_url  # NOQA # pylint: disable=unused-import
 
 from searx.engines.google import (
     get_lang_country,
@@ -75,6 +68,19 @@ def scrap_out_thumbs(dom):
         _img_data = _img_data.replace(r"\/", r"/")
         ret_val[_thumb_no] = _img_data.replace(r"\x3d", "=")
     return ret_val
+
+
+def scrap_img_by_id(script, data_id):
+    """Get full image URL by data-id in parent element
+    """
+    img_url = ''
+    _script = script.split('\n')
+    for i, line in enumerate(_script):
+        if 'gstatic.com/images' in line and data_id in line:
+            url_line = _script[i + 1]
+            img_url = url_line.split('"')[1]
+            img_url = unquote(img_url.replace(r'\u00', r'%'))
+    return img_url
 
 
 def request(query, params):
@@ -122,10 +128,10 @@ def response(resp):
     # detect google sorry
     resp_url = urlparse(resp.url)
     if resp_url.netloc == 'sorry.google.com' or resp_url.path == '/sorry/IndexRedirect':
-        raise RuntimeWarning('sorry.google.com')
+        raise SearxEngineCaptchaException()
 
     if resp_url.path.startswith('/sorry'):
-        raise RuntimeWarning(gettext('CAPTCHA required'))
+        raise SearxEngineCaptchaException()
 
     # which subdomain ?
     # subdomain = resp.search_params.get('google_subdomain')
@@ -133,6 +139,7 @@ def response(resp):
     # convert the text to dom
     dom = html.fromstring(resp.text)
     img_bas64_map = scrap_out_thumbs(dom)
+    img_src_script = eval_xpath(dom, '//script[contains(., "AF_initDataCallback({key: ")]')[1].text
 
     # parse results
     #
@@ -142,8 +149,7 @@ def response(resp):
     #     <div jsmodel="tTXmib"> / <div jsaction="..." data-id="..."
     #     The data-id matches to a item in a json-data structure in::
     #         <script nonce="I+vqelcy/01CKiBJi5Z1Ow">AF_initDataCallback({key: 'ds:1', ... data:function(){return [ ...
-    #     In this structure the ling to the origin PNG, JPG or whatever is given
-    #     (we do not blow out the link there, you could still implement that)
+    #     In this structure the link to the origin PNG, JPG or whatever is given
     # first link per image-div contains a <img> with the data-iid for bas64 encoded image data::
     #      <img class="rg_i Q4LuWd" data-iid="0"
     # second link per image-div is the target link::
@@ -186,12 +192,17 @@ def response(resp):
                 pub_descr = extract_text(pub_nodes[0])
                 pub_source = extract_text(pub_nodes[1])
 
+            img_src_id = eval_xpath(img_node, '../../../@data-id')[0]
+            src_url = scrap_img_by_id(img_src_script, img_src_id)
+            if not src_url:
+                src_url = thumbnail_src
+
             results.append({
                 'url': url,
                 'title': img_alt,
                 'content': pub_descr,
                 'source': pub_source,
-                'img_src': url,
+                'img_src': src_url,
                 # 'img_format': img_format,
                 'thumbnail_src': thumbnail_src,
                 'template': 'images.html'

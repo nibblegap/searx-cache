@@ -18,6 +18,9 @@ engines.  Adapters are stored under the folder :origin:`searx/engines`.
    :depth: 3
    :backlinks: entry
 
+
+.. _general engine configuration:
+
 general engine configuration
 ============================
 
@@ -49,16 +52,19 @@ offline                 boolean     engine runs offline
 settings.yml
 ------------
 
-======================= =========== ===========================================
+======================= =========== =============================================
 argument                type        information
-======================= =========== ===========================================
+======================= =========== =============================================
 name                    string      name of search-engine
 engine                  string      name of searx-engine
                                     (filename without ``.py``)
 shortcut                string      shortcut of search-engine
 timeout                 string      specific timeout for search-engine
 display_error_messages  boolean     display error messages on the web UI
-======================= =========== ===========================================
+proxies                 dict        set proxies for a specific engine
+                                    (e.g. ``proxies : {http: socks5://proxy:port,
+                                    https: socks5://proxy:port}``)
+======================= =========== =============================================
 
 
 overrides
@@ -128,16 +134,19 @@ The function ``def request(query, params):`` always returns the ``params``
 variable.  Inside searx, the following paramters can be used to specify a search
 request:
 
-============ =========== =========================================================
-argument     type        information
-============ =========== =========================================================
-url          string      requested url
-method       string      HTTP request method
-headers      set         HTTP header information
-data         set         HTTP data information (parsed if ``method != 'GET'``)
-cookies      set         HTTP cookies
-verify       boolean     Performing SSL-Validity check
-============ =========== =========================================================
+=================== =========== ==========================================================================
+argument            type        information
+=================== =========== ==========================================================================
+url                 string      requested url
+method              string      HTTP request method
+headers             set         HTTP header information
+data                set         HTTP data information (parsed if ``method != 'GET'``)
+cookies             set         HTTP cookies
+verify              boolean     Performing SSL-Validity check
+max_redirects       int         maximum redirects, hard limit
+soft_max_redirects  int         maximum redirects, soft limit. Record an error but don't stop the engine
+raise_for_httperror bool        True by default: raise an exception if the HTTP code of response is >= 300
+=================== =========== ==========================================================================
 
 
 example code
@@ -256,7 +265,7 @@ latitude                  latitude of result (in decimal format)
 longitude                 longitude of result (in decimal format)
 boundingbox               boundingbox of result (array of 4. values
                           ``[lat-min, lat-max, lon-min, lon-max]``)
-geojson                   geojson of result (http://geojson.org)
+geojson                   geojson of result (https://geojson.org/)
 osm.type                  type of osm-object (if OSM-Result)
 osm.id                    id of osm-object (if OSM-Result)
 address.name              name of object

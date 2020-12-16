@@ -19,14 +19,14 @@ along with searx. If not, see < http://www.gnu.org/licenses/ >.
 import sys
 import threading
 from os.path import realpath, dirname
-from io import open
 from babel.localedata import locale_identifiers
+from urllib.parse import urlparse
 from flask_babel import gettext
 from operator import itemgetter
-from json import loads
-from requests import get
 from searx import settings
 from searx import logger
+from searx.data import ENGINES_LANGUAGES
+from searx.poolrequests import get, get_proxy_cycles
 from searx.utils import load_module, match_language, get_engine_from_settings
 
 
@@ -38,7 +38,6 @@ engines = {}
 
 categories = {'general': []}
 
-languages = loads(open(engine_dir + '/../data/engines_languages.json', 'r', encoding='utf-8').read())
 babel_langs = [lang_parts[0] + '-' + lang_parts[-1] if len(lang_parts) > 1 else lang_parts[0]
                for lang_parts in (lang_code.split('_') for lang_code in locale_identifiers())]
 
@@ -74,20 +73,25 @@ def load_engine(engine_data):
 
     try:
         engine = load_module(engine_module + '.py', engine_dir)
+    except (SyntaxError, KeyboardInterrupt, SystemExit, SystemError, ImportError, RuntimeError):
+        logger.exception('Fatal exception in engine "{}"'.format(engine_module))
+        sys.exit(1)
     except:
         logger.exception('Cannot load engine "{}"'.format(engine_module))
         return None
 
-    for param_name in engine_data:
+    for param_name, param_value in engine_data.items():
         if param_name == 'engine':
-            continue
-        if param_name == 'categories':
-            if engine_data['categories'] == 'none':
+            pass
+        elif param_name == 'categories':
+            if param_value == 'none':
                 engine.categories = []
             else:
-                engine.categories = list(map(str.strip, engine_data['categories'].split(',')))
-            continue
-        setattr(engine, param_name, engine_data[param_name])
+                engine.categories = list(map(str.strip, param_value.split(',')))
+        elif param_name == 'proxies':
+            engine.proxies = get_proxy_cycles(param_value)
+        else:
+            setattr(engine, param_name, param_value)
 
     for arg_name, arg_value in engine_default_args.items():
         if not hasattr(engine, arg_name):
@@ -105,8 +109,8 @@ def load_engine(engine_data):
             sys.exit(1)
 
     # assign supported languages from json file
-    if engine_data['name'] in languages:
-        setattr(engine, 'supported_languages', languages[engine_data['name']])
+    if engine_data['name'] in ENGINES_LANGUAGES:
+        setattr(engine, 'supported_languages', ENGINES_LANGUAGES[engine_data['name']])
 
     # find custom aliases for non standard language codes
     if hasattr(engine, 'supported_languages'):
@@ -129,8 +133,9 @@ def load_engine(engine_data):
                 lambda: engine._fetch_supported_languages(get(engine.supported_languages_url)))
 
     engine.stats = {
+        'sent_search_count': 0,  # sent search
+        'search_count': 0,  # succesful search
         'result_count': 0,
-        'search_count': 0,
         'engine_time': 0,
         'engine_time_count': 0,
         'score_count': 0,
@@ -140,6 +145,17 @@ def load_engine(engine_data):
     if not engine.offline:
         engine.stats['page_load_time'] = 0
         engine.stats['page_load_count'] = 0
+
+    # tor related settings
+    if settings['outgoing'].get('using_tor_proxy'):
+        # use onion url if using tor.
+        if hasattr(engine, 'onion_url'):
+            engine.search_url = engine.onion_url + getattr(engine, 'search_path', '')
+    elif 'onions' in engine.categories:
+        # exclude onion engines if not using tor.
+        return None
+
+    engine.timeout += settings['outgoing'].get('extra_proxy_timeout', 0)
 
     for category_name in engine.categories:
         categories.setdefault(category_name, []).append(engine)
@@ -220,7 +236,7 @@ def get_engines_stats(preferences):
     results = to_percentage(results, max_results)
     scores = to_percentage(scores, max_score)
     scores_per_result = to_percentage(scores_per_result, max_score_per_result)
-    erros = to_percentage(errors, max_errors)
+    errors = to_percentage(errors, max_errors)
 
     return [
         (
@@ -251,8 +267,9 @@ def get_engines_stats(preferences):
 
 
 def load_engines(engine_list):
-    global engines
+    global engines, engine_shortcuts
     engines.clear()
+    engine_shortcuts.clear()
     for engine_data in engine_list:
         engine = load_engine(engine_data)
         if engine is not None:
@@ -264,8 +281,12 @@ def initialize_engines(engine_list):
     load_engines(engine_list)
 
     def engine_init(engine_name, init_fn):
-        init_fn(get_engine_from_settings(engine_name))
-        logger.debug('%s engine: Initialized', engine_name)
+        try:
+            init_fn(get_engine_from_settings(engine_name))
+        except Exception:
+            logger.exception('%s engine: Fail to initialize', engine_name)
+        else:
+            logger.debug('%s engine: Initialized', engine_name)
 
     for engine_name, engine in engines.items():
         if hasattr(engine, 'init'):
@@ -273,3 +294,34 @@ def initialize_engines(engine_list):
             if init_fn:
                 logger.debug('%s engine: Starting background initialization', engine_name)
                 threading.Thread(target=engine_init, args=(engine_name, init_fn)).start()
+
+        _set_https_support_for_engine(engine)
+
+
+def _set_https_support_for_engine(engine):
+    # check HTTPS support if it is not disabled
+    if not engine.offline and not hasattr(engine, 'https_support'):
+        params = engine.request('http_test', {
+            'method': 'GET',
+            'headers': {},
+            'data': {},
+            'url': '',
+            'cookies': {},
+            'verify': True,
+            'auth': None,
+            'pageno': 1,
+            'time_range': None,
+            'language': '',
+            'safesearch': False,
+            'is_test': True,
+            'category': 'files',
+            'raise_for_status': True,
+        })
+
+        if 'url' not in params:
+            return
+
+        parsed_url = urlparse(params['url'])
+        https_support = parsed_url.scheme == 'https'
+
+        setattr(engine, 'https_support', https_support)

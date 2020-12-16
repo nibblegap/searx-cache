@@ -11,10 +11,9 @@
  @parse       url, title, content, suggestion
 """
 
+from urllib.parse import unquote, urlencode
 from lxml import html
-from searx.engines.xpath import extract_text, extract_url
-from searx.url_utils import unquote, urlencode
-from searx.utils import match_language, eval_xpath
+from searx.utils import extract_text, extract_url, match_language, eval_xpath
 
 # engine dependent config
 categories = ['general']

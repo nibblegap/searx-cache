@@ -1,10 +1,37 @@
-import requests
+# pylint: disable=E0102
 
+import sys
+from time import time
 from itertools import cycle
 from threading import RLock, local
+
+import requests
+
 from searx import settings
 from searx.cache import redis_cache
-from time import time
+from searx import logger
+from searx.raise_for_httperror import raise_for_httperror
+
+
+logger = logger.getChild('poolrequests')
+
+
+try:
+    import ssl
+    if ssl.OPENSSL_VERSION_INFO[0:3] < (1, 0, 2):
+        # https://github.com/certifi/python-certifi#1024-bit-root-certificates
+        logger.critical('You are using an old openssl version({0}), please upgrade above 1.0.2!'
+                        .format(ssl.OPENSSL_VERSION))
+        sys.exit(1)
+except ImportError:
+    ssl = None
+if not getattr(ssl, "HAS_SNI", False):
+    try:
+        import OpenSSL  # pylint: disable=unused-import
+    except ImportError:
+        logger.critical("ssl doesn't support SNI and the pyopenssl module is not installed.\n"
+                        "Some HTTPS connections will fail")
+        sys.exit(1)
 
 
 class HTTPAdapterWithConnParams(requests.adapters.HTTPAdapter):
@@ -21,7 +48,7 @@ class HTTPAdapterWithConnParams(requests.adapters.HTTPAdapter):
         self.config = {}
         self.proxy_manager = {}
 
-        super(requests.adapters.HTTPAdapter, self).__init__()
+        super().__init__()
 
         self._pool_connections = pool_connections
         self._pool_maxsize = pool_maxsize
@@ -61,7 +88,7 @@ else:
 class SessionSinglePool(requests.Session):
 
     def __init__(self):
-        super(SessionSinglePool, self).__init__()
+        super().__init__()
 
         # reuse the same adapters
         with RLock():
@@ -72,7 +99,7 @@ class SessionSinglePool(requests.Session):
     def close(self):
         """Call super, but clear adapters since there are managed globaly"""
         self.adapters.clear()
-        super(SessionSinglePool, self).close()
+        super().close()
 
 
 def set_timeout_for_thread(timeout, start_time=None):
@@ -88,6 +115,32 @@ def get_time_for_thread():
     return threadLocal.total_time
 
 
+def get_proxy_cycles(proxy_settings):
+    if not proxy_settings:
+        return None
+    # Backwards compatibility for single proxy in settings.yml
+    for protocol, proxy in proxy_settings.items():
+        if isinstance(proxy, str):
+            proxy_settings[protocol] = [proxy]
+
+    for protocol in proxy_settings:
+        proxy_settings[protocol] = cycle(proxy_settings[protocol])
+    return proxy_settings
+
+
+GLOBAL_PROXY_CYCLES = get_proxy_cycles(settings['outgoing'].get('proxies'))
+
+
+def get_proxies(proxy_cycles):
+    if proxy_cycles:
+        return {protocol: next(proxy_cycle) for protocol, proxy_cycle in proxy_cycles.items()}
+    return None
+
+
+def get_global_proxies():
+    return get_proxies(GLOBAL_PROXY_CYCLES)
+
+
 def request(method, url, **kwargs):
     """same as requests/requests/api.py request(...)"""
     time_before_request = time()
@@ -96,7 +149,8 @@ def request(method, url, **kwargs):
     session = SessionSinglePool()
 
     # proxies
-    kwargs['proxies'] = settings['outgoing'].get('proxies') or None
+    if not kwargs.get('proxies'):
+        kwargs['proxies'] = get_global_proxies()
 
     # timeout
     if 'timeout' in kwargs:
@@ -105,6 +159,12 @@ def request(method, url, **kwargs):
         timeout = getattr(threadLocal, 'timeout', None)
         if timeout is not None:
             kwargs['timeout'] = timeout
+
+    # raise_for_error
+    check_for_httperror = True
+    if 'raise_for_httperror' in kwargs:
+        check_for_httperror = kwargs['raise_for_httperror']
+        del kwargs['raise_for_httperror']
 
     # do request
     response = session.request(method=method, url=url, **kwargs)
@@ -125,6 +185,10 @@ def request(method, url, **kwargs):
 
     if hasattr(threadLocal, 'total_time'):
         threadLocal.total_time += time_after_request - time_before_request
+
+    # raise an exception
+    if check_for_httperror:
+        raise_for_httperror(response)
 
     return response
 

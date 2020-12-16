@@ -14,7 +14,7 @@
 from flask_babel import gettext
 from lxml import etree
 from datetime import datetime
-from searx.url_utils import urlencode
+from urllib.parse import urlencode
 from searx.poolrequests import get
 
 
@@ -81,7 +81,7 @@ def response(resp):
             pass
 
         if len(content) > 300:
-                    content = content[0:300] + "..."
+            content = content[0:300] + "..."
         # TODO: center snippet on query term
 
         res_dict = {'url': url,
