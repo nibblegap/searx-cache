@@ -264,7 +264,6 @@ engines:
     engine : duckduckgo_images
     shortcut : ddi
     timeout: 3.0
-    disabled : True
 
   - name : etools
     engine : etools
@@ -642,16 +641,19 @@ engines:
     engine : qwant
     shortcut : qw
     categories : general
+    disabled: True
 
   - name : qwant images
     engine : qwant
     shortcut : qwi
     categories : images
+    disabled: True
 
   - name : qwant news
     engine : qwant
     shortcut : qwn
     categories : news
+    disabled: True
 
 #  - name: library
 #    engine: recoll
@@ -740,7 +742,6 @@ engines:
     engine : startpage
     shortcut : sp
     timeout : 6.0
-    disabled : True
 
   - name : tokyotoshokan
     engine : tokyotoshokan
