@@ -18,7 +18,7 @@
             <div class="result" id="corrections">
                 <span class="text-muted">{{ _('Did you mean:') }}
                     {% for correction in corrections %}
-                    {{ search_link(correction, correction, method) }}
+                    {{ search_link(correction.title, correction.url, method) }}
                     {% endfor %}
                 </span>
                 ?

@@ -96,7 +96,7 @@
 
 
 {% macro search_link(text, q, method=None, time_range=None, lang=None, category=None) -%}
-<form method="{{ method or 'POST' }}" action="{{ url_for('index') }}" role="navigation">
+<form method="{{ method or 'POST' }}" action="{{ url_for('search') }}" role="navigation">
     <input type="hidden" name="q" value="{{ q }}" />
     {% if time_range %}
     <input type="hidden" name="time_range" value="{{ time_range }}" />
