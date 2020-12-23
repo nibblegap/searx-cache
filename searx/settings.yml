@@ -135,6 +135,7 @@ engines:
     engine : wikipedia
     shortcut : wp
     base_url : 'https://{language}.wikipedia.org/'
+    disabled: True
 
   - name : bing
     engine : bing
@@ -197,6 +198,7 @@ engines:
     engine : currency_convert
     categories : general
     shortcut : cc
+    disabled: True
 
   - name : deezer
     engine : deezer
@@ -693,6 +695,7 @@ engines:
   - name: sepiasearch
     engine: sepiasearch
     shortcut: sep
+    disabled : True
 
   - name : soundcloud
     engine : soundcloud
@@ -904,6 +907,7 @@ engines:
   - name : dictzone
     engine : dictzone
     shortcut : dc
+    disabled: True
 
   - name : mymemory translated
     engine : translated
