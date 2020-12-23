@@ -202,7 +202,8 @@ def get_results(attribute_result, attributes, language):
                 for url in value.split(', '):
                     infobox_urls.append({'title': attribute.get_label(language), 'url': url, **attribute.kwargs})
                     # "normal" results (not infobox) include official website and Wikipedia links.
-                    if attribute.kwargs.get('official') or attribute_type == WDArticle:
+                    if attribute.kwargs.get('official') \
+                            or (attribute_type == WDArticle and attribute.language == language):
                         results.append({'title': infobox_title, 'url': url})
                     # update the infobox_id with the wikipedia URL
                     # first the local wikipedia URL, and as fallback the english wikipedia URL
