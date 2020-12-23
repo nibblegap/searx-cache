@@ -87,7 +87,7 @@ deploy:spot.test.cloud.global:
     FILTRON_RULES: /etc/filtron/rules.json
     SPOT_HOSTNAME: spot.test.ecloud.global
     SPOT_MORTY_HOSTNAME: proxy.spot.test.ecloud.global
-    SPOT_MORTY_URL: https://proxy.spot.test.ecloud.global
+    SEARX_MORTY_URL: https://proxy.spot.test.ecloud.global
     COMPOSE_PROJECT_NAME: my-spot
     SSH_PRIVATE_KEY: ${SSH_PRIVATE_KEY_TEST}
   script:
@@ -106,7 +106,7 @@ deploy:spot.cloud.global:
     FILTRON_RULES: /home/spot/filtron/rules.json
     SPOT_HOSTNAME: spot.ecloud.global
     SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
-    SPOT_MORTY_URL: https://proxy.spot.ecloud.global
+    SEARX_MORTY_URL: https://proxy.spot.ecloud.global
     COMPOSE_PROJECT_NAME: my-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}

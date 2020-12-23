@@ -22,13 +22,13 @@ services:
     logging: *default-logging
     restart: unless-stopped
     environment:
-      SEARX_SECRET: "${SPOT_SECRET}"
-      SEARX_MORTY_URL: "${SPOT_MORTY_URL}"
-      SEARX_MORTY_KEY: "${MORTY_KEY}"
-      SEARX_PROXY_HTTP: "socks5://tor:9050"
-      SEARX_PROXY_HTTPS: "socks5://tor:9050"
-      SEARX_REDIS_HOST: "redis"
-      SEARX_UI_DEFAULT_THEME: "eelo"
+      SEARX_SECRET: "${SEARX_SECRET}"
+      SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
+      SEARX_MORTY_KEY: "${SEARX_MORTY_KEY}"
+      SEARX_PROXY_HTTP: "${SEARX_PROXY_HTTP}"
+      SEARX_PROXY_HTTPS: "${SEARX_PROXY_HTTPS}"
+      SEARX_REDIS_HOST: "${SEARX_REDIS_HOST}"
+      SEARX_UI_DEFAULT_THEME: "${SEARX_UI_DEFAULT_THEME}"
       GUNICORN_LOGGER: 1
       GUNICORN_LEVEL: INFO
 
@@ -40,7 +40,7 @@ services:
     logging: *default-logging
     restart: unless-stopped
     environment:
-      SPOT_MORTY_URL: "${SPOT_MORTY_URL}"
+      SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
 
   filtron:
     image: dalf/filtron:latest
@@ -64,7 +64,7 @@ services:
     environment:
       DEBUG: "false"
       MORTY_ADDRESS: ":3000"
-      MORTY_KEY: "${MORTY_KEY}"
+      MORTY_KEY: "${SEARX_MORTY_KEY}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.morty.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"

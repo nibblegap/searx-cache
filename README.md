@@ -57,12 +57,11 @@ Then go to http://localhost:8088.
 ### For developer
 
 You can directly run spot, with a python command inside a docker container which
-contains all dependencies.
+contains all dependencies. After running the docker-compose stack you can stop
+the default spot service and run the debug one with Flask server.
 
 ```
-docker-compose up -d redis
-docker run -it --rm -v $(pwd):/ws -w /ws --network=my-spot_default registry.gitlab.e.foundation:5000/e/cloud/my-spot/env sh
-PYTHONPATH=$(pwd) SEARX_REDIS_HOST=redis SEARX_DEBUG=1 python -X dev searx/webapp.py
+docker-compose rm -sf spot
+docker run -it --rm -v $(pwd):/ws -w /ws --hostname spot --network=my-spot_default --env-file .env registry.gitlab.e.foundation:5000/e/cloud/my-spot/env bash
+PYTHONPATH=$(pwd) SEARX_DEBUG=1 python -X dev searx/webapp.py
 ```
-
-Then, open your browser and navigate to the container IP.
