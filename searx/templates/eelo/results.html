@@ -98,11 +98,11 @@
                 {%- endmacro %}
 
                 <div id="pagination" {% if rtl %} class="rtl" {% endif %} >
-                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('search') }}">
                         {{ search_form_attrs(pageno - 1) }}
                         <button type="submit" class="btn btn-default" {% if pageno == 1 %}disabled{% endif %}><span class="glyphicon glyphicon-forward"></span> {{ _('previous page') }}</button>
                     </form>
-                    <form method="{{ method or 'POST' }}" action="{{ url_for('index') }}">
+                    <form method="{{ method or 'POST' }}" action="{{ url_for('search') }}">
                         {{ search_form_attrs(pageno + 1) }}
                         <button type="submit" class="btn primary"><span class="glyphicon glyphicon-backward"></span> {{ _('next page') }}</button>
                     </form>
