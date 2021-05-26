@@ -2,27 +2,15 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    concat: {
-      options: {
-        separator: ';'
-      },
-      dist: {
-        src: ['js/searx_src/*.js'],
-        dest: 'js/searx.js'
-      }
-    },
     uglify: {
-      options: {
-        banner: '/*! eelo/searx.min.js | <%= grunt.template.today("dd-mm-yyyy") %> | https://github.com/asciimoo/searx */\n'
-      },
       dist: {
         files: {
-          'js/searx.min.js': ['<%= concat.dist.dest %>']
+          'js/eelo.min.js': ['js/eelo.js']
         }
       }
     },
     jshint: {
-      files: ['gruntfile.js', 'js/searx_src/*.js'],
+      files: ['gruntfile.js', 'js/eelo.js'],
       options: {
         reporterOutput: "",
         // options here to override JSHint defaults
@@ -64,7 +52,7 @@ module.exports = function(grunt) {
     watch: {
         scripts: {
             files: ['<%= jshint.files %>'],
-            tasks: ['jshint', 'concat', 'uglify']
+            tasks: ['jshint', 'uglify']
         },
         eelo_styles: {
             files: ['less/eelo/**/*.less'],
@@ -85,7 +73,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', ['jshint']);
 
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'less']);
+  grunt.registerTask('default', ['jshint', 'uglify', 'less']);
 
   grunt.registerTask('styles', ['less']);
 
