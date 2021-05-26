@@ -1,23 +1,24 @@
-#  INA (Videos)
-#
-# @website     https://www.ina.fr/
-# @provide-api no
-#
-# @using-api   no
-# @results     HTML (using search portal)
-# @stable      no (HTML can change)
-# @parse       url, title, content, publishedDate, thumbnail
-#
-# @todo        set content-parameter with correct data
-# @todo        embedded (needs some md5 from video page)
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+ INA (Videos)
+"""
 
 from json import loads
+from html import unescape
 from urllib.parse import urlencode
 from lxml import html
 from dateutil import parser
-from html import unescape
 from searx.utils import extract_text
 
+# about
+about = {
+    "website": 'https://www.ina.fr/',
+    "wikidata_id": 'Q1665109',
+    "official_api_documentation": None,
+    "use_official_api": False,
+    "require_api_key": False,
+    "results": 'HTML',
+}
 
 # engine dependent config
 categories = ['videos']
@@ -52,9 +53,7 @@ def response(resp):
 
     # we get html in a JSON container...
     response = loads(resp.text)
-    if "content" not in response:
-        return []
-    dom = html.fromstring(response["content"])
+    dom = html.fromstring(response)
 
     # parse results
     for result in dom.xpath(results_xpath):

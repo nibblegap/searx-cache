@@ -60,7 +60,7 @@ from searx import brand, static_path
 from searx import settings, searx_dir, searx_debug
 from searx.exceptions import SearxParameterException
 from searx.engines import (
-    categories, engines, engine_shortcuts, get_engines_stats, initialize_engines
+    categories, engines, engine_shortcuts, get_engines_stats
 )
 from searx.webutils import (
     UnicodeWriter, highlight_content, get_resources_directory,
@@ -71,20 +71,26 @@ from searx.webadapter import get_search_query_from_webapp, get_selected_categori
 from searx.utils import html_to_text, gen_useragent, dict_subset, match_language
 from searx.version import VERSION_STRING
 from searx.languages import language_codes as languages
-from searx.search import SearchWithPlugins
+from searx.search import SearchWithPlugins, initialize as search_initialize
+from searx.search.checker import get_result as checker_get_result
 from searx.query import RawTextQuery
-from searx.autocomplete import searx_bang, backends as autocomplete_backends
+from searx.autocomplete import search_autocomplete, backends as autocomplete_backends
 from searx.plugins import plugins
 from searx.plugins.oa_doi_rewrite import get_doi_resolver
 from searx.preferences import Preferences, ValidationException, LANGUAGE_CODES
 from searx.answerers import answerers
 from searx.poolrequests import get_global_proxies
+from searx.answerers import ask
 from searx.metrology.error_recorder import errors_per_engines
-
 
 # serve pages with HTTP/1.1
 from werkzeug.serving import WSGIRequestHandler
 WSGIRequestHandler.protocol_version = "HTTP/{}".format(settings['server'].get('http_protocol_version', '1.0'))
+
+# check secret_key
+if not searx_debug and settings['server']['secret_key'] == 'ultrasecretkey':
+    logger.error('server.secret_key is not changed. Please use something else instead of ultrasecretkey.')
+    exit(1)
 
 # about static
 static_path = get_resources_directory(searx_dir, 'static', settings['ui']['static_path'])
@@ -131,12 +137,13 @@ werkzeug_reloader = flask_run_development or (searx_debug and __name__ == "__mai
 # initialize the engines except on the first run of the werkzeug server.
 if not werkzeug_reloader\
    or (werkzeug_reloader and os.environ.get("WERKZEUG_RUN_MAIN") == "true"):
-    initialize_engines(settings['engines'])
+    search_initialize(enable_checker=True)
 
 babel = Babel(app)
 
 rtl_locales = ['ar', 'arc', 'bcc', 'bqi', 'ckb', 'dv', 'fa', 'fa_IR', 'glk', 'he',
                'ku', 'mzn', 'pnb', 'ps', 'sd', 'ug', 'ur', 'yi']
+ui_locale_codes = [l.replace('_', '-') for l in settings['locales'].keys()]
 
 # used when translating category names
 _category_names = (gettext('files'),
@@ -170,6 +177,9 @@ def _get_browser_or_settings_language(request, lang_list):
     for lang in request.headers.get("Accept-Language", "en").split(","):
         if ';' in lang:
             lang = lang.split(';')[0]
+        if '-' in lang:
+            lang_parts = lang.split('-')
+            lang = "{}-{}".format(lang_parts[0], lang_parts[-1].upper())
         locale = match_language(lang, lang_list, fallback=None)
         if locale is not None:
             return locale
@@ -189,12 +199,9 @@ def get_locale():
         locale_source = 'preferences'
     else:
         # use local from the browser
-        locale = _get_browser_or_settings_language(request, settings['locales'].keys())
+        locale = _get_browser_or_settings_language(request, ui_locale_codes)
+        locale = locale.replace('-', '_')
         locale_source = 'browser'
-
-    #
-    if locale == 'zh_TW':
-        locale = 'zh_Hant_TW'
 
     # see _get_translations function
     # and https://github.com/searx/searx/pull/1863
@@ -235,7 +242,8 @@ def code_highlighter(codelines, language=None):
 
             # highlight last codepart
             formatter = HtmlFormatter(linenos='inline',
-                                      linenostart=line_code_start)
+                                      linenostart=line_code_start,
+                                      cssclass="code-highlight")
             html_code = html_code + highlight(tmp_code, lexer, formatter)
 
             # reset conditions for next codepart
@@ -249,7 +257,7 @@ def code_highlighter(codelines, language=None):
         last_line = line
 
     # highlight last codepart
-    formatter = HtmlFormatter(linenos='inline', linenostart=line_code_start)
+    formatter = HtmlFormatter(linenos='inline', linenostart=line_code_start, cssclass="code-highlight")
     html_code = html_code + highlight(tmp_code, lexer, formatter)
 
     return html_code
@@ -354,6 +362,15 @@ def image_proxify(url):
                             urlencode(dict(url=url.encode(), h=h)))
 
 
+def get_translations():
+    return {
+        # when overpass AJAX request fails (on a map result)
+        'could_not_load': gettext('could not load data'),
+        # when there is autocompletion
+        'no_item_found': gettext('No item found')
+    }
+
+
 def render(template_name, override_theme=None, **kwargs):
     disabled_engines = request.preferences.engines.get_disabled()
 
@@ -412,6 +429,8 @@ def render(template_name, override_theme=None, **kwargs):
     kwargs['preferences'] = request.preferences
 
     kwargs['brand'] = brand
+
+    kwargs['translations'] = json.dumps(get_translations(), separators=(',', ':'))
 
     kwargs['scripts'] = set()
     kwargs['endpoint'] = 'results' if 'q' in kwargs else request.endpoint
@@ -723,6 +742,7 @@ def search():
         answers=result_container.answers,
         corrections=correction_urls,
         infoboxes=result_container.infoboxes,
+        engine_data=result_container.engine_data,
         paging=result_container.paging,
         unresponsive_engines=__get_translated_errors(result_container.unresponsive_engines),
         current_language=match_language(search_query.lang,
@@ -757,27 +777,18 @@ def about():
 def autocompleter():
     """Return autocompleter results"""
 
+    # run autocompleter
+    results = []
+
     # set blocked engines
     disabled_engines = request.preferences.engines.get_disabled()
 
     # parse query
     raw_text_query = RawTextQuery(request.form.get('q', ''), disabled_engines)
 
-    # check if search query is set
-    if not raw_text_query.getQuery():
-        return '', 400
-
-    # run autocompleter
-    completer = autocomplete_backends.get(request.preferences.get_value('autocomplete'))
-
-    # parse searx specific autocompleter results like !bang
-    raw_results = searx_bang(raw_text_query)
-
     # normal autocompletion results only appear if no inner results returned
-    # and there is a query part besides the engine and language bangs
-    if len(raw_results) == 0 and completer and (len(raw_text_query.query_parts) > 1 or
-                                                (len(raw_text_query.languages) == 0 and
-                                                 not raw_text_query.specific)):
+    # and there is a query part
+    if len(raw_text_query.autocomplete_list) == 0 and len(raw_text_query.getQuery()) > 0:
         # get language from cookie
         language = request.preferences.get_value('language')
         if not language or language == 'all':
@@ -785,15 +796,18 @@ def autocompleter():
         else:
             language = language.split('-')[0]
         # run autocompletion
-        raw_results.extend(completer(raw_text_query.getQuery(), language))
+        raw_results = search_autocomplete(request.preferences.get_value('autocomplete'),
+                                          raw_text_query.getQuery(), language)
+        for result in raw_results:
+            results.append(raw_text_query.changeQuery(result).getFullQuery())
 
-    # parse results (write :language and !engine back to result string)
-    results = []
-    for result in raw_results:
-        raw_text_query.changeQuery(result)
+    if len(raw_text_query.autocomplete_list) > 0:
+        for autocomplete_text in raw_text_query.autocomplete_list:
+            results.append(raw_text_query.get_autocomplete_full_query(autocomplete_text))
 
-        # add parsed result
-        results.append(raw_text_query.getFullQuery())
+    for answers in ask(raw_text_query):
+        for answer in answers:
+            results.append(str(answer['answer']))
 
     # return autocompleter results
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -839,7 +853,6 @@ def preferences():
             if e.timeout > settings['outgoing']['request_timeout']:
                 stats[e.name]['warn_timeout'] = True
             stats[e.name]['supports_selected_language'] = _is_selected_language_supported(e, request.preferences)
-
             engines_by_category[c].append(e)
 
     # get first element [0], the engine time,
@@ -972,6 +985,12 @@ def stats_errors():
     return jsonify(result)
 
 
+@app.route('/stats/checker', methods=['GET'])
+def stats_checker():
+    result = checker_get_result()
+    return jsonify(result)
+
+
 @app.route('/robots.txt', methods=['GET'])
 def robots():
     return Response("""User-agent: *
@@ -1066,20 +1085,13 @@ def config():
         'default_theme': settings['ui']['default_theme'],
         'version': VERSION_STRING,
         'brand': {
+            'CONTACT_URL': brand.CONTACT_URL,
             'GIT_URL': brand.GIT_URL,
             'DOCS_URL': brand.DOCS_URL
         },
         'doi_resolvers': [r for r in settings['doi_resolvers']],
         'default_doi_resolver': settings['default_doi_resolver'],
     })
-
-
-@app.route('/translations.js')
-def js_translations():
-    return render(
-        'translations.js.tpl',
-        override_theme='__common__',
-    ), {'Content-Type': 'text/javascript; charset=UTF-8'}
 
 
 @app.errorhandler(404)

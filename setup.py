@@ -25,7 +25,7 @@ setup(
     author='Adam Tauber',
     author_email='asciimoo@gmail.com',
     license='GNU Affero General Public License',
-    packages=find_packages(exclude=["tests*"]),
+    packages=find_packages(exclude=["tests*", "searx_extra"]),
     zip_safe=False,
     install_requires=requirements,
     setup_requires=["setuptools_scm"],
@@ -34,7 +34,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'searx-run = searx.webapp:run'
+            'searx-run = searx.webapp:run',
+            'searx-checker = searx.search.checker.__main__:main'
         ]
     },
     package_data={

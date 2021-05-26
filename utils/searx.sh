@@ -36,26 +36,26 @@ GIT_BRANCH="${GIT_BRANCH:-master}"
 SEARX_PYENV="${SERVICE_HOME}/searx-pyenv"
 SEARX_SRC="${SERVICE_HOME}/searx-src"
 SEARX_SETTINGS_PATH="/etc/searx/settings.yml"
-SEARX_SETTINGS_TEMPLATE="${REPO_ROOT}/utils/templates/etc/searx/use_default_settings.yml"
+SEARX_SETTINGS_TEMPLATE="${SEARX_SETTINGS_TEMPLATE:-${REPO_ROOT}/utils/templates/etc/searx/use_default_settings.yml}"
 SEARX_UWSGI_APP="searx.ini"
 # shellcheck disable=SC2034
 SEARX_UWSGI_SOCKET="/run/uwsgi/app/searx/socket"
 
 # apt packages
 SEARX_PACKAGES_debian="\
-virtualenv python3-dev python3-babel python3-venv
+python3-dev python3-babel python3-venv
 uwsgi uwsgi-plugin-python3
 git build-essential libxslt-dev zlib1g-dev libffi-dev libssl-dev
 shellcheck"
 
 BUILD_PACKAGES_debian="\
 firefox graphviz imagemagick texlive-xetex librsvg2-bin
-texlive-latex-recommended texlive-extra-utils ttf-dejavu
+texlive-latex-recommended texlive-extra-utils fonts-dejavu
 latexmk"
 
 # pacman packages
 SEARX_PACKAGES_arch="\
-python-virtualenv python python-pip python-lxml python-babel
+python python-pip python-lxml python-babel
 uwsgi uwsgi-plugin-python
 git base-devel libxml2
 shellcheck"
@@ -66,7 +66,7 @@ texlive-core texlive-latexextra ttf-dejavu"
 
 # dnf packages
 SEARX_PACKAGES_fedora="\
-virtualenv python python-pip python-lxml python-babel
+python python-pip python-lxml python-babel
 uwsgi uwsgi-plugin-python3
 git @development-tools libxml2
 ShellCheck"
@@ -79,7 +79,7 @@ dejavu-sans-mono-fonts"
 
 # yum packages
 SEARX_PACKAGES_centos="\
-python36-virtualenv python36 python36-pip python36-lxml python-babel
+python36 python36-pip python36-lxml python-babel
 uwsgi uwsgi-plugin-python3
 git @development-tools libxml2
 ShellCheck"
@@ -157,7 +157,7 @@ install / remove
   :searx-src:  clone $GIT_URL
   :pyenv:      create/remove virtualenv (python) in $SEARX_PYENV
   :uwsgi:      install searx uWSGI application
-  :settings:   reinstall settings from ${REPO_ROOT}/searx/settings.yml
+  :settings:   reinstall settings from ${SEARX_SETTINGS_TEMPLATE}
   :packages:   install needed packages from OS package manager
   :buildhost:  install packages from OS package manager needed by buildhosts
 update searx
@@ -331,6 +331,7 @@ git pull
 pip install -U pip
 pip install -U setuptools
 pip install -U wheel
+pip install -U pyyaml
 pip install -U -e .
 EOF
     install_settings
@@ -388,6 +389,14 @@ clone_searx() {
         err_msg "to clone searx sources, user $SERVICE_USER hast to be created first"
         return 42
     fi
+    if [[ ! $(git show-ref "refs/heads/${GIT_BRANCH}") ]]; then
+        warn_msg "missing local branch ${GIT_BRANCH}"
+        info_msg "create local branch ${GIT_BRANCH} from start point: origin/${GIT_BRANCH}"
+        git branch "${GIT_BRANCH}" "origin/${GIT_BRANCH}"
+    fi
+    if [[ ! $(git rev-parse --abbrev-ref HEAD) == "${GIT_BRANCH}" ]]; then
+        warn_msg "take into account, installing branch $GIT_BRANCH while current branch is $(git rev-parse --abbrev-ref HEAD)"
+    fi
     export SERVICE_HOME
     git_clone "$REPO_ROOT" "$SEARX_SRC" \
               "$GIT_BRANCH" "$SERVICE_USER"
@@ -412,7 +421,7 @@ install_settings() {
     mkdir -p "$(dirname ${SEARX_SETTINGS_PATH})"
 
     if [[ ! -f ${SEARX_SETTINGS_PATH} ]]; then
-        info_msg "install settings ${REPO_ROOT}/searx/settings.yml"
+        info_msg "install settings ${SEARX_SETTINGS_TEMPLATE}"
         info_msg "  --> ${SEARX_SETTINGS_PATH}"
         cp "${SEARX_SETTINGS_TEMPLATE}" "${SEARX_SETTINGS_PATH}"
         configure_searx
@@ -493,7 +502,7 @@ EOF
 pip install -U pip
 pip install -U setuptools
 pip install -U wheel
-pip install -U -e .
+pip install -U pyyaml
 cd ${SEARX_SRC}
 pip install -e .
 EOF

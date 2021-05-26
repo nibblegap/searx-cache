@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 from searx.exceptions import SearxParameterException
 from searx.webutils import VALID_LANGUAGE_CODE
@@ -105,20 +106,8 @@ def parse_timeout(form: Dict[str, str], raw_text_query: RawTextQuery) -> Optiona
         return None
     try:
         return float(timeout_limit)
-    except ValueError:
-        raise SearxParameterException('timeout_limit', timeout_limit)
-
-
-def parse_specific(raw_text_query: RawTextQuery) -> Tuple[List[EngineRef], List[str]]:
-    query_engineref_list = raw_text_query.enginerefs
-    additional_categories = set()
-    for engineref in raw_text_query.enginerefs:
-        if engineref.from_bang:
-            additional_categories.add('none')
-        else:
-            additional_categories.add(engineref.category)
-    query_categories = list(additional_categories)
-    return query_engineref_list, query_categories
+    except ValueError as e:
+        raise SearxParameterException('timeout_limit', timeout_limit) from e
 
 
 def parse_category_form(query_categories: List[str], name: str, value: str) -> None:
@@ -171,8 +160,7 @@ def get_engineref_from_category_list(category_list: List[str], disabled_engines:
     return result
 
 
-def parse_generic(preferences: Preferences, form: Dict[str, str], disabled_engines: List[str])\
-        -> Tuple[List[EngineRef], List[str]]:
+def parse_generic(preferences: Preferences, form: Dict[str, str], disabled_engines: List[str]) -> List[EngineRef]:
     query_engineref_list = []
     query_categories = []
 
@@ -195,8 +183,6 @@ def parse_generic(preferences: Preferences, form: Dict[str, str], disabled_engin
         if query_categories:
             # add engines from referenced by the "categories" parameter and the "category_*"" parameters
             query_engineref_list.extend(get_engineref_from_category_list(query_categories, disabled_engines))
-        # get categories from the query_engineref_list
-        query_categories = list(set(engine.category for engine in query_engineref_list))
     else:
         # no "engines" parameters in the form
         if not query_categories:
@@ -208,7 +194,16 @@ def parse_generic(preferences: Preferences, form: Dict[str, str], disabled_engin
         # declared under the specific categories
         query_engineref_list.extend(get_engineref_from_category_list(query_categories, disabled_engines))
 
-    return query_engineref_list, query_categories
+    return query_engineref_list
+
+
+def parse_engine_data(form):
+    engine_data = defaultdict(dict)
+    for k, v in form.items():
+        if k.startswith("engine_data"):
+            _, engine, key = k.split('-')
+            engine_data[engine][key] = v
+    return engine_data
 
 
 def get_search_query_from_webapp(preferences: Preferences, form: Dict[str, str])\
@@ -232,24 +227,24 @@ def get_search_query_from_webapp(preferences: Preferences, form: Dict[str, str])
     query_time_range = parse_time_range(form)
     query_timeout = parse_timeout(form, raw_text_query)
     external_bang = raw_text_query.external_bang
+    engine_data = parse_engine_data(form)
 
     if not is_locked('categories') and raw_text_query.enginerefs and raw_text_query.specific:
         # if engines are calculated from query,
         # set categories by using that informations
-        query_engineref_list, query_categories = parse_specific(raw_text_query)
+        query_engineref_list = raw_text_query.enginerefs
     else:
         # otherwise, using defined categories to
         # calculate which engines should be used
-        query_engineref_list, query_categories = parse_generic(preferences, form, disabled_engines)
+        query_engineref_list = parse_generic(preferences, form, disabled_engines)
 
     query_engineref_list = deduplicate_engineref_list(query_engineref_list)
     query_engineref_list, query_engineref_list_unknown, query_engineref_list_notoken =\
         validate_engineref_list(query_engineref_list, preferences)
 
-    return (SearchQuery(query, query_engineref_list, query_categories,
-                        query_lang, query_safesearch, query_pageno,
-                        query_time_range, query_timeout,
-                        external_bang=external_bang),
+    return (SearchQuery(query, query_engineref_list, query_lang, query_safesearch, query_pageno,
+                        query_time_range, query_timeout, external_bang=external_bang,
+                        engine_data=engine_data),
             raw_text_query,
             query_engineref_list_unknown,
             query_engineref_list_notoken)

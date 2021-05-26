@@ -41,7 +41,7 @@ DOT_CONFIG="${DOT_CONFIG:-${REPO_ROOT}/.config.sh}"
 
 source_dot_config() {
     if [[ ! -e "${DOT_CONFIG}" ]]; then
-        err_msg "configuration does not extsts at: ${DOT_CONFIG}"
+        err_msg "configuration does not exists at: ${DOT_CONFIG}"
         return 42
     fi
     # shellcheck disable=SC1090
@@ -159,7 +159,7 @@ clean_stdin() {
 }
 
 wait_key(){
-    # usage: waitKEY [<timeout in sec>]
+    # usage: wait_key [<timeout in sec>]
 
     clean_stdin
     local _t=$1
@@ -639,7 +639,7 @@ nginx_distro_setup() {
     NGINX_DEFAULT_SERVER=/etc/nginx/nginx.conf
 
     # Including *location* directives from a dedicated config-folder into the
-    # server directive is, what what fedora and centos (already) does.
+    # server directive is, what fedora and centos (already) does.
     NGINX_APPS_ENABLED="/etc/nginx/default.d"
 
     # We add a apps-available folder and linking configurations into the
@@ -692,7 +692,7 @@ nginx_reload() {
 
 nginx_install_app() {
 
-    # usage:  nginx_install_app [<template option> ...] <myapp>
+    # usage:  nginx_install_app [<template option> ...] <myapp.conf>
     #
     # <template option>:   see install_template
 
@@ -1381,7 +1381,7 @@ in_container() {
 LXC_ENV_FOLDER=
 if in_container; then
     # shellcheck disable=SC2034
-    LXC_ENV_FOLDER="lxc/$(hostname)/"
+    LXC_ENV_FOLDER="lxc-env/$(hostname)/"
 fi
 
 lxc_init_container_env() {
@@ -1399,36 +1399,39 @@ EOF
 }
 
 # apt packages
-LXC_BASE_PACKAGES_debian="bash git build-essential python3 virtualenv"
+LXC_BASE_PACKAGES_debian="bash git build-essential python3 python3-venv"
 
 # pacman packages
-LXC_BASE_PACKAGES_arch="bash git base-devel python python-virtualenv"
+LXC_BASE_PACKAGES_arch="bash git base-devel python"
 
 # dnf packages
-LXC_BASE_PACKAGES_fedora="bash git @development-tools python virtualenv"
+LXC_BASE_PACKAGES_fedora="bash git @development-tools python"
 
 # yum packages
-LXC_BASE_PACKAGES_centos="bash git @development-tools python python-virtualenv"
+LXC_BASE_PACKAGES_centos="bash git python3"
 
 case $DIST_ID in
     ubuntu|debian) LXC_BASE_PACKAGES="${LXC_BASE_PACKAGES_debian}" ;;
     arch)          LXC_BASE_PACKAGES="${LXC_BASE_PACKAGES_arch}" ;;
-    fedora) LXC_BASE_PACKAGES="${LXC_BASE_PACKAGES_fedora}" ;;
-    centos) LXC_BASE_PACKAGES="${LXC_BASE_PACKAGES_centos}" ;;
+    fedora)        LXC_BASE_PACKAGES="${LXC_BASE_PACKAGES_fedora}" ;;
+    centos)        LXC_BASE_PACKAGES="${LXC_BASE_PACKAGES_centos}" ;;
     *) err_msg "$DIST_ID-$DIST_VERS: pkg_install LXC_BASE_PACKAGES not yet implemented" ;;
 esac
 
 lxc_install_base_packages() {
     info_msg "install LXC_BASE_PACKAGES in container $1"
+    case $DIST_ID in
+        centos) yum groupinstall "Development Tools" -y  ;;
+    esac
     pkg_install "${LXC_BASE_PACKAGES}"
 }
 
 
 lxc_image_copy() {
 
-    # usage: lxc_copy_image <remote image> <local image>
+    # usage: lxc_image_copy <remote image> <local image>
     #
-    #        lxc_copy_image "images:ubuntu/19.10"  "ubu1910"
+    #        lxc_image_copy "images:ubuntu/20.04"  "ubu2004"
 
     if lxc_image_exists "local:${LXC_SUITE[i+1]}"; then
         info_msg "image ${LXC_SUITE[i]} already copied --> ${LXC_SUITE[i+1]}"

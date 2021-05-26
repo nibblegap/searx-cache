@@ -1,13 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
  Wikipedia (Web)
-
- @website     https://en.wikipedia.org/api/rest_v1/
- @provide-api yes
-
- @using-api   yes
- @results     JSON
- @stable      yes
- @parse       url, infobox
 """
 
 from urllib.parse import quote
@@ -16,9 +9,20 @@ from lxml.html import fromstring
 from searx.utils import match_language, searx_useragent
 from searx.raise_for_httperror import raise_for_httperror
 
+# about
+about = {
+    "website": 'https://www.wikipedia.org/',
+    "wikidata_id": 'Q52',
+    "official_api_documentation": 'https://en.wikipedia.org/api/',
+    "use_official_api": True,
+    "require_api_key": False,
+    "results": 'JSON',
+}
+
 # search-url
 search_url = 'https://{language}.wikipedia.org/api/rest_v1/page/summary/{title}'
 supported_languages_url = 'https://meta.wikimedia.org/wiki/List_of_Wikipedias'
+language_variants = {"zh": ("zh-cn", "zh-hk", "zh-mo", "zh-my", "zh-sg", "zh-tw")}
 
 
 # set language in base_url
@@ -34,8 +38,12 @@ def request(query, params):
     if query.islower():
         query = query.title()
 
+    language = url_lang(params['language'])
     params['url'] = search_url.format(title=quote(query),
-                                      language=url_lang(params['language']))
+                                      language=language)
+
+    if params['language'].lower() in language_variants.get(language, []):
+        params['headers']['Accept-Language'] = params['language'].lower()
 
     params['headers']['User-Agent'] = searx_useragent()
     params['raise_for_httperror'] = False
@@ -48,6 +56,17 @@ def request(query, params):
 def response(resp):
     if resp.status_code == 404:
         return []
+
+    if resp.status_code == 400:
+        try:
+            api_result = loads(resp.text)
+        except:
+            pass
+        else:
+            if api_result['type'] == 'https://mediawiki.org/wiki/HyperSwitch/errors/bad_request' \
+               and api_result['detail'] == 'title-invalid-characters':
+                return []
+
     raise_for_httperror(resp)
 
     results = []
@@ -87,6 +106,6 @@ def _fetch_supported_languages(resp):
             articles = int(td[4].xpath('./a/b')[0].text.replace(',', ''))
             # exclude languages with too few articles
             if articles >= 100:
-                supported_languages[code] = {"name": name, "english_name": english_name, "articles": articles}
+                supported_languages[code] = {"name": name, "english_name": english_name}
 
     return supported_languages

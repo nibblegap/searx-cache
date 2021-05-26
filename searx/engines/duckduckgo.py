@@ -1,26 +1,26 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
  DuckDuckGo (Web)
-
- @website     https://duckduckgo.com/
- @provide-api yes (https://duckduckgo.com/api),
-              but not all results from search-site
-
- @using-api   no
- @results     HTML (using search portal)
- @stable      no (HTML can change)
- @parse       url, title, content
-
- @todo        rewrite to api
 """
 
 from lxml.html import fromstring
 from json import loads
-from searx.utils import extract_text, match_language, eval_xpath
+from searx.utils import extract_text, match_language, eval_xpath, dict_subset
+from searx.poolrequests import get
+
+# about
+about = {
+    "website": 'https://duckduckgo.com/',
+    "wikidata_id": 'Q12805',
+    "official_api_documentation": 'https://duckduckgo.com/api',
+    "use_official_api": False,
+    "require_api_key": False,
+    "results": 'HTML',
+}
 
 # engine dependent config
 categories = ['general']
 paging = False
-language_support = True
 supported_languages_url = 'https://duckduckgo.com/util/u172.js'
 time_range_support = True
 
@@ -36,9 +36,11 @@ language_aliases = {
 
 # search-url
 url = 'https://html.duckduckgo.com/html'
+url_ping = 'https://duckduckgo.com/t/sl_h'
 time_range_dict = {'day': 'd',
                    'week': 'w',
-                   'month': 'm'}
+                   'month': 'm',
+                   'year': 'y'}
 
 # specific xpath variables
 result_xpath = '//div[@class="result results_links results_links_deep web-result "]'  # noqa
@@ -66,27 +68,33 @@ def request(query, params):
 
     params['url'] = url
     params['method'] = 'POST'
-    params['data']['b'] = ''
     params['data']['q'] = query
-    params['data']['df'] = ''
+    params['data']['b'] = ''
 
     region_code = get_region_code(params['language'], supported_languages)
     if region_code:
         params['data']['kl'] = region_code
         params['cookies']['kl'] = region_code
+
     if params['time_range'] in time_range_dict:
         params['data']['df'] = time_range_dict[params['time_range']]
 
+    params['allow_redirects'] = False
     return params
 
 
 # get response from search-request
 def response(resp):
+    if resp.status_code == 303:
+        return []
+
+    # ping
+    headers_ping = dict_subset(resp.request.headers, ['User-Agent', 'Accept-Encoding', 'Accept', 'Cookie'])
+    get(url_ping, headers=headers_ping)
+
+    # parse the response
     results = []
-
     doc = fromstring(resp.text)
-
-    # parse results
     for i, r in enumerate(eval_xpath(doc, result_xpath)):
         if i >= 30:
             break

@@ -10,7 +10,7 @@ SPHINX_CONF ?= conf.py
 DOCS_FOLDER = ./docs
 DOCS_BUILD  = ./$(LXC_ENV_FOLDER)build/docs
 DOCS_DIST   = ./$(LXC_ENV_FOLDER)dist/docs
-GH_PAGES    ?= gh-pages
+GH_PAGES    ?= build/gh-pages
 
 BOOKS_FOLDER = ./docs
 BOOKS_DIST   = ./$(LXC_ENV_FOLDER)dist/books
@@ -27,7 +27,7 @@ docs-help:
 	@echo  '  docs-clean	- clean intermediate doc objects'
 	@echo  '  $(GH_PAGES)	- create & upload github pages'
 	@echo  '  sphinx-pdf    - run sphinx latex & pdf targets'
-	echo   ''
+	@echo  ''
 	@echo  '  books/{name}.html : build only the HTML of document {name}'
 	@echo  '  valid values for books/{name}.html are:'
 	@echo  '    $(BOOKS_HTML)' | $(FMT)
@@ -99,7 +99,7 @@ sphinx-pdf: sphinx-latex
 	@echo "SPHINX    *.pdf --> file://$(abspath $(DOCS_DIST)/pdf)"
 
 PHONY += sphinx-latex
-sphinx-latex: texlive sphinx-doc
+sphinx-latex: pyenvinstall texlive
 	$(SPHINXBUILD) $(SPHINX_VERBOSE) $(SPHINXOPTS)\
 	  -b latex \
 	  -c $(DOCS_FOLDER) \
@@ -124,7 +124,7 @@ $(BOOKS_DIST):
 	mkdir -p $(BOOKS_DIST)
 
 PHONY += $(BOOKS_HTML)
-$(BOOKS_HTML): sphinx-doc | $(BOOKS_DIST)
+$(BOOKS_HTML): pyenvinstall | $(BOOKS_DIST)
 	SPHINX_CONF=$(patsubst books/%.html,%,$@)/conf.py \
 	$(SPHINXBUILD) $(SPHINX_VERBOSE) $(SPHINXOPTS)\
 	  -b html \
@@ -135,7 +135,7 @@ $(BOOKS_HTML): sphinx-doc | $(BOOKS_DIST)
 	@echo "SPHINX    $@ --> file://$(abspath $(BOOKS_DIST)/$(patsubst books/%.html,%,$@))"
 
 PHONY += $(BOOKS_HTML)
-$(BOOKS_LIVE): sphinx-live | $(BOOKS_DIST)
+$(BOOKS_LIVE): pyenvinstall | $(BOOKS_DIST)
 	PATH="$(PY_ENV_BIN):$(PATH)" \
 	SPHINX_CONF=$(patsubst books/%.live,%,$@)/conf.py \
 	$(PY_ENV_BIN)/sphinx-autobuild --poll -B --host 0.0.0.0 --port 8080 $(SPHINX_VERBOSE) $(SPHINXOPTS)\
@@ -152,7 +152,7 @@ $(BOOKS_PDF): %.pdf : %.latex
 	@echo "SPHINX    $@ --> file://$(abspath $(BOOKS_DIST)/$(patsubst books/%.pdf,%,$@))/pdf"
 
 PHONY += $(BOOKS_LATEX)
-$(BOOKS_LATEX): sphinx-doc | $(BOOKS_DIST)
+$(BOOKS_LATEX): pyenvinstall | $(BOOKS_DIST)
 	SPHINX_CONF=$(patsubst books/%.latex,%,$@)/conf.py \
 	$(SPHINXBUILD) $(SPHINX_VERBOSE) $(SPHINXOPTS)\
 	  -b latex \
@@ -172,24 +172,22 @@ PHONY += prepare-gh-pages
 prepare-gh-pages:
 	cp -r $(DOCS_DIST)/* $(GH_PAGES)/
 	touch $(GH_PAGES)/.nojekyll
-	echo "<html><head><META http-equiv='refresh' content='0;URL=index.html'></head></html>" > $(GH_PAGES)/404.html	
+	echo "<html><head><META http-equiv='refresh' content='0;URL=index.html'></head></html>" > $(GH_PAGES)/404.html
 
-PHONY += $(GH_PAGES)
-$(GH_PAGES)::
-	$(MAKE) docs
-	[ -d "gh-pages/.git" ] || git clone $(GIT_URL) gh-pages
-	-cd $(GH_PAGES); git checkout gh-pages >/dev/null
-	-cd $(GH_PAGES); git pull
-	-cd $(GH_PAGES); ls -A | grep -v '.git$$' | xargs rm -rf
+PHONY += gh-pages
+gh-pages: docs-clean docs
+	- git worktree remove -f $(GH_PAGES) || exit 0
+	- git branch -D gh-pages || exit 0
+	git worktree add --no-checkout $(GH_PAGES) master
+	cd $(GH_PAGES); git checkout --orphan gh-pages && git rm -rfq .
 	$(MAKE) prepare-gh-pages
 	cd $(GH_PAGES);\
 		git add --all . ;\
-		git commit -m "gh-pages: updated" ;\
-		git push origin gh-pages
+		git commit -q -m "make gh-pages: from $(shell git config --get remote.origin.url)@$(shell git rev-parse HEAD)" ;\
+		git push -f origin gh-pages
 
-PHONY += travis-gh-pages
-travis-gh-pages:
-	$(MAKE) docs
+PHONY += ci-gh-pages
+ci-gh-pages: docs-clean docs
 	rm -Rf $(GH_PAGES)
 	mkdir -p $(GH_PAGES)
 	$(MAKE) prepare-gh-pages

@@ -1,14 +1,7 @@
-#  Startpage (Web)
-#
-# @website     https://startpage.com
-# @provide-api no (nothing found)
-#
-# @using-api   no
-# @results     HTML
-# @stable      no (HTML can change)
-# @parse       url, title, content
-#
-# @todo        paging
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+ Startpage (Web)
+"""
 
 from lxml import html
 from dateutil import parser
@@ -19,6 +12,16 @@ from babel import Locale
 from babel.localedata import locale_identifiers
 from searx.utils import extract_text, eval_xpath, match_language
 
+# about
+about = {
+    "website": 'https://startpage.com',
+    "wikidata_id": 'Q2333295',
+    "official_api_documentation": None,
+    "use_official_api": False,
+    "require_api_key": False,
+    "results": 'HTML',
+}
+
 # engine dependent config
 categories = ['general']
 # there is a mechanism to block "bot" search
@@ -26,7 +29,6 @@ categories = ['general']
 # storing of qid's between mulitble search-calls
 
 paging = True
-language_support = True
 supported_languages_url = 'https://www.startpage.com/do/settings'
 
 # search-url
@@ -37,7 +39,7 @@ search_url = base_url + 'do/search'
 # ads xpath //div[@id="results"]/div[@id="sponsored"]//div[@class="result"]
 # not ads: div[@class="result"] are the direct childs of div[@id="results"]
 results_xpath = '//div[@class="w-gl__result__main"]'
-link_xpath = './/a[@class="w-gl__result-url result-link"]'
+link_xpath = './/a[@class="w-gl__result-title result-link"]'
 content_xpath = './/p[@class="w-gl__description"]'
 
 

@@ -81,6 +81,48 @@ if 'SEARX_REDIS_HOST' in environ:
 if 'SEARX_UI_DEFAULT_THEME' in environ:
     settings['ui']['default_theme'] = environ['SEARX_UI_DEFAULT_THEME']
 
-if not searx_debug and settings['server']['secret_key'] == 'ultrasecretkey':
-    logger.error('server.secret_key is not changed. Please use something else instead of ultrasecretkey.')
-    exit(1)
+
+class _brand_namespace:
+
+    @classmethod
+    def get_val(cls, group, name, default=''):
+        return settings.get(group, {}).get(name) or default
+
+    @property
+    def SEARX_URL(self):
+        return self.get_val('server', 'base_url')
+
+    @property
+    def CONTACT_URL(self):
+        return self.get_val('general', 'contact_url')
+
+    @property
+    def GIT_URL(self):
+        return self.get_val('brand', 'git_url')
+
+    @property
+    def GIT_BRANCH(self):
+        return self.get_val('brand', 'git_branch')
+
+    @property
+    def ISSUE_URL(self):
+        return self.get_val('brand', 'issue_url')
+
+    @property
+    def DOCS_URL(self):
+        return self.get_val('brand', 'docs_url')
+
+    @property
+    def PUBLIC_INSTANCES(self):
+        return self.get_val('brand', 'public_instances')
+
+    @property
+    def WIKI_URL(self):
+        return self.get_val('brand', 'wiki_url')
+
+    @property
+    def TWITTER_URL(self):
+        return self.get_val('brand', 'twitter_url')
+
+
+brand = _brand_namespace()

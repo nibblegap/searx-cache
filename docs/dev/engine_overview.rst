@@ -37,15 +37,15 @@ settings.  However, the standard way is the following:
 engine file
 -----------
 
-======================= =========== ===========================================
+======================= =========== ========================================================
 argument                type        information
-======================= =========== ===========================================
+======================= =========== ========================================================
 categories              list        pages, in which the engine is working
 paging                  boolean     support multible pages
-language_support        boolean     support language choosing
 time_range_support      boolean     support search time range
-offline                 boolean     engine runs offline
-======================= =========== ===========================================
+engine_type             str         ``online`` by default, other possibles values are 
+                                    ``offline``, ``online_dictionnary``, ``online_currency``
+======================= =========== ========================================================
 
 .. _engine settings:
 
@@ -58,6 +58,8 @@ argument                type        information
 name                    string      name of search-engine
 engine                  string      name of searx-engine
                                     (filename without ``.py``)
+enable_http             bool        enable HTTP
+                                    (by default only HTTPS is enabled).
 shortcut                string      shortcut of search-engine
 timeout                 string      specific timeout for search-engine
 display_error_messages  boolean     display error messages on the web UI
@@ -96,7 +98,6 @@ example code
    # engine dependent config
    categories = ['general']
    paging = True
-   language_support = True
 
 
 making a request
@@ -111,21 +112,48 @@ passed arguments
 These arguments can be used to construct the search query.  Furthermore,
 parameters with default value can be redefined for special purposes.
 
+If the ``engine_type`` is ``online```:
+
+====================== ============== ========================================================================
+argument               type           default-value, information
+====================== ============== ========================================================================
+url                    str            ``''``
+method                 str            ``'GET'``
+headers                set            ``{}``
+data                   set            ``{}``
+cookies                set            ``{}``
+verify                 bool           ``True``
+headers.User-Agent     str            a random User-Agent
+category               str            current category, like ``'general'``
+safesearch             int            ``0``, between ``0`` and ``2`` (normal, moderate, strict)
+time_range             Optional[str]  ``None``, can be ``day``, ``week``, ``month``, ``year``
+pageno                 int            current pagenumber
+language               str            specific language code like ``'en_US'``, or ``'all'`` if unspecified
+====================== ============== ========================================================================
+
+
+If the ``engine_type`` is ``online_dictionnary```, in addition to the ``online`` arguments:
+
 ====================== ============ ========================================================================
 argument               type         default-value, information
 ====================== ============ ========================================================================
-url                    string       ``''``
-method                 string       ``'GET'``
-headers                set          ``{}``
-data                   set          ``{}``
-cookies                set          ``{}``
-verify                 boolean      ``True``
-headers.User-Agent     string       a random User-Agent
-category               string       current category, like ``'general'``
-started                datetime     current date-time
-pageno                 int          current pagenumber
-language               string       specific language code like ``'en_US'``, or ``'all'`` if unspecified
+from_lang              str          specific language code like ``'en_US'``
+to_lang                str          specific language code like ``'en_US'``
+query                  str          the text query without the languages
 ====================== ============ ========================================================================
+
+If the ``engine_type`` is ``online_currency```, in addition to the ``online`` arguments:
+
+====================== ============ ========================================================================
+argument               type         default-value, information
+====================== ============ ========================================================================
+amount                 float        the amount to convert
+from                   str          ISO 4217 code
+to                     str          ISO 4217 code
+from_name              str          currency name
+to_name                str          currency name
+====================== ============ ========================================================================
+
 
 parsed arguments
 ----------------
@@ -137,12 +165,13 @@ request:
 =================== =========== ==========================================================================
 argument            type        information
 =================== =========== ==========================================================================
-url                 string      requested url
-method              string      HTTP request method
+url                 str         requested url
+method              str         HTTP request method
 headers             set         HTTP header information
-data                set         HTTP data information (parsed if ``method != 'GET'``)
+data                set         HTTP data information
 cookies             set         HTTP cookies
-verify              boolean     Performing SSL-Validity check
+verify              bool        Performing SSL-Validity check
+allow_redirects     bool        Follow redirects
 max_redirects       int         maximum redirects, hard limit
 soft_max_redirects  int         maximum redirects, soft limit. Record an error but don't stop the engine
 raise_for_httperror bool        True by default: raise an exception if the HTTP code of response is >= 300

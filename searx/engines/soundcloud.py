@@ -1,13 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
  Soundcloud (Music)
-
- @website     https://soundcloud.com
- @provide-api yes (https://developers.soundcloud.com/)
-
- @using-api   yes
- @results     JSON
- @stable      yes
- @parse       url, title, content, publishedDate, embedded
 """
 
 import re
@@ -18,6 +11,15 @@ from urllib.parse import quote_plus, urlencode
 from searx import logger
 from searx.poolrequests import get as http_get
 
+# about
+about = {
+    "website": 'https://soundcloud.com',
+    "wikidata_id": 'Q568769',
+    "official_api_documentation": 'https://developers.soundcloud.com/',
+    "use_official_api": True,
+    "require_api_key": False,
+    "results": 'JSON',
+}
 
 # engine dependent config
 categories = ['music']
@@ -53,7 +55,7 @@ def get_client_id():
         app_js_urls = [script_tag.get('src') for script_tag in script_tags if script_tag is not None]
 
         # extracts valid app_js urls from soundcloud.com content
-        for app_js_url in app_js_urls:
+        for app_js_url in app_js_urls[::-1]:
             # gets app_js and searches for the clientid
             response = http_get(app_js_url)
             if response.ok:

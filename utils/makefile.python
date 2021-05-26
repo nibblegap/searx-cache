@@ -41,19 +41,6 @@ ifeq ($(OS),Windows_NT)
 endif
 
 VTENV_OPTS ?=
-ifeq ($(PYTHON),python)
-  VIRTUALENV   = virtualenv
-else
-  VIRTUALENV   = virtualenv --python=$(PYTHON)
-endif
-
-ifeq ($(KBUILD_VERBOSE),1)
-  PIP_VERBOSE =
-  VIRTUALENV_VERBOSE =
-else
-  PIP_VERBOSE = "-q"
-  VIRTUALENV_VERBOSE = "-q"
-endif
 
 python-help::
 	@echo  'makefile.python:'
@@ -88,13 +75,31 @@ msg-python-exe:
   https://www.python.org or install it from your package\n\
   manager. On debian based OS these requirements are\n\
   installed by::\n\n\
-    sudo -H apt-get install $(PYTHON)\n" | $(FMT)
+    sudo -H add-apt-repository ppa:deadsnakes/ppa\n\
+    sudo -H apt update\n\
+    sudo -H apt-get install $(PYTHON) $(PYTHON)-venv\n"
 
 ifeq ($(shell which $(PYTHON) >/dev/null 2>&1; echo $$?), 1)
 python-exe: msg-python-exe
 	$(error The '$(PYTHON)' command was not found)
 else
 python-exe:
+	@:
+endif
+
+msg-pip-exe:
+	@echo "\n  $(PIP) is required\n\n\
+  Make sure you have updated pip installed, grab it from\n\
+  https://pip.pypa.io or install it from your package\n\
+  manager. On debian based OS these requirements are\n\
+  installed by::\n\n\
+    sudo -H apt-get install python$(PY)-pip\n" | $(FMT)
+
+ifeq ($(shell which $(PIP) >/dev/null 2>&1; echo $$?), 1)
+pip-exe: msg-pip-exe
+	$(error The '$(PIP)' command was not found)
+else
+pip-exe:
 	@:
 endif
 
@@ -108,7 +113,14 @@ quiet_cmd_pyinstall = INSTALL   $2
 
 # $2 path to folder with setup.py, this uses pip from pyenv (not OS!)
 quiet_cmd_pyenvinstall = PYENV     install $2
-      cmd_pyenvinstall = $(PY_ENV_BIN)/python -m pip $(PIP_VERBOSE) install -e $2$(PY_SETUP_EXTRAS)
+      cmd_pyenvinstall = \
+	if ! cat $(PY_ENV)/requirements.sha256 2>/dev/null | sha256sum --check --status 2>/dev/null; then \
+		rm -f $(PY_ENV)/requirements.sha256; \
+		$(PY_ENV_BIN)/python -m pip $(PIP_VERBOSE) install -e $2$(PY_SETUP_EXTRAS) &&\
+		sha256sum requirements*.txt > $(PY_ENV)/requirements.sha256 ;\
+	else \
+		echo "PYENV     $2 already installed"; \
+	fi
 
 # Uninstall the package.  Since pip does not uninstall the no longer needed
 # depencies (something like autoremove) the depencies remain.
@@ -124,15 +136,17 @@ quiet_cmd_pyenvuninstall = PYENV     uninstall   $2
 # $2 path to folder where virtualenv take place
 quiet_cmd_virtualenv  = PYENV     usage: $ source ./$@/bin/activate
       cmd_virtualenv  = \
-	if [ ! -d "./$(PY_ENV)" ];then                                  \
-		$(VIRTUALENV) $(VIRTUALENV_VERBOSE) $(VTENV_OPTS) $2;   \
-	else                                                            \
-		echo "PYENV     using virtualenv from $2";              \
-        fi
+	if [ -d "./$(PY_ENV)" -a -x "./$(PY_ENV_BIN)/python" ]; then \
+		echo "PYENV     using virtualenv from $2"; \
+	else \
+		$(PYTHON) -m venv $(VTENV_OPTS) $2; \
+		$(PY_ENV_BIN)/python -m pip install $(PIP_VERBOSE) -U pip wheel setuptools; \
+		$(PY_ENV_BIN)/python -m pip install $(PIP_VERBOSE) -r requirements.txt; \
+	fi
 
 # $2 path to lint
 quiet_cmd_pylint      = LINT      $@
-      cmd_pylint      = $(PY_ENV_BIN)/python -m pylint --rcfile $(PYLINT_RC) $2
+      cmd_pylint      = $(PY_ENV_BIN)/python -m pylint -j 0 --rcfile $(PYLINT_RC) $2
 
 quiet_cmd_pytest      = TEST      $@
       cmd_pytest      = $(PY_ENV_BIN)/python -m tox -vv
@@ -206,8 +220,6 @@ pyclean:
 pyenv: $(PY_ENV)
 $(PY_ENV): python-exe
 	$(call cmd,virtualenv,$(PY_ENV))
-	$(Q)$(PY_ENV_BIN)/python -m pip install $(PIP_VERBOSE) -U pip wheel pip setuptools
-	$(Q)$(PY_ENV_BIN)/python -m pip install $(PIP_VERBOSE) -r requirements.txt
 
 PHONY += pylint-exe
 pylint-exe: $(PY_ENV)
@@ -233,16 +245,8 @@ PHONY += pydebug
 pydebug: $(PY_ENV)
 	DEBUG=$(DEBUG) $(PY_ENV_BIN)/pytest $(DEBUG) -v $(TEST_FOLDER)/$(TEST)
 
-# install / uninstall python objects into virtualenv (PYENV)
-pyenv-install: $(PY_ENV)
-	@$(PY_ENV_BIN)/python -m pip $(PIP_VERBOSE) install -e .
-	@echo "ACTIVATE  $(call normpath,$(PY_ENV_ACT)) "
-
-pyenv-uninstall: $(PY_ENV)
-	@$(PY_ENV_BIN)/python -m pip $(PIP_VERBOSE) uninstall --yes .
-
 # runs python interpreter from ./local/py<N>/bin/python
-pyenv-python: pyenv-install
+pyenv-python: pyenvinstall
 	$(PY_ENV_BIN)/python -i
 
 # With 'dependency_links=' setuptools supports dependencies on packages hosted
@@ -256,8 +260,10 @@ pyenv-python: pyenv-install
 # [2] https://github.com/pypa/pip/pull/1519
 
 # https://github.com/pypa/twine
-PHONY += upload-pypi
+PHONY += upload-pypi upload-pypi-test
 upload-pypi: pyclean pyenvinstall pybuild
 	@$(PY_ENV_BIN)/twine upload $(PYDIST)/*
 
+upload-pypi-test: pyclean pyenvinstall pybuild
+	@$(PY_ENV_BIN)/twine upload -r testpypi $(PYDIST)/*
 .PHONY: $(PHONY)

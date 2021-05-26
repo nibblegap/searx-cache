@@ -47,19 +47,16 @@ class ErrorContext:
 def add_error_context(engine_name: str, error_context: ErrorContext) -> None:
     errors_for_engine = errors_per_engines.setdefault(engine_name, {})
     errors_for_engine[error_context] = errors_for_engine.get(error_context, 0) + 1
-    logger.debug('⚠️ %s: %s', engine_name, str(error_context))
+    logger.debug('%s: %s', engine_name, str(error_context))
 
 
 def get_trace(traces):
-    previous_trace = traces[-1]
     for trace in reversed(traces):
-        if trace.filename.endswith('searx/search.py'):
-            if previous_trace.filename.endswith('searx/poolrequests.py'):
-                return trace
-            if previous_trace.filename.endswith('requests/models.py'):
-                return trace
-            return previous_trace
-        previous_trace = trace
+        split_filename = trace.filename.split('/')
+        if '/'.join(split_filename[-3:-1]) == 'searx/engines':
+            return trace
+        if '/'.join(split_filename[-4:-1]) == 'searx/search/processors':
+            return trace
     return traces[-1]
 
 

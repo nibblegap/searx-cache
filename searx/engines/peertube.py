@@ -1,15 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
  peertube (Videos)
-
- @website     https://www.peertube.live
- @provide-api yes (https://docs.joinpeertube.org/api-rest-reference.html)
-
- @using-api   yes
- @results     JSON
- @stable      yes
- @parse       url, title, thumbnail, publishedDate, embedded
-
- @todo        implement time range support
 """
 
 from json import loads
@@ -17,18 +8,28 @@ from datetime import datetime
 from urllib.parse import urlencode
 from searx.utils import html_to_text
 
+# about
+about = {
+    "website": 'https://joinpeertube.org',
+    "wikidata_id": 'Q50938515',
+    "official_api_documentation": 'https://docs.joinpeertube.org/api-rest-reference.html',
+    "use_official_api": True,
+    "require_api_key": False,
+    "results": 'JSON',
+}
+
 # engine dependent config
 categories = ["videos"]
 paging = True
-language_support = True
-base_url = "https://peer.tube/"
-supported_languages_url = base_url + "api/v1/videos/languages"
+base_url = "https://peer.tube"
+supported_languages_url = base_url + "/api/v1/videos/languages"
 
 
 # do search-request
 def request(query, params):
+    sanitized_url = base_url.rstrip("/")
     pageno = (params["pageno"] - 1) * 15
-    search_url = base_url + "api/v1/search/videos/?pageno={pageno}&{query}"
+    search_url = sanitized_url + "/api/v1/search/videos/?pageno={pageno}&{query}"
     query_dict = {"search": query}
     language = params["language"].split("-")[0]
     # pylint: disable=undefined-variable
@@ -46,6 +47,7 @@ def _get_offset_from_pageno(pageno):
 
 # get response from search-request
 def response(resp):
+    sanitized_url = base_url.rstrip("/")
     results = []
 
     search_res = loads(resp.text)
@@ -53,7 +55,7 @@ def response(resp):
     embedded_url = (
         '<iframe width="560" height="315" sandbox="allow-same-origin allow-scripts allow-popups" '
         + 'src="'
-        + base_url
+        + sanitized_url
         + '{embed_path}" frameborder="0" allowfullscreen></iframe>'
     )
     # return empty array if there are no results
@@ -63,15 +65,15 @@ def response(resp):
     # parse results
     for res in search_res["data"]:
         title = res["name"]
-        url = base_url + "/videos/watch/" + res["uuid"]
+        url = sanitized_url + "/videos/watch/" + res["uuid"]
         description = res["description"]
         if description:
             content = html_to_text(res["description"])
         else:
-            content = None
-        thumbnail = base_url + res["thumbnailPath"]
+            content = ""
+        thumbnail = sanitized_url + res["thumbnailPath"]
         publishedDate = datetime.strptime(res["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        embedded = embedded_url.format(embed_path=res["embedPath"][1:])
+        embedded = embedded_url.format(embed_path=res["embedPath"])
 
         results.append(
             {

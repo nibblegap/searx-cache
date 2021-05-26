@@ -6,7 +6,7 @@ Search API
 
 The search supports both ``GET`` and ``POST``.
 
-Furthermore, two enpoints ``/`` and ``/search`` are available for querying.
+Furthermore, two endpoints ``/`` and ``/search`` are available for querying.
 
 
 ``GET /``
@@ -76,7 +76,7 @@ Parameters
   supports safe search in the preferences page of an instance.
 
 ``theme`` : default ``oscar``
-  [ ``oscar``, ``simple``, ``legacy``, ``pix-art``, ``courgette`` ]
+  [ ``oscar``, ``simple`` ]
 
   Theme of instance.
 
