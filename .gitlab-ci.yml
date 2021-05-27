@@ -115,7 +115,7 @@ deploy:spot.eeo.one.backend1:
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB1}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
-    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST)"
+    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)"
     - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env && docker-compose up -d --build --scale tor=5"
     # - docker-compose up -d --build --scale tor=5
     #- docker-compose restart filtron
@@ -136,9 +136,9 @@ deploy:spot.eeo.one.backend2:
     SEARX_MORTY_URL: https://proxy.spot.eeo.one
     COMPOSE_PROJECT_NAME: my-spot
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB2}
-    WIREGUARD_IP: ${BACKEND1_WG_IP}
+    WIREGUARD_IP: $BACKEND2_WG_IP
   script:
-    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST)"
+    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)"
     - ssh $SSH_USER@$BACKEND2_HOST "cd $PATH_STAGING && docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env && docker-compose up -d --build --scale tor=5"
     # - docker-compose up -d --build --scale tor=5
     #- docker-compose restart filtron
