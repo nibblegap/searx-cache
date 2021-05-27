@@ -64,54 +64,100 @@ test:unit:
 .deploy:template:
   stage: deploy
   before_script:
-    - eval $(ssh-agent -s)
-    - echo "$PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+#    - eval $(ssh-agent -s)
+#    - echo "$PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-    - ssh $DOCKER_HOST "mkdir -p $(dirname $FILTRON_RULES) && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
+    - echo "$SSH_PRIVATE_KEY_ED" > $HOME/.ssh/id_ed25519
+    - echo "$SSH_PUBKEY_ED" > $HOME/.ssh/id_ed25519.pub
+    - echo "$SSH_KNOWN_HOSTS" > $HOME/.ssh/known_hosts
+    - chmod 600 ~/.ssh/id_ed25519
+    - chmod 644 ~/.ssh/known_hosts ~/.ssh/id_ed25519.pub
+#    - ssh $DOCKER_HOST "mkdir -p $(dirname $FILTRON_RULES) && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
 
-deploy:spot.test.cloud.global:
+#deploy:spot.test.cloud.global:
+#  extends: .deploy:template
+#  when: manual
+#  only:
+#    - branches
+#  environment:
+#    name: test
+#    url: https://spot.test.ecloud.global
+#  variables:
+#    DOCKER_HOST: ssh://root@spot.test.ecloud.global
+#    FILTRON_RULES: /etc/filtron/rules.json
+#    SPOT_HOSTNAME: spot.test.ecloud.global
+#    SPOT_MORTY_HOSTNAME: proxy.spot.test.ecloud.global
+#    SEARX_MORTY_URL: https://proxy.spot.test.ecloud.global
+#    COMPOSE_PROJECT_NAME: my-spot
+#    PRIVATE_KEY: ${PRIVATE_KEY_TEST}
+#  script:
+#    - docker-compose up -d --build --scale tor=5
+#    - docker-compose restart filtron
+
+deploy:spot.eeo.one.backend1:
   extends: .deploy:template
   when: manual
   only:
     - branches
   environment:
-    name: test
-    url: https://spot.test.ecloud.global
+    name: eeo1
+    url: https://spot.eeo.one
   variables:
-    DOCKER_HOST: ssh://root@spot.test.ecloud.global
-    FILTRON_RULES: /etc/filtron/rules.json
-    SPOT_HOSTNAME: spot.test.ecloud.global
-    SPOT_MORTY_HOSTNAME: proxy.spot.test.ecloud.global
-    SEARX_MORTY_URL: https://proxy.spot.test.ecloud.global
+#    DOCKER_HOST: ssh://root@web1.ecloud.global
+#    FILTRON_RULES: /etc/filtron/rules.json
+    SPOT_HOSTNAME: spot.eeo.one
+    SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
+    SEARX_MORTY_URL: https://proxy.spot.eeo.one
     COMPOSE_PROJECT_NAME: my-spot
-    PRIVATE_KEY: ${PRIVATE_KEY_TEST}
+#    PRIVATE_KEY: ${PRIVATE_KEY_WEB1}
+    WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
     - docker-compose up -d --build --scale tor=5
     - docker-compose restart filtron
 
-deploy:spot.cloud.global:
+deploy:spot.eeo.one.backend2:
   extends: .deploy:template
+  when: manual
   only:
-    - tags
+    - branches
   environment:
-    name: prod
-    url: https://spot.ecloud.global
+    name: eeo2
+    url: https://spot.eeo.one
   variables:
-    DOCKER_HOST: ssh://spot@spot.ecloud.global
-    FILTRON_RULES: /home/spot/filtron/rules.json
-    SPOT_HOSTNAME: spot.ecloud.global
-    SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
-    SEARX_MORTY_URL: https://proxy.spot.ecloud.global
+#    DOCKER_HOST: ssh://root@web2.ecloud.global
+#    FILTRON_RULES: /etc/filtron/rules.json
+    SPOT_HOSTNAME: spot.eeo.one
+    SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
+    SEARX_MORTY_URL: https://proxy.spot.eeo.one
     COMPOSE_PROJECT_NAME: my-spot
-    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
-    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
-    PRIVATE_KEY: ${PRIVATE_KEY_PROD}
+#    PRIVATE_KEY: ${PRIVATE_KEY_WEB2}
+    WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
-    - docker-compose pull
-    - docker-compose up -d --scale tor=5
+    - docker-compose up -d --build --scale tor=5
     - docker-compose restart filtron
+
+
+#deploy:spot.cloud.global:
+#  extends: .deploy:template
+#  only:
+#    - tags
+#  environment:
+#    name: prod
+#    url: https://spot.ecloud.global
+#  variables:
+#    DOCKER_HOST: ssh://spot@spot.ecloud.global
+#    FILTRON_RULES: /home/spot/filtron/rules.json
+#    SPOT_HOSTNAME: spot.ecloud.global
+#    SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
+#    SEARX_MORTY_URL: https://proxy.spot.ecloud.global
+#    COMPOSE_PROJECT_NAME: my-spot
+#    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+#    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+#    PRIVATE_KEY: ${PRIVATE_KEY_PROD}
+#  script:
+#    - docker-compose pull
+#    - docker-compose up -d --scale tor=5
+#    - docker-compose restart filtron

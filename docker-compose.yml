@@ -12,6 +12,8 @@ services:
     image: redis:5.0.7-alpine
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - my-spot_default
     command: redis-server --maxmemory 8G --maxmemory-policy allkeys-lru
 
   spot:
@@ -21,6 +23,8 @@ services:
       dockerfile: Dockerfile
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - my-spot_default
     environment:
       SEARX_SECRET: "${SEARX_SECRET}"
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
@@ -39,6 +43,8 @@ services:
       dockerfile: nginx.Dockerfile
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - my-spot_default
     environment:
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
 
@@ -47,8 +53,11 @@ services:
     logging: *default-logging
     restart: unless-stopped
     command: -listen :3000 -rules /etc/filtron/rules.json -target nginx
+    networks:
+      - my-spot_default
+      - wireguarded
     ports:
-      - "8088:3000"
+      - "${WIREGUARD_IP}:8088:3000"
     volumes:
       - ${FILTRON_RULES:-./etc/filtron/rules.json}:/etc/filtron/rules.json
     labels:
@@ -59,8 +68,11 @@ services:
     image: dalf/morty:latest
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - my-spot_default
+      - wireguarded
     ports:
-      - "8089:3000"
+      - "${WIREGUARD_IP}:8089:3000"
     environment:
       DEBUG: "false"
       MORTY_ADDRESS: ":3000"
@@ -73,3 +85,10 @@ services:
     image: osminogin/tor-simple
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - my-spot_default
+    
+
+networks:
+  wireguarded:
+    external: true
