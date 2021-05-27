@@ -75,7 +75,7 @@ test:unit:
     - chmod 644 ~/.ssh/known_hosts ~/.ssh/id_ed25519.pub
 #    - ssh $DOCKER_HOST "mkdir -p $(dirname $FILTRON_RULES) && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
+#    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
 
 #deploy:spot.test.cloud.global:
 #  extends: .deploy:template
@@ -115,8 +115,9 @@ deploy:spot.eeo.one.backend1:
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB1}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
-    - docker-compose up -d --build --scale tor=5
-    - docker-compose restart filtron
+    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env && docker-compose up -d --build --scale tor=5
+    # - docker-compose up -d --build --scale tor=5
+    #- docker-compose restart filtron
 
 deploy:spot.eeo.one.backend2:
   extends: .deploy:template
@@ -136,8 +137,9 @@ deploy:spot.eeo.one.backend2:
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB2}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
-    - docker-compose up -d --build --scale tor=5
-    - docker-compose restart filtron
+    - ssh $SSH_USER@$BACKEND2_HOST "cd $PATH_STAGING && docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env && docker-compose up -d --build --scale tor=5
+    # - docker-compose up -d --build --scale tor=5
+    #- docker-compose restart filtron
 
 
 #deploy:spot.cloud.global:
