@@ -73,9 +73,9 @@ test:unit:
     - echo "$SSH_KNOWN_HOSTS" > $HOME/.ssh/known_hosts
     - chmod 600 ~/.ssh/id_ed25519
     - chmod 644 ~/.ssh/known_hosts ~/.ssh/id_ed25519.pub
-#    - ssh $DOCKER_HOST "mkdir -p $(dirname $FILTRON_RULES) && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
+    - ssh $SSH_USER@$BACKEND1_HOST
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-#    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
+    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
 
 #deploy:spot.test.cloud.global:
 #  extends: .deploy:template
@@ -116,9 +116,11 @@ deploy:spot.eeo.one.backend1:
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)"
-    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
-    # - docker-compose up -d --build --scale tor=5
-    #- docker-compose restart filtron
+    #- ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
+    - cd $PATH_STAGING 
+    - pwd
+    - docker-compose up -d --build --scale tor=5
+    - docker-compose restart filtron
 
 deploy:spot.eeo.one.backend2:
   extends: .deploy:template
