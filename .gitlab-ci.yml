@@ -130,13 +130,12 @@ deploy:spot.eeo.one.backend1:
 #    FILTRON_RULES: /etc/filtron/rules.json
     SPOT_HOSTNAME: spot.eeo.one
     SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
-    SEARX_MORTY_URL: https://proxy.spot.eeo.one
     COMPOSE_PROJECT_NAME: my-spot
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB1}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)"
-    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && sed -i 's/WIREGUARD_IP_ENV=127.0.0.1/WIREGUARD_IP_ENV=$WIREGUARD_IP/g' .env && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env && sed -i 's/SEARX_MORTY_URL=http://localhost:8089/SEARX_MORTY_URL=$SEARX_MORTY_URL/g' .env && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
+    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
     
 
 deploy:spot.eeo.one.backend2:
