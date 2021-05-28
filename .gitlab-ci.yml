@@ -6,6 +6,10 @@ stages:
  - test
  - deploy
 
+services:
+ - docker:20.10-dind
+
+
 python:
   stage: check
   before_script:
