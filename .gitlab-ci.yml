@@ -77,7 +77,7 @@ test:unit:
     - echo "$SSH_KNOWN_HOSTS" > $HOME/.ssh/known_hosts
     - chmod 600 ~/.ssh/id_ed25519
     - chmod 644 ~/.ssh/known_hosts ~/.ssh/id_ed25519.pub
-    - ssh $SSH_USER@$BACKEND1_HOST
+#    - ssh $SSH_USER@$BACKEND1_HOST
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 #    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
 
@@ -93,7 +93,7 @@ test:unit:
     - echo "$SSH_KNOWN_HOSTS" > $HOME/.ssh/known_hosts
     - chmod 600 ~/.ssh/id_ed25519
     - chmod 644 ~/.ssh/known_hosts ~/.ssh/id_ed25519.pub
-    - ssh $DOCKER_HOST
+    - ssh $DOCKER_HOST "cd $PATH_STAGING"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 #    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
 
@@ -136,11 +136,8 @@ deploy:spot.eeo.one.backend1:
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)"
-    #- ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
-    - cd $PATH_STAGING 
-    - pwd
-    - docker-compose up -d --build --scale tor=5
-    - docker-compose restart filtron
+    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && sed -i 's/WIREGUARD_IP_ENV=127.0.0.1/WIREGUARD_IP_ENV=$WIREGUARD_IP/g' .env && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env && sed -i 's/SEARX_MORTY_URL=http://localhost:8089/SEARX_MORTY_URL=$SEARX_MORTY_URL/g' .env && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
+    
 
 deploy:spot.eeo.one.backend2:
   extends: .deploy:template2
@@ -160,9 +157,7 @@ deploy:spot.eeo.one.backend2:
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB2}
     WIREGUARD_IP: ${BACKEND2_WG_IP}
   script:
-    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)"
-    - cd $PATH_STAGING 
-    - pwd
+    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
     - docker-compose up -d --build --scale tor=5
     - docker-compose restart filtron
     # - ssh $SSH_USER@$BACKEND2_HOST "cd $PATH_STAGING && docker-compose up -d --build --build-arg $WIREGUARD_IP --scale tor=5 && docker-compose restart filtron"
