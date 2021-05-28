@@ -152,13 +152,13 @@ deploy:spot.eeo.one.backend2:
     SPOT_HOSTNAME: spot.eeo.one
     SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
     SEARX_MORTY_URL: https://proxy.spot.eeo.one
-    COMPOSE_PROJECT_NAME: my-spot
+    COMPOSE_PROJECT_NAME: staging-spot
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB2}
     WIREGUARD_IP: ${BACKEND2_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
     - docker-compose up -d --build --scale tor=5
-    - docker-compose restart filtron
+    #- docker-compose restart filtron
     # - ssh $SSH_USER@$BACKEND2_HOST "cd $PATH_STAGING && docker-compose up -d --build --build-arg $WIREGUARD_IP --scale tor=5 && docker-compose restart filtron"
     # - docker-compose up -d --build --scale tor=5
     #- docker-compose restart filtron
