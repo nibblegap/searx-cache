@@ -80,7 +80,7 @@ services:
 
   tor:
     image: osminogin/tor-simple
-    container_name: spot-redis
+    container_name: spot-tor
     logging: *default-logging
     restart: unless-stopped
     
