@@ -56,7 +56,7 @@ services:
     ports:
       - ${WIREGUARD_IP}:8088:3000
     volumes:
-      - ./etc/filtron/rules.json:/etc/filtron/rules.json
+      - ${REPO_BASE}/etc/filtron/rules.json:/etc/filtron/rules.json
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.filtron.rule=Host(`${SPOT_HOSTNAME}`)"
