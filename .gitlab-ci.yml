@@ -136,13 +136,13 @@ deploy:spot.eeo.one.backend1:
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)"
-    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env \
-      && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env \
-      && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env \
-      && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env \
-      && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env \
-      && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env \
-      && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env \
+    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env 
+      && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
+      && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
+      && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
       && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
     
 
