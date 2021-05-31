@@ -95,7 +95,7 @@ test:unit:
     - chmod 644 ~/.ssh/known_hosts ~/.ssh/id_ed25519.pub
     - ssh $DOCKER_HOST "cd $PATH_STAGING"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-#    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
+    - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
 
 #deploy:spot.test.cloud.global:
 #  extends: .deploy:template
@@ -131,11 +131,19 @@ deploy:spot.eeo.one.backend1:
     SPOT_HOSTNAME: spot.eeo.one
     SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
     COMPOSE_PROJECT_NAME: staging-spot
-#    PRIVATE_KEY: ${PRIVATE_KEY_WEB1}
+    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)"
-    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
+    - ssh $SSH_USER@$BACKEND1_HOST "cd $PATH_STAGING && docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env \
+      && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env \
+      && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env \
+      && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env \
+      && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env \
+      && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env \
+      && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env \
+      && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
     
 
 deploy:spot.eeo.one.backend2:
@@ -153,7 +161,8 @@ deploy:spot.eeo.one.backend2:
     SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
     SEARX_MORTY_URL: https://proxy.spot.eeo.one
     COMPOSE_PROJECT_NAME: staging-spot
-#    PRIVATE_KEY: ${PRIVATE_KEY_WEB2}
+    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     WIREGUARD_IP: ${BACKEND2_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
