@@ -10,12 +10,14 @@ x-logging:
 services:
   redis:
     image: redis:5.0.7-alpine
+    container_name: spot-redis
     logging: *default-logging
     restart: unless-stopped
     command: redis-server --maxmemory 8G --maxmemory-policy allkeys-lru
 
   spot:
     image: registry.gitlab.e.foundation:5000/e/cloud/my-spot:${SPOT_DOCKER_TAG}
+    container_name: spot-spot
     build:
       context: .
       dockerfile: Dockerfile
@@ -34,6 +36,7 @@ services:
 
   nginx:
     image: registry.gitlab.e.foundation:5000/e/cloud/my-spot/nginx:${SPOT_NGINX_DOCKER_TAG}
+    container_name: spot-nginx
     build:
       context: .
       dockerfile: nginx.Dockerfile
@@ -44,6 +47,7 @@ services:
 
   filtron:
     image: dalf/filtron:latest
+    container_name: spot-filtron
     logging: *default-logging
     restart: unless-stopped
     command: -listen :3000 -rules /etc/filtron/rules.json -target nginx
@@ -59,6 +63,7 @@ services:
 
   morty:
     image: dalf/morty:latest
+    container_name: spot-morty
     logging: *default-logging
     restart: unless-stopped
     networks:
@@ -75,6 +80,7 @@ services:
 
   tor:
     image: osminogin/tor-simple
+    container_name: spot-redis
     logging: *default-logging
     restart: unless-stopped
     

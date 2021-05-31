@@ -130,7 +130,7 @@ deploy:spot.eeo.one.backend1:
 #    FILTRON_RULES: /etc/filtron/rules.json
     SPOT_HOSTNAME: spot.eeo.one
     SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
-    COMPOSE_PROJECT_NAME: my-spot
+    COMPOSE_PROJECT_NAME: staging-spot
 #    PRIVATE_KEY: ${PRIVATE_KEY_WEB1}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
   script:
