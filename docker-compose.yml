@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
     networks:
       - spot-default
-      environment:
+    environment:
       SEARX_SECRET: "${SEARX_SECRET}"
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
       SEARX_MORTY_KEY: "${SEARX_MORTY_KEY}"
