@@ -19,7 +19,7 @@ services:
 
   spot:
     image: registry.gitlab.e.foundation:5000/e/cloud/my-spot:${SPOT_DOCKER_TAG}
-    container_name: spot-spot
+    container_name: spot
     build:
       context: .
       dockerfile: Dockerfile
@@ -46,6 +46,8 @@ services:
       dockerfile: nginx.Dockerfile
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - spot-default
     environment:
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
 
