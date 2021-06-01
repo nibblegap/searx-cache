@@ -34,7 +34,7 @@ services:
       GUNICORN_LOGGER: 1
       GUNICORN_LEVEL: INFO
 
-  nginx:
+  spot-nginx:
     image: registry.gitlab.e.foundation:5000/e/cloud/my-spot/nginx:${SPOT_NGINX_DOCKER_TAG}
     container_name: spot-nginx
     build:
@@ -50,9 +50,9 @@ services:
     container_name: spot-filtron
     logging: *default-logging
     restart: unless-stopped
-    command: -listen :3000 -rules /etc/filtron/rules.json -target nginx
+    command: -listen :3000 -rules /etc/filtron/rules.json -target spot-nginx
     networks:
-      - wireguarded
+      - spot-wireguarded
     ports:
       - ${WIREGUARD_IP}:8088:3000
     volumes:
@@ -67,7 +67,7 @@ services:
     logging: *default-logging
     restart: unless-stopped
     networks:
-      - wireguarded
+      - spot-wireguarded
     ports:
       - ${WIREGUARD_IP}:8089:3000
     environment:
@@ -86,5 +86,5 @@ services:
     
 
 networks:
-  wireguarded:
+  spot-wireguarded:
     external: true
