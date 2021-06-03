@@ -86,13 +86,24 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.morty.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"
 
-  tor:
-    image: osminogin/tor-simple
-    #container_name: spot-tor
-    logging: *default-logging
+  tor-socks-proxy:
+    container_name: tor-socks-proxy
+    image: peterdavehello/tor-socks-proxy:latest
+    ports:
+      - "${WIREGUARD_IP}:8853:53/udp"
+      - "${WIREGUARD_IP}:9150:9150/tcp"
     restart: unless-stopped
     networks:
-      - spot-default    
+      - spot-default 
+      - spot-wireguarded
+
+#  tor:
+#    image: osminogin/tor-simple
+#    #container_name: spot-tor
+#    logging: *default-logging
+#    restart: unless-stopped
+#    networks:
+#      - spot-default    
     
 
 networks:

@@ -143,7 +143,7 @@ deploy:spot.eeo.one.backend1:
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
       && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
       && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
-      && docker-compose up -d --build --scale tor=5 && docker-compose restart filtron"
+      && docker-compose up -d --build --scale tor-socks-proxy=2 && docker-compose restart filtron"
     
 
 deploy:spot.eeo.one.backend2:
@@ -166,7 +166,7 @@ deploy:spot.eeo.one.backend2:
     WIREGUARD_IP: ${BACKEND2_WG_IP}
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
-    - docker-compose up -d --build --scale tor=5
+    - docker-compose up -d --build --scale tor-socks-proxy=2
     #- docker-compose restart filtron
     # - ssh $SSH_USER@$BACKEND2_HOST "cd $PATH_STAGING && docker-compose up -d --build --build-arg $WIREGUARD_IP --scale tor=5 && docker-compose restart filtron"
     # - docker-compose up -d --build --scale tor=5
