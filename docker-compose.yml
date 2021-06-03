@@ -88,13 +88,13 @@ services:
 
   tor-socks-proxy:
     image: peterdavehello/tor-socks-proxy:latest
-    ports:
-      - "${WIREGUARD_IP}:8853:53/udp"
-      - "${WIREGUARD_IP}:9150:9150/tcp"
+#    ports:
+#      - "${WIREGUARD_IP}:8853:53/udp"
+#      - "${WIREGUARD_IP}:9150:9150/tcp"
     restart: unless-stopped
     networks:
       - spot-default 
-      - spot-wireguarded
+#      - spot-wireguarded
 
 #  tor:
 #    image: osminogin/tor-simple
