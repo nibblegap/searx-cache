@@ -87,7 +87,6 @@ services:
       - "traefik.http.routers.morty.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"
 
   tor-socks-proxy:
-    container_name: tor-socks-proxy
     image: peterdavehello/tor-socks-proxy:latest
     ports:
       - "${WIREGUARD_IP}:8853:53/udp"
