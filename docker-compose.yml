@@ -61,7 +61,7 @@ services:
       - spot-default
       - spot-wireguarded
     ports:
-      - ${WIREGUARD_IP}:8088:3000
+      - ${WIREGUARD_IP}:${FILTRON_PORT}:3000
     volumes:
       - ${REPO_BASE}/etc/filtron/rules.json:/etc/filtron/rules.json
     labels:
@@ -77,7 +77,7 @@ services:
       - spot-default
       - spot-wireguarded
     ports:
-      - ${WIREGUARD_IP}:8089:3000
+      - ${WIREGUARD_IP}:${MORTY_PORT}:3000
     environment:
       DEBUG: "false"
       MORTY_ADDRESS: ":3000"
