@@ -148,7 +148,8 @@ deploy:spot.ecloud.global.backend1:
     MORTY_PORT: 8099
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)" 
-    - docker-compose up -d --build --scale tor-socks-proxy=5
+    - docker-compose pull
+    - docker-compose up -d --scale tor-socks-proxy=5
     - docker-compose restart filtron
 
 deploy:spot.ecloud.global.backend2:
@@ -172,6 +173,7 @@ deploy:spot.ecloud.global.backend2:
     MORTY_PORT: 8099
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
-    - docker-compose up -d --build --scale tor-socks-proxy=5
+    - docker-compose pull
+    - docker-compose up -d --scale tor-socks-proxy=5
     - docker-compose restart filtron
 
