@@ -86,7 +86,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.morty.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"
 
-  tor:
+  tor-socks-proxy:
     image: peterdavehello/tor-socks-proxy:latest
     logging: *default-logging
     restart: unless-stopped
