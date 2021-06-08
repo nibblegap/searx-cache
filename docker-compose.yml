@@ -10,17 +10,23 @@ x-logging:
 services:
   redis:
     image: redis:5.0.7-alpine
+    # container_name: spot-redis
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - spot-default
     command: redis-server --maxmemory 8G --maxmemory-policy allkeys-lru
 
   spot:
     image: registry.gitlab.e.foundation:5000/e/cloud/my-spot:${SPOT_DOCKER_TAG}
+    # container_name: spot
     build:
       context: .
       dockerfile: Dockerfile
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - spot-default
     environment:
       SEARX_SECRET: "${SEARX_SECRET}"
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
@@ -32,35 +38,46 @@ services:
       GUNICORN_LOGGER: 1
       GUNICORN_LEVEL: INFO
 
-  nginx:
+  spot-nginx:
     image: registry.gitlab.e.foundation:5000/e/cloud/my-spot/nginx:${SPOT_NGINX_DOCKER_TAG}
+    # container_name: spot-nginx
     build:
       context: .
       dockerfile: nginx.Dockerfile
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - spot-default
     environment:
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
 
   filtron:
     image: dalf/filtron:latest
+    # container_name: spot-filtron
     logging: *default-logging
     restart: unless-stopped
-    command: -listen :3000 -rules /etc/filtron/rules.json -target nginx
+    command: -listen :3000 -rules /etc/filtron/rules.json -target spot-nginx
+    networks:
+      - spot-default
+      - spot-wireguarded
     ports:
-      - "8088:3000"
+      - ${WIREGUARD_IP}:8088:3000
     volumes:
-      - ${FILTRON_RULES:-./etc/filtron/rules.json}:/etc/filtron/rules.json
+      - ${REPO_BASE}/etc/filtron/rules.json:/etc/filtron/rules.json
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.filtron.rule=Host(`${SPOT_HOSTNAME}`)"
 
   morty:
     image: dalf/morty:latest
+    # container_name: spot-morty
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - spot-default
+      - spot-wireguarded
     ports:
-      - "8089:3000"
+      - ${WIREGUARD_IP}:8089:3000
     environment:
       DEBUG: "false"
       MORTY_ADDRESS: ":3000"
@@ -70,6 +87,14 @@ services:
       - "traefik.http.routers.morty.rule=Host(`${SPOT_MORTY_HOSTNAME}`)"
 
   tor:
-    image: osminogin/tor-simple
+    image: peterdavehello/tor-socks-proxy:latest
     logging: *default-logging
     restart: unless-stopped
+    networks:
+      - spot-default 
+
+networks:
+  spot-default:
+    external: true
+  spot-wireguarded:
+    external: true
