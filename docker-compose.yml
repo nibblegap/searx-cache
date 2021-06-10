@@ -13,8 +13,6 @@ services:
     # container_name: spot-redis
     logging: *default-logging
     restart: unless-stopped
-    networks:
-      - spot-default
     command: redis-server --maxmemory 8G --maxmemory-policy allkeys-lru
 
   spot:
@@ -25,8 +23,6 @@ services:
       dockerfile: Dockerfile
     logging: *default-logging
     restart: unless-stopped
-    networks:
-      - spot-default
     environment:
       SEARX_SECRET: "${SEARX_SECRET}"
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
@@ -46,8 +42,6 @@ services:
       dockerfile: nginx.Dockerfile
     logging: *default-logging
     restart: unless-stopped
-    networks:
-      - spot-default
     environment:
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
 
@@ -58,7 +52,6 @@ services:
     restart: unless-stopped
     command: -listen :3000 -rules /etc/filtron/rules.json -target spot-nginx
     networks:
-      - spot-default
       - spot-wireguarded
     ports:
       - ${WIREGUARD_IP}:${FILTRON_PORT}:3000
@@ -74,7 +67,6 @@ services:
     logging: *default-logging
     restart: unless-stopped
     networks:
-      - spot-default
       - spot-wireguarded
     ports:
       - ${WIREGUARD_IP}:${MORTY_PORT}:3000
@@ -90,8 +82,7 @@ services:
     image: peterdavehello/tor-socks-proxy:latest
     logging: *default-logging
     restart: unless-stopped
-    networks:
-      - spot-default 
+    
 
 networks:
   spot-default:
