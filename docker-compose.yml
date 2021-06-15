@@ -91,7 +91,7 @@ services:
     logging: *default-logging
     restart: unless-stopped
     networks:
-      - spot-default 
+      - staging-spot-default 
 
 networks:
   staging-spot-default:

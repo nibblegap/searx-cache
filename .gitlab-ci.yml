@@ -98,7 +98,7 @@ deploy:spot.eeo.one.backend1:
     MORTY_PORT: 8089
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)" 
-    - docker-compose up -d --build --scale tor-socks-proxy=5
+    - docker-compose up -d --build
     - docker-compose restart filtron
 
 deploy:spot.eeo.one.backend2:
@@ -123,7 +123,7 @@ deploy:spot.eeo.one.backend2:
     MORTY_PORT: 8089
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
-    - docker-compose up -d --build --scale tor-socks-proxy=5
+    - docker-compose up -d --build
     - docker-compose restart filtron
 
 
