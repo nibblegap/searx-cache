@@ -89,6 +89,8 @@ deploy:spot.eeo.one.backend1:
     SPOT_HOSTNAME: spot.eeo.one
     SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
     SEARX_MORTY_URL: https://proxy.spot.eeo.one
+    SEARX_PROXY_HTTP: http://proxy01.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy01.ecloud.global:1099
     COMPOSE_PROJECT_NAME: staging-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
@@ -114,6 +116,8 @@ deploy:spot.eeo.one.backend2:
     SPOT_HOSTNAME: spot.eeo.one
     SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
     SEARX_MORTY_URL: https://proxy.spot.eeo.one
+    SEARX_PROXY_HTTP: http://proxy02.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy02.ecloud.global:1099
     COMPOSE_PROJECT_NAME: staging-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
@@ -139,6 +143,8 @@ deploy:spot.ecloud.global.backend1:
     SPOT_HOSTNAME: spot.ecloud.global
     SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
     SEARX_MORTY_URL: https://proxy.spot.ecloud.global
+    SEARX_PROXY_HTTP: http://proxy01.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy01.ecloud.global:1099
     COMPOSE_PROJECT_NAME: production-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
@@ -164,6 +170,8 @@ deploy:spot.ecloud.global.backend2:
     SPOT_HOSTNAME: spot.ecloud.global
     SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
     SEARX_MORTY_URL: https://proxy.spot.ecloud.global
+    SEARX_PROXY_HTTP: http://proxy02.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy02.ecloud.global:1099
     COMPOSE_PROJECT_NAME: production-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
