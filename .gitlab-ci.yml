@@ -230,7 +230,7 @@ deploy:spot.ecloud.global.backend2:
       && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
       && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
-      && sed -i '/proxy01.ecloud.global/proxy01.ecloud.global/g' .env
+      && sed -i '/proxy01.ecloud.global/proxy02.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
       && sed -i 's/\/mnt\/repo-base\/staging-spot/$REPO_BASE/g' .env 
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
