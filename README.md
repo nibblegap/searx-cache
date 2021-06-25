@@ -46,6 +46,13 @@ below to run spot for production or local environment.
 
 ### Like production
 
+
+update .env file with the path where spot is cloned : 
+
+```
+REPO_BASE=/PATH/TO/SPOT/FOLDER
+```
+
 Run the docker-compose to start the project
 
 ```

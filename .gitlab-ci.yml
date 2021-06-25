@@ -101,6 +101,7 @@ deploy:spot.eeo.one.backend1:
     MORTY_PORT: 8089
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND1_HOST "cd $REPO_BASE && git stash && git pull && rm .env && mv .env.e .env && rm docker-compose.yml && mv docker-compose.e.yml docker-compose.yml"
     - docker-compose up -d --build
     - docker-compose restart filtron
     - ssh $SSH_USER@$BACKEND1_HOST "cd $REPO_BASE 
@@ -141,6 +142,7 @@ deploy:spot.eeo.one.backend2:
     MORTY_PORT: 8089
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND2_HOST "cd $REPO_BASE && git stash && git pull && rm .env && mv .env.e .env && rm docker-compose.yml && mv docker-compose.e.yml docker-compose.yml"
     - docker-compose up -d --build
     - docker-compose restart filtron
     - ssh $SSH_USER@$BACKEND2_HOST "cd $REPO_BASE 
@@ -181,6 +183,7 @@ deploy:spot.ecloud.global.backend1:
     MORTY_PORT: 8099
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND1_HOST "cd $REPO_BASE && git stash && git pull && rm .env && mv .env.e .env && rm docker-compose.yml && mv docker-compose.e.yml docker-compose.yml"
     - docker-compose pull
     - docker-compose up -d
     - docker-compose restart filtron
@@ -221,6 +224,7 @@ deploy:spot.ecloud.global.backend2:
     MORTY_PORT: 8099
   script:
     - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND2_HOST "cd $REPO_BASE && git stash && git pull && rm .env && mv .env.e .env && rm docker-compose.yml && mv docker-compose.e.yml docker-compose.yml"
     - docker-compose pull
     - docker-compose up -d
     - docker-compose restart filtron
