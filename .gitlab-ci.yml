@@ -111,7 +111,7 @@ deploy:spot.eeo.one.backend1:
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
       && sed -i 's/proxy01.ecloud.global/proxy01.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/staging-spot/g'
+      && sed -i 's/PATH/staging-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
@@ -151,7 +151,7 @@ deploy:spot.eeo.one.backend2:
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
       && sed -i 's/proxy01.ecloud.global/proxy02.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/staging-spot/g'
+      && sed -i 's/PATH/staging-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
@@ -192,7 +192,7 @@ deploy:spot.ecloud.global.backend1:
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
       && sed -i 's/proxy01.ecloud.global/proxy01.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/production-spot/g'
+      && sed -i 's/PATH/production-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
@@ -232,7 +232,7 @@ deploy:spot.ecloud.global.backend2:
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
       && sed -i 's/proxy01.ecloud.global/proxy02.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/production-spot/g'
+      && sed -i 's/PATH/production-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
