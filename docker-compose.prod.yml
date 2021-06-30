@@ -10,8 +10,11 @@ x-logging:
 services:
   redis:
     image: redis:5.0.7-alpine
+    # container_name: spot-redis
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
+    networks:
+      - ${INTERNAL_NETWORK_NAME}
     command: redis-server --maxmemory 8G --maxmemory-policy allkeys-lru
 
   spot:
@@ -20,7 +23,9 @@ services:
       context: .
       dockerfile: Dockerfile
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
+    networks:
+      - ${INTERNAL_NETWORK_NAME}
     environment:
       SEARX_SECRET: "${SEARX_SECRET}"
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
@@ -34,38 +39,49 @@ services:
 
   spot-nginx:
     image: registry.gitlab.e.foundation:5000/e/cloud/my-spot/nginx:${SPOT_NGINX_DOCKER_TAG}
+    # container_name: spot-nginx
     build:
       context: .
       dockerfile: nginx.Dockerfile
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
+    networks:
+      - ${INTERNAL_NETWORK_NAME}
     environment:
       SEARX_MORTY_URL: "${SEARX_MORTY_URL}"
 
   filtron:
     image: dalf/filtron:latest
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
     command: -listen :3000 -rules /etc/filtron/rules.json -target spot-nginx
+    networks:
+      - ${INTERNAL_NETWORK_NAME}
+      - spot-wireguarded
     ports:
-      - ${FILTRON_PORT}:3000
+      - ${WIREGUARD_IP}:${FILTRON_PORT}:3000
     volumes:
       - ./etc/filtron/rules.json:/etc/filtron/rules.json
 
   morty:
     image: dalf/morty:latest
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
+    networks:
+      - ${INTERNAL_NETWORK_NAME}
+      - spot-wireguarded
     ports:
-      - ${MORTY_PORT}:3000
+      - ${WIREGUARD_IP}:${MORTY_PORT}:3000
     environment:
       DEBUG: "false"
       MORTY_ADDRESS: ":3000"
       MORTY_KEY: "${SEARX_MORTY_KEY}"
 
-  tor-socks-proxy:
-    image: peterdavehello/tor-socks-proxy:latest
-    logging: *default-logging
-    restart: unless-stopped
 
-
+networks:
+  staging-spot-default:
+    external: true
+  spot-default:
+    external: true
+  spot-wireguarded:
+    external: true

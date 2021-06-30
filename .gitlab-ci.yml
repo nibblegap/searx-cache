@@ -6,6 +6,9 @@ stages:
  - test
  - deploy
 
+services:  
+  - docker:20.10-dind 
+
 python:
   stage: check
   before_script:
@@ -28,8 +31,6 @@ build:web:
   image: docker:git
   tags:
     - generic_privileged
-  services:
-    - docker:18-dind
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
@@ -64,54 +65,179 @@ test:unit:
 .deploy:template:
   stage: deploy
   before_script:
-    - eval $(ssh-agent -s)
-    - echo "$PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-    - ssh $DOCKER_HOST "mkdir -p $(dirname $FILTRON_RULES) && echo '$(cat ./etc/filtron/rules.json)' > $FILTRON_RULES"
+    - echo "$SSH_PRIVATE_KEY_ED" > $HOME/.ssh/id_ed25519
+    - echo "$SSH_PUBKEY_ED" > $HOME/.ssh/id_ed25519.pub
+    - echo "$SSH_KNOWN_HOSTS" > $HOME/.ssh/known_hosts
+    - chmod 600 ~/.ssh/id_ed25519
+    - chmod 644 ~/.ssh/known_hosts ~/.ssh/id_ed25519.pub
+    - ssh $DOCKER_HOST "cd $PATH_STAGING"
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull registry.gitlab.e.foundation:5000/e/cloud/my-spot/env
 
-deploy:spot.test.cloud.global:
+deploy:spot.eeo.one.backend1:
   extends: .deploy:template
   when: manual
   only:
     - branches
   environment:
-    name: test
-    url: https://spot.test.ecloud.global
+    name: eeo1
+    url: https://spot.eeo.one
   variables:
-    DOCKER_HOST: ssh://root@spot.test.ecloud.global
-    FILTRON_RULES: /etc/filtron/rules.json
-    SPOT_HOSTNAME: spot.test.ecloud.global
-    SPOT_MORTY_HOSTNAME: proxy.spot.test.ecloud.global
-    SEARX_MORTY_URL: https://proxy.spot.test.ecloud.global
-    COMPOSE_PROJECT_NAME: my-spot
-    PRIVATE_KEY: ${PRIVATE_KEY_TEST}
+    DOCKER_HOST: ssh://${SSH_USER}@${BACKEND1_HOST}
+    SPOT_HOSTNAME: spot.eeo.one
+    SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
+    SEARX_MORTY_URL: https://proxy.spot.eeo.one
+    SEARX_PROXY_HTTP: http://proxy01.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy01.ecloud.global:1099
+    COMPOSE_PROJECT_NAME: staging-spot
+    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    WIREGUARD_IP: ${BACKEND1_WG_IP}
+    INTERNAL_NETWORK_NAME: staging-spot-default
+    FILTRON_PORT: 8088
+    MORTY_PORT: 8089
   script:
-    - docker-compose up -d --build --scale tor=5
+    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND1_HOST "cd /mnt/repo-base/staging-spot && git stash && git pull && rm .env && mv .env.prod .env && rm docker-compose.yml && mv docker-compose.prod.yml docker-compose.yml"
+    - docker-compose up -d --build
     - docker-compose restart filtron
+    - ssh $SSH_USER@$BACKEND1_HOST "cd /mnt/repo-base/staging-spot 
+      && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
+      && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
+      && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
+      && sed -i 's/proxy01.ecloud.global/proxy01.ecloud.global/g' .env
+      && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
+      && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
+      && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
+      && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
 
-deploy:spot.cloud.global:
+deploy:spot.eeo.one.backend2:
+  extends: .deploy:template
+  when: manual
+  only:
+    - branches
+  environment:
+    name: eeo2
+    url: https://spot.eeo.one
+  variables:
+    DOCKER_HOST: ssh://${SSH_USER}@${BACKEND2_HOST}
+    SPOT_HOSTNAME: spot.eeo.one
+    SPOT_MORTY_HOSTNAME: proxy.spot.eeo.one
+    SEARX_MORTY_URL: https://proxy.spot.eeo.one
+    SEARX_PROXY_HTTP: http://proxy02.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy02.ecloud.global:1099
+    COMPOSE_PROJECT_NAME: staging-spot
+    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    WIREGUARD_IP: ${BACKEND2_WG_IP}
+    INTERNAL_NETWORK_NAME: staging-spot-default
+    FILTRON_PORT: 8088
+    MORTY_PORT: 8089
+  script:
+    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND2_HOST "cd /mnt/repo-base/staging-spot && git stash && git pull && rm .env && mv .env.prod .env && rm docker-compose.yml && mv docker-compose.prod.yml docker-compose.yml"
+    - docker-compose up -d --build
+    - docker-compose restart filtron
+    - ssh $SSH_USER@$BACKEND2_HOST "cd /mnt/repo-base/staging-spot 
+      && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
+      && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
+      && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
+      && sed -i 's/proxy01.ecloud.global/proxy02.ecloud.global/g' .env
+      && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
+      && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
+      && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
+      && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
+
+
+deploy:spot.ecloud.global.backend1:
   extends: .deploy:template
   only:
     - tags
   environment:
-    name: prod
+    name: ecloud1
     url: https://spot.ecloud.global
   variables:
-    DOCKER_HOST: ssh://spot@spot.ecloud.global
-    FILTRON_RULES: /home/spot/filtron/rules.json
+    DOCKER_HOST: ssh://${SSH_USER}@${BACKEND1_HOST}
     SPOT_HOSTNAME: spot.ecloud.global
     SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
     SEARX_MORTY_URL: https://proxy.spot.ecloud.global
-    COMPOSE_PROJECT_NAME: my-spot
+    SEARX_PROXY_HTTP: http://proxy01.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy01.ecloud.global:1099
+    COMPOSE_PROJECT_NAME: production-spot
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
-    PRIVATE_KEY: ${PRIVATE_KEY_PROD}
+    WIREGUARD_IP: ${BACKEND1_WG_IP}
+    INTERNAL_NETWORK_NAME: spot-default
+    FILTRON_PORT: 8098
+    MORTY_PORT: 8099
   script:
+    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND1_HOST - $BACKEND1_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND1_HOST "cd /mnt/repo-base/production-spot && git stash && git pull && rm .env && mv .env.prod .env && rm docker-compose.yml && mv docker-compose.prod.yml docker-compose.yml"
     - docker-compose pull
-    - docker-compose up -d --scale tor=5
+    - docker-compose up -d
     - docker-compose restart filtron
+    - ssh $SSH_USER@$BACKEND1_HOST "cd /mnt/repo-base/production-spot 
+      && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
+      && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
+      && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
+      && sed -i 's/proxy01.ecloud.global/proxy01.ecloud.global/g' .env
+      && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
+      && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
+      && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
+      && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
+
+deploy:spot.ecloud.global.backend2:
+  extends: .deploy:template
+  only:
+    - tags
+  environment:
+    name: ecloud2
+    url: https://spot.ecloud.global
+  variables:
+    DOCKER_HOST: ssh://${SSH_USER}@${BACKEND2_HOST}
+    SPOT_HOSTNAME: spot.ecloud.global
+    SPOT_MORTY_HOSTNAME: proxy.spot.ecloud.global
+    SEARX_MORTY_URL: https://proxy.spot.ecloud.global
+    SEARX_PROXY_HTTP: http://proxy02.ecloud.global:1099
+    SEARX_PROXY_HTTPS: http://proxy02.ecloud.global:1099
+    COMPOSE_PROJECT_NAME: production-spot
+    SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
+    WIREGUARD_IP: ${BACKEND2_WG_IP}
+    INTERNAL_NETWORK_NAME: spot-default
+    FILTRON_PORT: 8098
+    MORTY_PORT: 8099
+  script:
+    - echo "Deploying to $CI_ENVIRONMENT_NAME ($SSH_USER@$BACKEND2_HOST - $BACKEND2_WG_IP - $WIREGUARD_IP)" 
+    - ssh $SSH_USER@$BACKEND2_HOST "cd /mnt/repo-base/production-spot && git stash && git pull && rm .env && mv .env.prod .env && rm docker-compose.yml && mv docker-compose.prod.yml docker-compose.yml"
+    - docker-compose pull
+    - docker-compose up -d
+    - docker-compose restart filtron
+    - ssh $SSH_USER@$BACKEND2_HOST "cd /mnt/repo-base/production-spot 
+      && sed -i 's/SPOT_HOSTNAME=spot.ecloud.global/SPOT_HOSTNAME=$SPOT_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_MORTY_HOSTNAME=proxy.spot.ecloud.global/SPOT_MORTY_HOSTNAME=$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
+      && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
+      && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
+      && sed -i 's/proxy01.ecloud.global/proxy02.ecloud.global/g' .env
+      && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
+      && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
+      && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
+      && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
+

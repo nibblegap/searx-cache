@@ -46,6 +46,7 @@ below to run spot for production or local environment.
 
 ### Like production
 
+
 Run the docker-compose to start the project
 
 ```
