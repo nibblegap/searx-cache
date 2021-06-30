@@ -12,7 +12,7 @@ services:
     image: redis:5.0.7-alpine
     # container_name: spot-redis
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
     networks:
       - ${INTERNAL_NETWORK_NAME}
     command: redis-server --maxmemory 8G --maxmemory-policy allkeys-lru
@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: Dockerfile
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
     networks:
       - ${INTERNAL_NETWORK_NAME}
     environment:
@@ -44,7 +44,7 @@ services:
       context: .
       dockerfile: nginx.Dockerfile
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
     networks:
       - ${INTERNAL_NETWORK_NAME}
     environment:
@@ -53,7 +53,7 @@ services:
   filtron:
     image: dalf/filtron:latest
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
     command: -listen :3000 -rules /etc/filtron/rules.json -target spot-nginx
     networks:
       - ${INTERNAL_NETWORK_NAME}
@@ -61,12 +61,12 @@ services:
     ports:
       - ${WIREGUARD_IP}:${FILTRON_PORT}:3000
     volumes:
-      - ${REPO_BASE}/etc/filtron/rules.json:/etc/filtron/rules.json
+      - ./etc/filtron/rules.json:/etc/filtron/rules.json
 
   morty:
     image: dalf/morty:latest
     logging: *default-logging
-    restart: unless-stopped
+    restart: always
     networks:
       - ${INTERNAL_NETWORK_NAME}
       - spot-wireguarded

@@ -95,7 +95,6 @@ deploy:spot.eeo.one.backend1:
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
-    REPO_BASE: /mnt/repo-base/staging-spot
     INTERNAL_NETWORK_NAME: staging-spot-default
     FILTRON_PORT: 8088
     MORTY_PORT: 8089
@@ -110,9 +109,10 @@ deploy:spot.eeo.one.backend1:
       && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
       && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
       && sed -i 's/proxy01.ecloud.global/proxy01.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/staging-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
@@ -136,7 +136,6 @@ deploy:spot.eeo.one.backend2:
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     WIREGUARD_IP: ${BACKEND2_WG_IP}
-    REPO_BASE: /mnt/repo-base/staging-spot
     INTERNAL_NETWORK_NAME: staging-spot-default
     FILTRON_PORT: 8088
     MORTY_PORT: 8089
@@ -151,9 +150,10 @@ deploy:spot.eeo.one.backend2:
       && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
       && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
       && sed -i 's/proxy01.ecloud.global/proxy02.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/staging-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
@@ -177,7 +177,6 @@ deploy:spot.ecloud.global.backend1:
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     WIREGUARD_IP: ${BACKEND1_WG_IP}
-    REPO_BASE: /mnt/repo-base/production-spot
     INTERNAL_NETWORK_NAME: spot-default
     FILTRON_PORT: 8098
     MORTY_PORT: 8099
@@ -193,9 +192,10 @@ deploy:spot.ecloud.global.backend1:
       && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
       && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
       && sed -i 's/proxy01.ecloud.global/proxy01.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/production-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
@@ -218,7 +218,6 @@ deploy:spot.ecloud.global.backend2:
     SPOT_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     SPOT_NGINX_DOCKER_TAG: ${CI_COMMIT_REF_SLUG}
     WIREGUARD_IP: ${BACKEND2_WG_IP}
-    REPO_BASE: /mnt/repo-base/production-spot
     INTERNAL_NETWORK_NAME: spot-default
     FILTRON_PORT: 8098
     MORTY_PORT: 8099
@@ -234,9 +233,10 @@ deploy:spot.ecloud.global.backend2:
       && sed -i 's/SPOT_DOCKER_TAG=latest/SPOT_DOCKER_TAG=$SPOT_DOCKER_TAG/g' .env 
       && sed -i 's/SPOT_NGINX_DOCKER_TAG=latest/SPOT_NGINX_DOCKER_TAG=$SPOT_NGINX_DOCKER_TAG/g' .env 
       && sed -i 's/localhost:8089/$SPOT_MORTY_HOSTNAME/g' .env 
+      && sed -i 's/SECRET2BEREPLACED/$SEARX_SECRET/g' .env
+      && sed -i 's/KEY2BEREPLACED/$SEARX_MORTY_KEY/g' .env
       && sed -i 's/proxy01.ecloud.global/proxy02.ecloud.global/g' .env
       && sed -i 's/WIREGUARD_IP=127.0.0.1/WIREGUARD_IP=$WIREGUARD_IP/g' .env 
-      && sed -i 's/PATH/production-spot/g' .env
       && sed -i 's/FILTRON_PORT=8088/FILTRON_PORT=$FILTRON_PORT/g' .env
       && sed -i 's/MORTY_PORT=8089/MORTY_PORT=$MORTY_PORT/g' .env
       && sed -i 's/INTERNAL_NETWORK_NAME=default/INTERNAL_NETWORK_NAME=$INTERNAL_NETWORK_NAME/g' .env"
